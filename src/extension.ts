@@ -3,10 +3,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { DataVirtNodeProvider, DataSourcesTreeNode, DVProjectTreeNode, DataSourceTreeNode } from './DataVirtNodeProvider';
-import { IDVConfig, IDataSourceConfig, IEnv } from './DataVirtModel';
-
-const YAML = require('yaml');
+import * as utils from './utils';
+import { DataVirtNodeProvider } from './model/tree/DataVirtNodeProvider';
+import { IDVConfig, IDataSourceConfig, IEnv } from './model/DataVirtModel';
 
 let dataVirtExtensionOutputChannel: vscode.OutputChannel;
 let dataVirtTreeView : vscode.TreeView<vscode.TreeItem>;
@@ -146,9 +145,9 @@ function handleVDBCreation(filepath: string, fileName: string): Promise<boolean>
 				let templatePath = path.join(pluginResourcesPath, "vdb_template.yaml");
 				let targetFile: string = path.join(filepath, `${fileName}.yaml`);
 				fs.copyFileSync(templatePath, targetFile);
-				let yamlDoc:IDVConfig = loadModelFromFile(targetFile);
+				let yamlDoc:IDVConfig = utils.loadModelFromFile(targetFile);
 				yamlDoc.metadata.name = fileName;
-				saveModelToFile(yamlDoc, targetFile);
+				utils.saveModelToFile(yamlDoc, targetFile);
 				dataVirtProvider.refresh();
 				resolve(true);
 			} catch (error) {
@@ -177,8 +176,8 @@ function handleDataSourceCreation(ctx, dsName: string): Promise<boolean> {
 					dsConfig.entries.set("PASSWORD", "");
 					dsConfig.entries.set("DATABASENAME", "");
 					dsConfig.entries.set("JDBCURL", "");
-					mapDSConfigToEnv(dsConfig, yaml);
-					saveModelToFile(yaml, ctx.getProject().getFile());
+					utils.mapDSConfigToEnv(dsConfig, yaml);
+					utils.saveModelToFile(yaml, ctx.getProject().getFile());
 					dataVirtProvider.refresh();
 					resolve(true);
 				} else {
@@ -285,44 +284,4 @@ function handleDeploy(filepath: string): void {
 
 function handleUndeploy(filepath: string): void {
 	log("\nUNDEPLOY: Selected File: " + filepath + "\n");
-}
-
-function getDataSourcesNode(ctx): DataSourcesTreeNode {
-	if (ctx) {
-		if (ctx instanceof DVProjectTreeNode) {
-			return ctx.getDataSourcesNode();
-		} else if (ctx instanceof DataSourcesTreeNode) {
-			return ctx;
-		}
-	}
-	return undefined;
-}
-
-function mapDSConfigToEnv(dsConfig: IDataSourceConfig, yaml: IDVConfig): void {
-	if (!yaml.spec.env) {
-		yaml.spec.env = [];
-	}
-	let prefix: string = `${dsConfig.type}_${dsConfig.name}_`;
-	for (let [key, value] of dsConfig.entries) {
-		let envEntry: IEnv = {
-			name: `${prefix}${key}`.toUpperCase(),
-			value: value
-		};
-		let idx: number = yaml.spec.env.indexOf(envEntry);
-		if (idx>=0) {
-			yaml.spec.env.entries[idx] = envEntry;
-		} else {
-			yaml.spec.env.push(envEntry);
-		}
-	}
-}
-
-export function loadModelFromFile(file: string): IDVConfig {
-	const f = fs.readFileSync(file, 'utf8');
-	let yamlDoc:IDVConfig = YAML.parse(f);
-	return yamlDoc;
-}
-
-export function saveModelToFile(dvConfig: IDVConfig, file: string): void {
-	fs.writeFileSync(file, YAML.stringify(dvConfig));
 }
