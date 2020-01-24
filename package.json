@@ -1,0 +1,185 @@
+{
+	"name": "datavirt-tools",
+	"displayName": "DataVirt Tooling by Red Hat",
+	"description": "",
+	"version": "0.0.1",
+	"publisher": "redhat",
+	"icon": "icons/icon128.png",
+	"preview": true,
+	"bugs": "https://github.com/jboss-fuse/vscode-datavirt/issues",
+	"homepage": "https://github.com/jboss-fuse/vscode-datavirt",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/jboss-fuse/vscode-datavirt.git"
+	},
+	"contributors": [
+		{
+			"name": "Lars Heinemann",
+			"email": "lheinema@redhat.com",
+			"url": "http://redhat.com"
+		}
+	],
+	"license": "Apache-2.0",
+	"engines": {
+		"vscode": "^1.41.0"
+	},
+	"keywords": [
+		"datavirt",
+		"data"
+	],
+	"categories": [
+		"Other"
+	],
+	"main": "./out/extension",
+	"contributes": {
+		"commands": [
+			{
+				"title": "Create VDB",
+				"command": "datavirt.create.vdb",
+				"category": "DataVirt",
+				"icon": "icons/datavirt.vdb.create.png"
+			},
+			{
+				"title": "Create Datasource",
+				"command": "datavirt.create.datasource",
+				"category": "DataVirt",
+				"icon": "icons/datavirt.datasource.create.png"
+			},
+			{
+				"title": "Modify Datasource",
+				"command": "datavirt.edit.datasource",
+				"category": "DataVirt",
+				"icon": "icons/datavirt.datasource.edit.png"
+			},
+			{
+				"title": "Delete Datasource",
+				"command": "datavirt.delete.datasource",
+				"category": "DataVirt",
+				"icon": "icons/datavirt.datasource.delete.png"
+			},
+			{
+				"title": "Create Schema",
+				"command": "datavirt.create.schema",
+				"category": "DataVirt",
+				"icon": "icons/datavirt.schema.create.png"
+			},
+			{
+				"title": "Modify Schema",
+				"command": "datavirt.edit.schema",
+				"category": "DataVirt",
+				"icon": "icons/datavirt.schema.edit.png"
+			},
+			{
+				"title": "Delete Schema",
+				"command": "datavirt.delete.schema",
+				"category": "DataVirt",
+				"icon": "icons/datavirt.schema.delete.png"
+			}
+		],
+		"views": {
+			"explorer": [
+				{
+					"id": "datavirt",
+					"name": "Data Virtualization"
+				}
+			]
+		},
+		"menus": {
+			"view/title": [
+				{
+					"group": "DataVirt",
+					"command": "datavirt.create.vdb"
+				}
+			],
+			"view/item/context": [
+				{
+					"group": "DataVirt",
+					"command": "datavirt.create.vdb",
+					"when": "viewItem == dv.project"
+				},
+				{
+					"group": "DataVirt",
+					"command": "datavirt.create.datasource",
+					"when": "viewItem == dv.project || viewItem == dv.datasources"
+				},
+				{
+					"group": "DataVirt",
+					"command": "datavirt.edit.datasource",
+					"when": "viewItem == dv.datasource"
+				},
+				{
+					"group": "DataVirt",
+					"command": "datavirt.delete.datasource",
+					"when": "viewItem == dv.datasource"
+				},
+				{
+					"group": "DataVirt",
+					"command": "datavirt.create.schema",
+					"when": "viewItem == dv.project || viewItem == dv.schemas"
+				},
+				{
+					"group": "DataVirt",
+					"command": "datavirt.edit.schema",
+					"when": "viewItem == dv.schema"
+				},
+				{
+					"group": "DataVirt",
+					"command": "datavirt.delete.schema",
+					"when": "viewItem == dv.schema"
+				}
+			]
+		}
+	},
+	"activationEvents": [
+		"*"
+	],
+	"scripts": {
+		"vscode:prepublish": "tsc -p ./",
+		"compile": "tsc -p ./",
+		"watch": "tsc -w -p ./",
+		"clean": "rm -rf out || rmdir out /s /q",
+		"test": "node ./out/test/runTest.js",
+		"update-deps": "npm update",
+		"ui-test": "npm run compile && extest setup-and-run out/ui-test/all.js",
+		"tslint": "gulp tslint"
+	},
+	"dependencies": {
+		"child_process": "^1.0.2",
+		"detect-port": "^1.3.0",
+		"expand-home-dir": "^0.0.3",
+		"fetch": "^1.1.0",
+		"find-java-home": "^1.1.0",
+		"fs": "^0.0.1-security",
+		"path": "^0.12.7",
+		"path-exists": "^4.0.0",
+		"util": "^0.12.1",
+		"yaml": "^1.7.2"
+	},
+	"devDependencies": {
+		"@types/chai": "^4.2.7",
+		"@types/glob": "^7.1.1",
+		"@types/mocha": "^5.2.7",
+		"@types/node": "^13.1.4",
+		"@types/sinon": "^7.5.1",
+		"@types/sinon-chai": "^3.2.3",
+		"@types/vscode": "^1.41.0",
+		"assert": "^2.0.0",
+		"chai": "^4.2.0",
+		"download": "^7.1.0",
+		"file-uri-to-path": "^2.0.0",
+		"file-url": "^3.0.0",
+		"fs": "^0.0.1-security",
+		"gulp": "^4.0.2",
+		"gulp-tslint": "^8.1.4",
+		"mocha": "^7.0.0",
+		"mocha-jenkins-reporter": "^0.4.2",
+		"mvn-artifact-download": "^4.1.0",
+		"request": "^2.88.0",
+		"sinon": "^8.0.4",
+		"sinon-chai": "^3.4.0",
+		"tslint": "^5.20.1",
+		"typescript": "^3.7.4",
+		"vscode-extension-tester": "^2.2.0",
+		"vscode-test": "^1.3.0"
+	}
+}
