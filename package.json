@@ -1,7 +1,7 @@
 {
 	"name": "datavirt-tools",
 	"displayName": "DataVirt Tooling by Red Hat",
-	"description": "",
+	"description": "VSCode tools to work with Virtual Database Configurations for Red Hat DataVirt.",
 	"version": "0.0.1",
 	"publisher": "redhat",
 	"icon": "icons/icon128.png",
@@ -36,44 +36,37 @@
 			{
 				"title": "Create VDB",
 				"command": "datavirt.create.vdb",
-				"category": "DataVirt",
-				"icon": "icons/datavirt.vdb.create.png"
+				"category": "DataVirt"
 			},
 			{
 				"title": "Create Datasource",
 				"command": "datavirt.create.datasource",
-				"category": "DataVirt",
-				"icon": "icons/datavirt.datasource.create.png"
+				"category": "DataVirt"
 			},
 			{
 				"title": "Modify Datasource",
 				"command": "datavirt.edit.datasource",
-				"category": "DataVirt",
-				"icon": "icons/datavirt.datasource.edit.png"
+				"category": "DataVirt"
 			},
 			{
 				"title": "Delete Datasource",
 				"command": "datavirt.delete.datasource",
-				"category": "DataVirt",
-				"icon": "icons/datavirt.datasource.delete.png"
+				"category": "DataVirt"
 			},
 			{
 				"title": "Create Schema",
 				"command": "datavirt.create.schema",
-				"category": "DataVirt",
-				"icon": "icons/datavirt.schema.create.png"
+				"category": "DataVirt"
 			},
 			{
 				"title": "Modify Schema",
 				"command": "datavirt.edit.schema",
-				"category": "DataVirt",
-				"icon": "icons/datavirt.schema.edit.png"
+				"category": "DataVirt"
 			},
 			{
 				"title": "Delete Schema",
 				"command": "datavirt.delete.schema",
-				"category": "DataVirt",
-				"icon": "icons/datavirt.schema.delete.png"
+				"category": "DataVirt"
 			}
 		],
 		"views": {
@@ -138,9 +131,7 @@
 		"compile": "tsc -p ./",
 		"watch": "tsc -w -p ./",
 		"clean": "rm -rf out || rmdir out /s /q",
-		"test": "node ./out/test/runTest.js",
 		"update-deps": "npm update",
-		"ui-test": "npm run compile && extest setup-and-run out/ui-test/all.js",
 		"tslint": "gulp tslint"
 	},
 	"dependencies": {
@@ -158,16 +149,11 @@
 		"@types/vscode": "^1.41.0",
 		"assert": "^2.0.0",
 		"chai": "^4.2.0",
-		"download": "^7.1.0",
-		"file-uri-to-path": "^2.0.0",
-		"file-url": "^3.0.0",
 		"fs": "^0.0.1-security",
 		"gulp": "^4.0.2",
 		"gulp-tslint": "^8.1.4",
 		"mocha": "^7.0.0",
 		"mocha-jenkins-reporter": "^0.4.2",
-		"mvn-artifact-download": "^4.1.0",
-		"request": "^2.88.0",
 		"sinon": "^8.0.4",
 		"sinon-chai": "^3.4.0",
 		"tslint": "^5.20.1",
