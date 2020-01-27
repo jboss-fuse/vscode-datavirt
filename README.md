@@ -9,7 +9,7 @@
 ...
 
 
-## How to contribute / test
+## How to run / test
 
 - check out the latest sources from master branch
 - start VSCode and open the folder with the checked out project
@@ -20,5 +20,4 @@
 
 ## Prerequisites
 
-- Java 8+ must be installed on system path
 - recent Visual Studio Code
