@@ -21,14 +21,14 @@ node('rhel7'){
 		sh "npm run vscode:prepublish"
 	}
 
-	// withEnv(['JUNIT_REPORT_PATH=report.xml']) {
-    //     stage('Test') {
-    // 		wrap([$class: 'Xvnc']) {
-    // 			sh "npm test --silent"
-    // 			junit 'report.xml'
-    // 		}
-    //     }
-	// }
+	withEnv(['JUNIT_REPORT_PATH=report.xml']) {
+        stage('Test') {
+    		wrap([$class: 'Xvnc']) {
+    			sh "npm test --silent"
+    			junit 'report.xml'
+    		}
+        }
+	}
 
 	stage('Package') {
         def packageJson = readJSON file: 'package.json'

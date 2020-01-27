@@ -131,6 +131,7 @@
 		"compile": "tsc -p ./",
 		"watch": "tsc -w -p ./",
 		"clean": "rm -rf out || rmdir out /s /q",
+		"test": "node ./out/test/runTest.js",
 		"update-deps": "npm update",
 		"tslint": "gulp tslint"
 	},
