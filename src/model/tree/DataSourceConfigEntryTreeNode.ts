@@ -22,7 +22,7 @@ export class DataSourceConfigEntryTreeNode extends DVTreeItem {
 	key: string;
 	value: string;
 	constructor(key: string, value: string) {
-		super("dv.datasource", key, vscode.TreeItemCollapsibleState.None);
+		super("dv.datasourceentry", key, vscode.TreeItemCollapsibleState.None);
 		this.key = key;
 		this.value = value;
 	}

@@ -21,18 +21,23 @@ import { SchemaTreeNode } from "./SchemaTreeNode";
 
 // simple tree node for schemas
 export class SchemasTreeNode extends DVTreeItem {
-	constructor(label: string, ddl: string) {
+	
+	constructor(label: string) {
 		super("dv.schemas", label, vscode.TreeItemCollapsibleState.Collapsed);
-		this.initialize(ddl);
 	}
+
 	getIconName(): string {
 		return "dv_schemas.svg";
 	}
+
 	getToolTip(): string {
 		return `Defined Schemas`;
 	}
-	initialize(ddl: string): void {
-		let newItem = new SchemaTreeNode("ddl", ddl);
+
+	initialize(): void {
+		let newItem = new SchemaTreeNode("ddl", this.getProject().dvConfig.spec.build.source.ddl);
+		newItem.setProject(this.getProject());
+		newItem.parent = this;
 		if (this.children.indexOf(newItem) < 0) {
 			this.children.push(newItem);
 		}

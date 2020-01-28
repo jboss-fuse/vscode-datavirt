@@ -54,6 +54,21 @@
 				"category": "DataVirt"
 			},
 			{
+				"title": "Create Entry",
+				"command": "datavirt.create.datasourceentry",
+				"category": "DataVirt"
+			},
+			{
+				"title": "Modify Entry",
+				"command": "datavirt.edit.datasourceentry",
+				"category": "DataVirt"
+			},
+			{
+				"title": "Delete Entry",
+				"command": "datavirt.delete.datasourceentry",
+				"category": "DataVirt"
+			},
+			{
 				"title": "Create Schema",
 				"command": "datavirt.create.schema",
 				"category": "DataVirt"
@@ -107,17 +122,22 @@
 				},
 				{
 					"group": "DataVirt",
-					"command": "datavirt.create.schema",
-					"when": "viewItem == dv.project || viewItem == dv.schemas"
+					"command": "datavirt.create.datasourceentry",
+					"when": "viewItem == dv.datasource"
+				},
+				{
+					"group": "DataVirt",
+					"command": "datavirt.edit.datasourceentry",
+					"when": "viewItem == dv.datasourceentry"
+				},
+				{
+					"group": "DataVirt",
+					"command": "datavirt.delete.datasourceentry",
+					"when": "viewItem == dv.datasourceentry"
 				},
 				{
 					"group": "DataVirt",
 					"command": "datavirt.edit.schema",
-					"when": "viewItem == dv.schema"
-				},
-				{
-					"group": "DataVirt",
-					"command": "datavirt.delete.schema",
 					"when": "viewItem == dv.schema"
 				}
 			]
