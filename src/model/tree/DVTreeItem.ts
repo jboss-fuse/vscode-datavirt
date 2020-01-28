@@ -26,6 +26,7 @@ export class DVTreeItem extends vscode.TreeItem {
 	parent: DVTreeItem;
 	label: string;
 	project: DVProjectTreeNode;
+	
 	constructor(type: string, label: string, collapsibleState: vscode.TreeItemCollapsibleState, parent: DVTreeItem = undefined, children: DVTreeItem[] = []) {
 		super(label, collapsibleState);
 		this.contextValue = type;
@@ -40,7 +41,7 @@ export class DVTreeItem extends vscode.TreeItem {
 	getToolTip(): string {
 		return "";
 	}
-	getParent(): DVTreeItem {
+	getParent(): any {
 		return this.parent;
 	}
 	getIconName(): string {

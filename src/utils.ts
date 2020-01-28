@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as vscode from 'vscode';
 import * as fs from 'fs';
 import { IDataSourceConfig, IDVConfig, IEnv } from './model/DataVirtModel';
 
@@ -29,13 +30,25 @@ export function mapDSConfigToEnv(dsConfig: IDataSourceConfig, yaml: IDVConfig): 
 			name: `${prefix}${key}`.toUpperCase(),
 			value: value
 		};
-		let idx: number = yaml.spec.env.indexOf(envEntry);
-		if (idx>=0) {
-			yaml.spec.env.entries[idx] = envEntry;
-		} else {
+		let found: boolean = false;
+		yaml.spec.env.forEach( (element: IEnv) => {
+			if (element.name === envEntry.name) {
+				element.value = envEntry.value;
+				found = true;
+			}
+		});
+		if (!found) {
 			yaml.spec.env.push(envEntry);
 		}
 	}
+}
+
+export function generateDataSourceConfigPrefix(dsConfig: IDataSourceConfig): string {
+	return `${dsConfig.type}_${dsConfig.name}`;
+}
+
+export function generateFullDataSourceConfigEntryKey(dsConfig: IDataSourceConfig, key: string): string {
+	return `${generateDataSourceConfigPrefix(dsConfig)}_${key}`;
 }
 
 export function loadModelFromFile(file: string): IDVConfig {

@@ -18,8 +18,8 @@ import * as vscode from 'vscode';
 
 import { IDVConfig } from '../DataVirtModel';
 import { DVTreeItem } from './DVTreeItem';
-import { SchemasTreeNode } from "./SchemasTreeNode";
-import { DataSourcesTreeNode } from "./DataSourcesTreeNode";
+import { SchemasTreeNode } from './SchemasTreeNode';
+import { DataSourcesTreeNode } from './DataSourcesTreeNode';
 
 // simple tree node for datasources
 export class DVProjectTreeNode extends DVTreeItem {
@@ -27,33 +27,45 @@ export class DVProjectTreeNode extends DVTreeItem {
 	schemasNode: SchemasTreeNode;
 	dvConfig: IDVConfig;
 	file: string;
+
 	constructor(label: string, file: string, dvConfig: IDVConfig) {
-		super("dv.project", label, vscode.TreeItemCollapsibleState.Collapsed);
+		super('dv.project', label, vscode.TreeItemCollapsibleState.Collapsed);
 		this.dvConfig = dvConfig;
 		this.file = file;
 		this.initialize();
 	}
+
 	getIconName(): string {
-		return "dv_type.svg";
+		return 'dv_type.svg';
 	}
+	
 	getToolTip(): string {
 		return `Data Virtualization Configuration File`;
 	}
+	
 	getDataSourcesNode(): DataSourcesTreeNode {
 		return this.dataSourcesNode;
 	}
+	
 	getSchemasNode(): SchemasTreeNode {
 		return this.schemasNode;
 	}
+	
 	getFile(): string {
 		return this.file;
 	}
+	
 	initialize(): void {
-		this.dataSourcesNode = new DataSourcesTreeNode("Data Sources", this.dvConfig.spec.env);
-		this.dataSourcesNode.setProject(this);
+		this.setProject(this);
+		this.dataSourcesNode = new DataSourcesTreeNode('Data Sources', this.dvConfig.spec.env);
+		this.dataSourcesNode.setProject(this.getProject());
+		this.dataSourcesNode.parent = this;
+		this.dataSourcesNode.initialize();
 		this.children.push(this.dataSourcesNode);
-		this.schemasNode = new SchemasTreeNode("Schemas", this.dvConfig.spec.build.source.ddl);
-		this.schemasNode.setProject(this);
+		this.schemasNode = new SchemasTreeNode('Schemas');
+		this.schemasNode.setProject(this.getProject());
+		this.schemasNode.parent = this;
+		this.schemasNode.initialize();
 		this.children.push(this.schemasNode);
 	}
 }

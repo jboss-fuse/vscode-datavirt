@@ -23,24 +23,42 @@ import { DataSourceTreeNode } from "./DataSourceTreeNode";
 // simple tree node for datasources
 export class DataSourcesTreeNode extends DVTreeItem {
 	env: IEnv[];
+	
 	constructor(label: string, env: IEnv[]) {
 		super("dv.datasources", label, vscode.TreeItemCollapsibleState.Collapsed);
 		this.env = env;
-		this.initialize();
 	}
+
 	getIconName(): string {
 		return "dv_datasources.svg";
 	}
+
 	getToolTip(): string {
 		return `Defined DataSources`;
 	}
+
 	initialize(): void {
 		let nodes: Map<string, IDataSourceConfig> = new Map();
 		if (this.env) {
 			this.env.forEach(element => {
 				let parts: string[] = element.name.split("_");
-				let nodeName = parts[2];
-				let key = parts[3];
+				let nodeName: string;
+				let key: string;
+				let type: string;
+				if (parts.length === 3) {
+					nodeName = parts[1];
+					key = parts[2];
+					type = parts[0];
+				} else if (parts.length === 4) {
+					nodeName = parts[2];
+					key = parts[3];
+					type = `${parts[0]}_${parts[1]}`;
+				} else {
+					// error
+					console.log("Invalid datasource entry name");
+					return;
+				}
+				
 				let value = element.value;
 				let node: IDataSourceConfig = {
 					name: "",
@@ -52,7 +70,7 @@ export class DataSourcesTreeNode extends DVTreeItem {
 				}
 				else {
 					node.name = nodeName;
-					node.type = `${parts[0]}_${parts[1]}`;
+					node.type = type;
 					node.entries = new Map<string, string>();
 				}
 				node.entries.set(key, value);
@@ -61,6 +79,9 @@ export class DataSourcesTreeNode extends DVTreeItem {
 		}
 		nodes.forEach(element => {
 			let newItem = new DataSourceTreeNode(element);
+			newItem.setProject(this.getProject());
+			newItem.parent = this;
+			newItem.initialize();
 			if (this.children.indexOf(newItem) < 0) {
 				this.children.push(newItem);
 			}
