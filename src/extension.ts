@@ -342,11 +342,15 @@ function handleDataSourceDeletion(ctx): Promise<boolean> {
 				let ds: DataSourceTreeNode = ctx;
 				let dsConfig: IDataSourceConfig = ds.dsConfig;
 				let yaml: IDVConfig = ds.getProject().dvConfig;
+				let keys: IEnv[] = [];
 				if (yaml) {
 					yaml.spec.env.forEach( (element: IEnv) => {
-						if (element.name.startsWith(`${utils.generateDataSourceConfigPrefix(dsConfig)}_`)) {
-							yaml.spec.env.splice(yaml.spec.env.indexOf(element, 1));
+						if (element.name.toUpperCase().startsWith(`${utils.generateDataSourceConfigPrefix(dsConfig).toUpperCase()}_`)) {
+							keys.push(element);
 						}
+					});
+					keys.forEach( (key) => {
+						yaml.spec.env.splice(yaml.spec.env.indexOf(key, 1));
 					});
 					utils.saveModelToFile(yaml, ds.getProject().getFile());
 					dataVirtProvider.refresh();
@@ -432,7 +436,7 @@ function handleDataSourceEntryDeletion(ctx): Promise<boolean> {
 				let yaml: IDVConfig = ds.getProject().dvConfig;
 				if (yaml) {
 					yaml.spec.env.forEach( (element: IEnv) => {
-						if (element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, ds.getKey())) {
+						if (element.name.toUpperCase() === utils.generateFullDataSourceConfigEntryKey(dsConfig, ds.getKey()).toUpperCase()) {
 							yaml.spec.env.splice(yaml.spec.env.indexOf(element, 0), 1);
 						}
 					});
