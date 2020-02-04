@@ -1,5 +1,5 @@
 {
-	"name": "datavirt-tools",
+	"name": "vscode-datavirt",
 	"displayName": "DataVirt Tooling by Red Hat",
 	"description": "VSCode tools to work with Virtual Database Configurations for Red Hat DataVirt.",
 	"version": "0.0.1",
