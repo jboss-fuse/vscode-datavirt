@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import * as vscode from 'vscode';
-
+import * as extension from '../../extension';
 import { IEnv, IDataSourceConfig } from '../DataVirtModel';
 import { DVTreeItem } from './DVTreeItem';
 import { DataSourceTreeNode } from "./DataSourceTreeNode";
@@ -41,25 +41,20 @@ export class DataSourcesTreeNode extends DVTreeItem {
 		let nodes: Map<string, IDataSourceConfig> = new Map();
 		if (this.env) {
 			this.env.forEach(element => {
-				let parts: string[] = element.name.split("_");
 				let nodeName: string;
-				let key: string;
+				let nkey: string;
 				let type: string;
-				if (parts.length === 3) {
-					nodeName = parts[1];
-					key = parts[2];
-					type = parts[0];
-				} else if (parts.length === 4) {
-					nodeName = parts[2];
-					key = parts[3];
-					type = `${parts[0]}_${parts[1]}`;
-				} else {
-					// error
-					console.log("Invalid datasource entry name");
-					return;
-				}
-				
 				let value = element.value;
+
+				extension.DATASOURCE_TYPES.forEach( (value: IDataSourceConfig, key: string ) => {
+					let prefix: string = `${value.type}_`;
+					if (element.name.startsWith(prefix)) {
+						type = value.type;
+						nodeName = element.name.substring(prefix.length, element.name.indexOf('_', prefix.length));
+						nkey = element.name.substring(element.name.indexOf(`_${nodeName}_`) + `_${nodeName}_`.length);
+					}
+				});
+								
 				let node: IDataSourceConfig = {
 					name: "",
 					type: "",
@@ -73,7 +68,7 @@ export class DataSourcesTreeNode extends DVTreeItem {
 					node.type = type;
 					node.entries = new Map<string, string>();
 				}
-				node.entries.set(key, value);
+				node.entries.set(nkey, value);
 				nodes.set(nodeName, node);
 			});
 		}
