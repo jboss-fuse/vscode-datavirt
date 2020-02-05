@@ -24,10 +24,9 @@ export function mapDSConfigToEnv(dsConfig: IDataSourceConfig, yaml: IDVConfig): 
 	if (!yaml.spec.env) {
 		yaml.spec.env = [];
 	}
-	let prefix: string = `${dsConfig.type}_${dsConfig.name}_`;
 	for (let [key, value] of dsConfig.entries) {
 		let envEntry: IEnv = {
-			name: `${prefix}${key}`.toUpperCase(),
+			name: key.toUpperCase(),
 			value: value
 		};
 		let found: boolean = false;
@@ -48,7 +47,8 @@ export function generateDataSourceConfigPrefix(dsConfig: IDataSourceConfig): str
 }
 
 export function generateFullDataSourceConfigEntryKey(dsConfig: IDataSourceConfig, key: string): string {
-	return `${generateDataSourceConfigPrefix(dsConfig)}_${key}`;
+	return key;
+	//return `${generateDataSourceConfigPrefix(dsConfig)}_${key}`;
 }
 
 export function loadModelFromFile(file: string): IDVConfig {
@@ -59,4 +59,30 @@ export function loadModelFromFile(file: string): IDVConfig {
 
 export function saveModelToFile(dvConfig: IDVConfig, file: string): void {
 	fs.writeFileSync(file, YAML.stringify(dvConfig));
+}
+
+export function getLabelFromKey(key: string, dsName: string, dsType: string): string {
+	let searchStr: string = `${dsType}_${dsName}_`.toUpperCase();
+	if (key.toUpperCase().startsWith(searchStr)) {
+		return key.substring(searchStr.length+1);
+	}
+	return key;
+}
+
+export function replaceTemplateName(dsConfig: IDataSourceConfig, dsName: string, TEMPLATE_NAME: string): IDataSourceConfig {
+	let dsConfigNew : IDataSourceConfig = {
+		name: dsName,
+		type: dsConfig.type,
+		entries: new Map<string, string>()
+	};
+	
+	dsConfig.entries.forEach( (value: string, key: string) => {
+		if (key.indexOf(TEMPLATE_NAME) != -1) {
+			dsConfigNew.entries.set(key.replace(TEMPLATE_NAME, dsName.toUpperCase()), value);
+		} else {
+			dsConfigNew.entries.set(key, value);
+		}
+	});
+
+	return dsConfigNew;
 }

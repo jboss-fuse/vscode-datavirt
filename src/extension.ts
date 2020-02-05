@@ -25,6 +25,11 @@ import { IDVConfig, IDataSourceConfig, IEnv } from './model/DataVirtModel';
 import { DataSourceTreeNode } from './model/tree/DataSourceTreeNode';
 import { DataSourceConfigEntryTreeNode } from './model/tree/DataSourceConfigEntryTreeNode';
 import { SchemaTreeNode } from './model/tree/SchemaTreeNode';
+import { SpringDataSource } from './model/datasources/SpringDataSource';
+import { MongoDBDataSource } from './model/datasources/MongoDBDataSource';
+import { SalesForceDataSource } from './model/datasources/SalesForceDataSource';
+import { GoogleSheetsDataSource } from './model/datasources/GoogleSheetsDataSource';
+import { RestBasedDataSource } from './model/datasources/RestBasedDataSource';
 
 let dataVirtExtensionOutputChannel: vscode.OutputChannel;
 let dataVirtTreeView : vscode.TreeView<vscode.TreeItem>;
@@ -34,9 +39,16 @@ let pluginResourcesPath: string;
 let fileToNode: Map<string, SchemaTreeNode> = new Map();
 let fileToEditor: Map<string, vscode.TextEditor> = new Map();
 
-const DATASOURCE_TYPES: string[] = ["SPRING_BOOT", "OTHER"];
+export const TEMPLATE_NAME: string = '$!TEMPLATE!$';
+export const DATASOURCE_TYPES: Map<string, IDataSourceConfig> = new Map();
 
 export function activate(context: vscode.ExtensionContext) {
+
+	DATASOURCE_TYPES.set('SpringBoot', new SpringDataSource(TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('MongoDB', new MongoDBDataSource(TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('Salesforce', new SalesForceDataSource(TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('Google Sheets', new GoogleSheetsDataSource(TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('Rest Based', new RestBasedDataSource(TEMPLATE_NAME));
 
 	dataVirtProvider = new DataVirtNodeProvider(vscode.workspace.rootPath, context);
 	creatDataVirtView();
@@ -80,7 +92,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.datasource', (ctx) => {
 		vscode.window.showInputBox( {placeHolder: "Enter the name of the new datasource"})
 			.then( async (dsName: string) => {
-				await vscode.window.showQuickPick( DATASOURCE_TYPES, {canPickMany: false, placeHolder: "Select the datasource type" })
+				await vscode.window.showQuickPick( Array.from(DATASOURCE_TYPES.keys()), {canPickMany: false, placeHolder: "Select the datasource type" })
 					.then( (dsType: string) => {
 						handleDataSourceCreation(ctx, dsName, dsType)
 							.then( (success: boolean) => {
@@ -98,7 +110,7 @@ export function activate(context: vscode.ExtensionContext) {
 		let ds: DataSourceTreeNode = ctx;
 		vscode.window.showInputBox( {value: ds.getKey().split(' ')[0]})
 			.then( async (dsName: string) => {
-				await vscode.window.showQuickPick( DATASOURCE_TYPES, {canPickMany: false, placeHolder: ds.type })
+				await vscode.window.showQuickPick( Array.from(DATASOURCE_TYPES.keys()), {canPickMany: false, placeHolder: ds.type })
 					.then( (dsType: string) => {
 						handleDataSourceEdit(ctx, dsName, dsType)
 							.then( (success: boolean) => {
@@ -274,15 +286,8 @@ function handleDataSourceCreation(ctx, dsName: string, dsType: string): Promise<
 			try {
 				let yaml: IDVConfig = ctx.getProject().dvConfig;
 				if (yaml) {
-					let dsConfig: IDataSourceConfig = {
-						name: dsName.toUpperCase(),
-						type: dsType.toUpperCase(),
-						entries: new Map<string, string>()
-					};
-					dsConfig.entries.set("USERNAME", "");
-					dsConfig.entries.set("PASSWORD", "");
-					dsConfig.entries.set("DATABASENAME", "");
-					dsConfig.entries.set("JDBCURL", "");
+					let dsConfig: IDataSourceConfig = DATASOURCE_TYPES.get(dsType);
+					dsConfig = utils.replaceTemplateName(dsConfig, dsName, TEMPLATE_NAME);
 					utils.mapDSConfigToEnv(dsConfig, yaml);
 					utils.saveModelToFile(yaml, ctx.getProject().getFile());
 					dataVirtProvider.refresh();

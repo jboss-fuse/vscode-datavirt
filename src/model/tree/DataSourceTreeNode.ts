@@ -19,6 +19,7 @@ import * as vscode from 'vscode';
 import { IDataSourceConfig } from '../DataVirtModel';
 import { DVTreeItem } from './DVTreeItem';
 import { DataSourceConfigEntryTreeNode } from "./DataSourceConfigEntryTreeNode";
+import * as utils from '../../utils';
 
 // simple tree node for datasource
 export class DataSourceTreeNode extends DVTreeItem {
@@ -47,7 +48,8 @@ export class DataSourceTreeNode extends DVTreeItem {
 	
 	initialize(): void {
 		for (let [key, value] of this.dsConfig.entries) {
-			let newItem: DataSourceConfigEntryTreeNode = new DataSourceConfigEntryTreeNode(key, value);
+			let label = utils.getLabelFromKey(key, this.dsConfig.name, this.dsConfig.type);
+			let newItem: DataSourceConfigEntryTreeNode = new DataSourceConfigEntryTreeNode(label, value);
 			newItem.setProject(this.getProject());
 			newItem.parent = this;
 			if (this.children.indexOf(newItem) < 0) {
