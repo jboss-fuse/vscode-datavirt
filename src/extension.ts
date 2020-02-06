@@ -39,6 +39,8 @@ let pluginResourcesPath: string;
 let fileToNode: Map<string, SchemaTreeNode> = new Map();
 let fileToEditor: Map<string, vscode.TextEditor> = new Map();
 
+let workspaceReady : boolean = true;
+
 export const TEMPLATE_NAME: string = '$!TEMPLATE!$';
 export const DATASOURCE_TYPES: Map<string, IDataSourceConfig> = new Map();
 
@@ -50,8 +52,20 @@ export function activate(context: vscode.ExtensionContext) {
 	DATASOURCE_TYPES.set('Google Sheets', new GoogleSheetsDataSource(TEMPLATE_NAME));
 	DATASOURCE_TYPES.set('Rest Based', new RestBasedDataSource(TEMPLATE_NAME));
 
+	if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
+		workspaceReady = false;
+	}
+
 	dataVirtProvider = new DataVirtNodeProvider(vscode.workspace.rootPath, context);
 	creatDataVirtView();
+
+	vscode.workspace.onDidChangeWorkspaceFolders( event => {
+		if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
+			workspaceReady = true;
+		} else {
+			workspaceReady = false;
+		}
+	});
 
 	vscode.window.onDidChangeVisibleTextEditors( event => {
 		let k: string;
@@ -76,23 +90,23 @@ export function activate(context: vscode.ExtensionContext) {
 	pluginResourcesPath = context.asAbsolutePath('resources');
 
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.vdb', (ctx) => {
-		if (!vscode.workspace.rootPath || !vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
-			vscode.window.showErrorMessage(`A new VDB can only be created in a workspace with at least one folder added.` +
-			` Please add a folder to the workspace with 'File->Add Folder to Workspace' or use the Command Palette (Ctrl+Shift+P) and type 'Add Folder'.` +
-			` Once there is at least one folder in the workspace, please try again.`);
-			return;
+		if (workspaceReady) {
+			vscode.window.showInputBox( {placeHolder: "Enter the name of the new VDB config"})
+				.then( (fileName: string) => {
+					handleVDBCreation(vscode.workspace.rootPath, fileName)
+						.then( (success: boolean) => {
+							if (success) {
+								vscode.window.showInformationMessage(`New VDB ${fileName} has been created successfully...`);
+							} else {
+								vscode.window.showErrorMessage(`An error occured when trying to create a new VDB...`);
+							}
+						});
+				});
+		} else {
+			vscode.window.showErrorMessage(`DataVirt Tooling only works when a workspace folder is opened.` +
+				` Please add a folder to the workspace with 'File->Add Folder to Workspace' or use the Command Palette (Ctrl+Shift+P) and type 'Add Folder'.` +
+				` Once there is at least one folder in the workspace, please try again.`);
 		}
-		vscode.window.showInputBox( {placeHolder: "Enter the name of the new VDB config"})
-			.then( (fileName: string) => {
-				handleVDBCreation(vscode.workspace.rootPath, fileName)
-					.then( (success: boolean) => {
-						if (success) {
-							vscode.window.showInformationMessage(`New VDB ${fileName} has been created successfully...`);
-						} else {
-							vscode.window.showErrorMessage(`An error occured when trying to create a new VDB...`);
-						}
-					});
-			});
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.datasource', (ctx) => {
