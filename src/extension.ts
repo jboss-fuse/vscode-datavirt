@@ -76,6 +76,12 @@ export function activate(context: vscode.ExtensionContext) {
 	pluginResourcesPath = context.asAbsolutePath('resources');
 
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.vdb', (ctx) => {
+		if (!vscode.workspace.rootPath || !vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
+			vscode.window.showErrorMessage(`A new VDB can only be created in a workspace with at least one folder added.` +
+			`Please add a folder to the workspace with 'File->Add Folder to Workspace' or use the Command Palette (Ctrl+Shift+P) and type 'Add Folder'.` +
+			`Once there is at least one folder in the workspace, please try again.`);
+			return;
+		}
 		vscode.window.showInputBox( {placeHolder: "Enter the name of the new VDB config"})
 			.then( (fileName: string) => {
 				handleVDBCreation(vscode.workspace.rootPath, fileName)
