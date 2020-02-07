@@ -59,7 +59,7 @@ export function activate(context: vscode.ExtensionContext) {
 	dataVirtProvider = new DataVirtNodeProvider(vscode.workspace.rootPath, context);
 	creatDataVirtView();
 
-	vscode.workspace.onDidChangeWorkspaceFolders( event => {
+	vscode.workspace.onDidChangeWorkspaceFolders( () => {
 		if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
 			workspaceReady = true;
 		} else {
