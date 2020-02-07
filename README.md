@@ -9,13 +9,9 @@
 ...
 
 
-## How to run / test
+## How to contribute
 
-- check out the latest sources from master branch
-- start VSCode and open the folder with the checked out project
-- open a `Terminal -> New Terminal` inside VSCode
-- in the terminal type `npm install` and hit `[ENTER]`
-- press the `[F5]` to launch for testing / debugging
+See [Contributing guide](./Contributing.md)
 
 
 ## Prerequisites
