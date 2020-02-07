@@ -46,10 +46,10 @@ export class DataSourcesTreeNode extends DVTreeItem {
 				let type: string;
 				let value = element.value;
 
-				extension.DATASOURCE_TYPES.forEach( (value: IDataSourceConfig, key: string ) => {
-					let prefix: string = `${value.type}_`;
+				extension.DATASOURCE_TYPES.forEach( (dsConfig: IDataSourceConfig, key: string ) => {
+					let prefix: string = `${dsConfig.type}_`;
 					if (element.name.startsWith(prefix)) {
-						type = value.type;
+						type = dsConfig.type;
 						nodeName = element.name.substring(prefix.length, element.name.indexOf('_', prefix.length));
 						nkey = element.name.substring(element.name.indexOf(`_${nodeName}_`) + `_${nodeName}_`.length);
 					}
