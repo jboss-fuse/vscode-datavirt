@@ -21,7 +21,7 @@
 	],
 	"license": "Apache-2.0",
 	"engines": {
-		"vscode": "^1.41.0"
+		"vscode": "^1.42.0"
 	},
 	"keywords": [
 		"datavirt",
@@ -167,7 +167,7 @@
 		"@types/node": "^13.7.0",
 		"@types/sinon": "^7.5.1",
 		"@types/sinon-chai": "^3.2.3",
-		"@types/vscode": "^1.41.0",
+		"@types/vscode": "^1.42.0",
 		"chai": "^4.2.0",
 		"gulp": "^4.0.2",
 		"gulp-tslint": "^8.1.4",
