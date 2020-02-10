@@ -18,30 +18,30 @@ node('rhel7'){
 	}
 
 	withEnv(['JUNIT_REPORT_PATH=report.xml']) {
-        stage('Test') {
-    		wrap([$class: 'Xvnc']) {
-    			sh "npm test --silent"
-    			junit 'report.xml'
-    		}
-        }
+		stage('Test') {
+			wrap([$class: 'Xvnc']) {
+				sh "npm test --silent"
+				junit 'report.xml'
+			}
+		}
 	}
 
 	stage('Package') {
-        def packageJson = readJSON file: 'package.json'
-        sh "vsce package -o vscode-datavirt-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
-        sh "npm pack && mv vscode-datavirt-${packageJson.version}.tgz vscode-datavirt-${packageJson.version}-${env.BUILD_NUMBER}.tgz"
+		def packageJson = readJSON file: 'package.json'
+		sh "vsce package -o vscode-datavirt-${packageJson.version}-${env.BUILD_NUMBER}.vsix"
+		sh "npm pack && mv vscode-datavirt-${packageJson.version}.tgz vscode-datavirt-${packageJson.version}-${env.BUILD_NUMBER}.tgz"
 	}
 
 	if(params.UPLOAD_LOCATION) {
 		stage('Snapshot') {
 			def filesToPush = findFiles(glob: '**.vsix')
 			sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${filesToPush[0].path} ${UPLOAD_LOCATION}/snapshots/vscode-datavirt/"
-            stash name:'vsix', includes:filesToPush[0].path
-            def tgzFilesToPush = findFiles(glob: '**.tgz')
-            stash name:'tgz', includes:tgzFilesToPush[0].path
-            sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${tgzFilesToPush[0].path} ${UPLOAD_LOCATION}/snapshots/vscode-datavirt/"
+			stash name:'vsix', includes:filesToPush[0].path
+			def tgzFilesToPush = findFiles(glob: '**.tgz')
+			stash name:'tgz', includes:tgzFilesToPush[0].path
+			sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${tgzFilesToPush[0].path} ${UPLOAD_LOCATION}/snapshots/vscode-datavirt/"
 		}
-    }
+	}
 }
 
 node('rhel7'){
@@ -51,19 +51,19 @@ node('rhel7'){
 		}
 
 		stage("Publish to Marketplace") {
-            unstash 'vsix'
-            unstash 'tgz'
-            withCredentials([[$class: 'StringBinding', credentialsId: 'vscode_java_marketplace', variable: 'TOKEN']]) {
-                def vsix = findFiles(glob: '**.vsix')
-                sh 'vsce publish -p ${TOKEN} --packagePath' + " ${vsix[0].path}"
-            }
-            archiveArtifacts artifacts:"**.vsix,**.tgz"
+			unstash 'vsix'
+			unstash 'tgz'
+			withCredentials([[$class: 'StringBinding', credentialsId: 'vscode_java_marketplace', variable: 'TOKEN']]) {
+				def vsix = findFiles(glob: '**.vsix')
+				sh 'vsce publish -p ${TOKEN} --packagePath' + " ${vsix[0].path}"
+			}
+			archiveArtifacts artifacts:"**.vsix,**.tgz"
 
-            stage "Promote the build to stable"
-            def vsix = findFiles(glob: '**.vsix')
-            sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${vsix[0].path} ${UPLOAD_LOCATION}/stable/vscode-datavirt/"
-            def tgz = findFiles(glob: '**.tgz')
-            sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${tgz[0].path} ${UPLOAD_LOCATION}/stable/vscode-datavirt/"
-        }
+			stage "Promote the build to stable"
+			def vsix = findFiles(glob: '**.vsix')
+			sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${vsix[0].path} ${UPLOAD_LOCATION}/stable/vscode-datavirt/"
+			def tgz = findFiles(glob: '**.tgz')
+			sh "rsync -Pzrlt --rsh=ssh --protocol=28 ${tgz[0].path} ${UPLOAD_LOCATION}/stable/vscode-datavirt/"
+		}
 	}
 }
