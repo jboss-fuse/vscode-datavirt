@@ -171,7 +171,7 @@
 		"chai": "^4.2.0",
 		"gulp": "^4.0.2",
 		"gulp-tslint": "^8.1.4",
-		"mocha": "^7.0.0",
+		"mocha": "^7.0.1",
 		"mocha-jenkins-reporter": "^0.4.2",
 		"sinon": "^8.0.4",
 		"sinon-chai": "^3.4.0",
