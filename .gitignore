@@ -8,3 +8,4 @@ target
 .scannerwork
 *.log
 test-resources/
+coverage

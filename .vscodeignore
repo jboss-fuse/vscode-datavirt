@@ -9,3 +9,5 @@ tsconfig.json
 tslint.json
 Contributing.md
 test-resources
+coverconfig.json
+coverage
