@@ -34,54 +34,54 @@
 	"contributes": {
 		"commands": [
 			{
-				"title": "Create VDB",
+				"title": "Create a Virtual Database Definition (VDB)",
 				"command": "datavirt.create.vdb",
-				"category": "DataVirt"
+				"category": "dv"
 			},
 			{
-				"title": "Create Datasource",
+				"title": "Create a Datasource",
 				"command": "datavirt.create.datasource",
-				"category": "DataVirt"
+				"category": "dv"
 			},
 			{
 				"title": "Modify Datasource",
 				"command": "datavirt.edit.datasource",
-				"category": "DataVirt"
+				"category": "dv"
 			},
 			{
 				"title": "Delete Datasource",
 				"command": "datavirt.delete.datasource",
-				"category": "DataVirt"
+				"category": "dv"
 			},
 			{
-				"title": "Create Entry",
+				"title": "Create an Entry",
 				"command": "datavirt.create.datasourceentry",
-				"category": "DataVirt"
+				"category": "dv"
 			},
 			{
 				"title": "Modify Entry",
 				"command": "datavirt.edit.datasourceentry",
-				"category": "DataVirt"
+				"category": "dv"
 			},
 			{
 				"title": "Delete Entry",
 				"command": "datavirt.delete.datasourceentry",
-				"category": "DataVirt"
+				"category": "dv"
 			},
 			{
-				"title": "Create Schema",
+				"title": "Create a Schema",
 				"command": "datavirt.create.schema",
-				"category": "DataVirt"
+				"category": "dv"
 			},
 			{
 				"title": "Modify Schema",
 				"command": "datavirt.edit.schema",
-				"category": "DataVirt"
+				"category": "dv"
 			},
 			{
 				"title": "Delete Schema",
 				"command": "datavirt.delete.schema",
-				"category": "DataVirt"
+				"category": "dv"
 			}
 		],
 		"views": {
@@ -95,48 +95,48 @@
 		"menus": {
 			"view/title": [
 				{
-					"group": "DataVirt",
+					"group": "dv",
 					"command": "datavirt.create.vdb"
 				}
 			],
 			"view/item/context": [
 				{
-					"group": "DataVirt",
+					"group": "dv",
 					"command": "datavirt.create.vdb",
 					"when": "viewItem == dv.project"
 				},
 				{
-					"group": "DataVirt",
+					"group": "dv",
 					"command": "datavirt.create.datasource",
 					"when": "viewItem == dv.project || viewItem == dv.datasources"
 				},
 				{
-					"group": "DataVirt",
+					"group": "dv",
 					"command": "datavirt.edit.datasource",
 					"when": "viewItem == dv.datasource"
 				},
 				{
-					"group": "DataVirt",
+					"group": "dv",
 					"command": "datavirt.delete.datasource",
 					"when": "viewItem == dv.datasource"
 				},
 				{
-					"group": "DataVirt",
+					"group": "dv",
 					"command": "datavirt.create.datasourceentry",
 					"when": "viewItem == dv.datasource"
 				},
 				{
-					"group": "DataVirt",
+					"group": "dv",
 					"command": "datavirt.edit.datasourceentry",
 					"when": "viewItem == dv.datasourceentry"
 				},
 				{
-					"group": "DataVirt",
+					"group": "dv",
 					"command": "datavirt.delete.datasourceentry",
 					"when": "viewItem == dv.datasourceentry"
 				},
 				{
-					"group": "DataVirt",
+					"group": "dv",
 					"command": "datavirt.edit.schema",
 					"when": "viewItem == dv.schema"
 				}
