@@ -9,3 +9,10 @@ spec:
   build:
     source:
       ddl: |
+        CREATE DATABASE {name} OPTIONS (ANNOTATION 'provide your description here..');
+        USE DATABASE {name};
+
+        CREATE VIRTUAL SCHEMA {name};
+        SET SCHEMA {name};
+
+        CREATE VIEW SAMPLE AS SELECT 1 as valid;
