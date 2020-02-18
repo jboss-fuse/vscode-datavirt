@@ -41,6 +41,7 @@ let fileToEditor: Map<string, vscode.TextEditor> = new Map();
 
 let workspaceReady : boolean = true;
 
+export const DDL_FILE_EXT: string = '.ddl';
 export const TEMPLATE_NAME: string = '$!TEMPLATE!$';
 export const DATASOURCE_TYPES: Map<string, IDataSourceConfig> = new Map();
 
@@ -96,6 +97,10 @@ export function activate(context: vscode.ExtensionContext) {
 					handleVDBCreation(vscode.workspace.rootPath, fileName)
 						.then( (success: boolean) => {
 							if (success) {
+								let node: SchemaTreeNode = dataVirtProvider.getSchemaTreeNodeOfProject(fileName);
+								if (node) {
+									vscode.commands.executeCommand('datavirt.edit.schema', node);
+								}								
 								vscode.window.showInformationMessage(`New VDB ${fileName} has been created successfully...`);
 							} else {
 								vscode.window.showErrorMessage(`An error occured when trying to create a new VDB...`);
@@ -202,7 +207,7 @@ export function activate(context: vscode.ExtensionContext) {
 		let sNode: SchemaTreeNode = ctx;
 		let sql: string = sNode.getDDL();
 		let p = fs.mkdtempSync(`${vscode.workspace.rootPath}${path.sep}.tmp_`, 'utf-8');
-		let tempFile = path.join(p, `${sNode.getProject().label}.sql`);
+		let tempFile = path.join(p, `${sNode.getProject().label}${DDL_FILE_EXT}`);
 		fs.writeFileSync(tempFile, sql);
 		vscode.workspace.openTextDocument(tempFile)
 			.then((a: vscode.TextDocument) => {

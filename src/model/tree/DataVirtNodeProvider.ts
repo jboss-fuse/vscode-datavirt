@@ -22,6 +22,7 @@ import { IDVConfig } from '../DataVirtModel';
 import { DVTreeItem } from './DVTreeItem';
 import { DVProjectTreeNode } from './DVProjectTreeNode';
 import * as utils from '../../utils';
+import { SchemaTreeNode } from './SchemaTreeNode';
 
 export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
 
@@ -107,6 +108,14 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 			}
 			resolve();
 		});
+	}
+
+	getSchemaTreeNodeOfProject(name: string): SchemaTreeNode {
+		const projectNode:DVProjectTreeNode = this.treeNodes.find(node => node.label === name);
+		if (projectNode && projectNode.schemasNode && projectNode.schemasNode.children && projectNode.schemasNode.children.length>0) {
+			return projectNode.schemasNode.children[0] as SchemaTreeNode;
+		}
+		return undefined;
 	}
 
 	getTreeItem(node: vscode.TreeItem): vscode.TreeItem {
