@@ -19,36 +19,38 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import * as utils from './utils';
 import { DataVirtNodeProvider } from './model/tree/DataVirtNodeProvider';
-import { IDVConfig, IDataSourceConfig, IEnv } from './model/DataVirtModel';
-import { DataSourceTreeNode } from './model/tree/DataSourceTreeNode';
-import { DataSourceConfigEntryTreeNode } from './model/tree/DataSourceConfigEntryTreeNode';
+import { IDataSourceConfig } from './model/DataVirtModel';
 import { SchemaTreeNode } from './model/tree/SchemaTreeNode';
 import { SpringDataSource } from './model/datasources/SpringDataSource';
 import { MongoDBDataSource } from './model/datasources/MongoDBDataSource';
 import { SalesForceDataSource } from './model/datasources/SalesForceDataSource';
 import { GoogleSheetsDataSource } from './model/datasources/GoogleSheetsDataSource';
 import { RestBasedDataSource } from './model/datasources/RestBasedDataSource';
-import { SchemasTreeNode } from './model/tree/SchemasTreeNode';
 import { DVProjectTreeNode } from './model/tree/DVProjectTreeNode';
+import { createVDBCommand } from './commands/CreateVDBCommand';
+import { createDataSourceCommand } from './commands/CreateDataSourceCommand';
+import { deleteDataSourceCommand } from './commands/DeleteDataSourceCommand';
+import { createDataSourceEntryCommand } from './commands/CreateDataSourceEntryCommand';
+import { editDataSourceEntryCommand } from './commands/EditDataSourceEntryCommand';
+import { deleteDataSourceEntryCommand } from './commands/DeleteDataSourceEntryCommand';
+import { editSchemaCommand, handleSaveDDL } from './commands/EditSchemaCommand';
+import { deployVDBCommand } from './commands/DeployVDBCommand';
+import { undeployVDBCommand } from './commands/UndeployVDBCommand';
 
-let dataVirtExtensionOutputChannel: vscode.OutputChannel;
-let dataVirtTreeView : vscode.TreeView<vscode.TreeItem>;
-let dataVirtProvider : DataVirtNodeProvider;
-let pluginResourcesPath: string;
-
-let fileToNode: Map<string, SchemaTreeNode> = new Map();
-let fileToEditor: Map<string, vscode.TextEditor> = new Map();
-
-let workspaceReady : boolean = true;
-
+export let dataVirtProvider : DataVirtNodeProvider;
+export let pluginResourcesPath: string;
+export let workspaceReady : boolean = true;
 export const DDL_FILE_EXT: string = '.ddl';
 export const TEMPLATE_NAME: string = '$!TEMPLATE!$';
 export const DATASOURCE_TYPES: Map<string, IDataSourceConfig> = new Map();
+export let fileToNode: Map<string, SchemaTreeNode> = new Map();
+export let fileToEditor: Map<string, vscode.TextEditor> = new Map();
+
+let dataVirtExtensionOutputChannel: vscode.OutputChannel;
+let dataVirtTreeView : vscode.TreeView<vscode.TreeItem>;
 
 export function activate(context: vscode.ExtensionContext) {
-
 	DATASOURCE_TYPES.set('SpringBoot', new SpringDataSource(TEMPLATE_NAME));
 	DATASOURCE_TYPES.set('MongoDB', new MongoDBDataSource(TEMPLATE_NAME));
 	DATASOURCE_TYPES.set('Salesforce', new SalesForceDataSource(TEMPLATE_NAME));
@@ -70,21 +72,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	vscode.window.onDidChangeVisibleTextEditors( event => {
-		let k: string;
-		for( let [key, value] of fileToEditor) {
-			if (event.indexOf(value) === -1) {
-				let p = path.dirname(key);
-				if (fileToNode.has(key)) {
-					fs.unlinkSync(key);
-					fs.rmdirSync(p);
-				}
-				k = key;
-			}
-		}
-		fileToEditor.delete(k);
-		fileToNode.delete(k);
-	});
+	vscode.window.onDidChangeVisibleTextEditors(handleVisibleEditorChanges);
 
 	vscode.workspace.onWillSaveTextDocument(event => {
 		event.waitUntil(handleSaveDDL(event));
@@ -92,163 +80,16 @@ export function activate(context: vscode.ExtensionContext) {
 
 	pluginResourcesPath = context.asAbsolutePath('resources');
 
-	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.vdb', (ctx) => {
-		if (workspaceReady) {
-			vscode.window.showInputBox( {validateInput: (name: string) => {
-				let res: string = validateName(name);
-				if (!res) {
-					// check if file already exists
-					res = validateFileNotExisting(name);
-				}
-				return res;
-			}, placeHolder: "Enter the name of the new VDB config"})
-				.then( (fileName: string) => {
-					handleVDBCreation(vscode.workspace.rootPath, fileName)
-						.then( (success: boolean) => {
-							if (success) {
-								let node: SchemaTreeNode = dataVirtProvider.getSchemaTreeNodeOfProject(fileName);
-								if (node) {
-									vscode.commands.executeCommand('datavirt.edit.schema', node);
-								}								
-								vscode.window.showInformationMessage(`New VDB ${fileName} has been created successfully...`);
-							} else {
-								vscode.window.showErrorMessage(`An error occured when trying to create a new VDB...`);
-							}
-						});
-				});
-		} else {
-			vscode.window.showErrorMessage(`DataVirt Tooling only works when a workspace folder is opened.` +
-				` Please add a folder to the workspace with 'File->Add Folder to Workspace' or use the Command Palette (Ctrl+Shift+P) and type 'Add Folder'.` +
-				` Once there is at least one folder in the workspace, please try again.`);
-		}
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.datasource', (ctx) => {
-		vscode.window.showInputBox( {validateInput: validateName, placeHolder: "Enter the name of the new datasource"})
-			.then( async (dsName: string) => {
-				await vscode.window.showQuickPick( Array.from(DATASOURCE_TYPES.keys()), {canPickMany: false, placeHolder: "Select the datasource type" })
-					.then( (dsType: string) => {
-						handleDataSourceCreation(ctx, dsName, dsType)
-							.then( (success: boolean) => {
-								if (success) {
-									vscode.window.showInformationMessage(`New datasource ${dsName} has been created successfully...`);
-								} else {
-									vscode.window.showErrorMessage(`An error occured when trying to create a new datasource...`);
-								}
-							});
-					});
-			});
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand('datavirt.delete.datasource', (ctx) => {
-		handleDataSourceDeletion(ctx)
-			.then( (success: boolean) => {
-				if (success) {
-					vscode.window.showInformationMessage(`DataSource has been deleted...`);
-				} else {
-					vscode.window.showErrorMessage(`An error occured when trying to delete the datasource...`);
-				}
-			});
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.datasourceentry', (ctx) => {
-		vscode.window.showInputBox( {validateInput: validateName, placeHolder: "Enter the name of the new entry"})
-			.then( (eName: string) => {
-				vscode.window.showInputBox( {placeHolder: "Enter the value of the new entry"})
-					.then( (eValue: string) => {
-						handleDataSourceEntryCreation(ctx, eName, eValue)
-							.then( (success: boolean) => {
-								if (success) {
-									vscode.window.showInformationMessage(`New datasource entry ${eName} has been created successfully...`);
-								} else {
-									vscode.window.showErrorMessage(`An error occured when trying to create a new datasource entry...`);
-								}
-							});
-					});
-			});
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand('datavirt.edit.datasourceentry', (ctx) => {
-		let item: DataSourceConfigEntryTreeNode = ctx;
-		vscode.window.showInputBox( {validateInput: validateName, value: item.getValue()})
-			.then( ( newValue: string) => {
-				handleDataSourceEntryEdit(ctx, item, newValue)
-					.then( (success: boolean) => {
-						if (success) {
-							vscode.window.showInformationMessage(`DataSource entry has been modified...`);
-						} else {
-							vscode.window.showErrorMessage(`An error occured when trying to modify the datasource entry...`);
-						}
-					});
-			});
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand('datavirt.delete.datasourceentry', (ctx) => {
-		handleDataSourceEntryDeletion(ctx)
-			.then( (success: boolean) => {
-				if (success) {
-					vscode.window.showInformationMessage(`DataSource entry has been deleted...`);
-				} else {
-					vscode.window.showErrorMessage(`An error occured when trying to delete the datasource entry...`);
-				}
-			});
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand('datavirt.edit.schema', (ctx) => {
-		let sNode: SchemasTreeNode;
-		let ddlNode: SchemaTreeNode;
-
-		if (ctx instanceof SchemasTreeNode) {
-			sNode = ctx;
-		} else if (ctx instanceof SchemaTreeNode) {
-			ddlNode = ctx;
-			sNode = ddlNode.getParent();
-		} else {
-			log(`Unsupported type for schema modification: ${ctx}`);
-			return;
-		}
-		if (sNode && sNode.children && sNode.children.length>0) {
-			if (!ddlNode) {
-				ddlNode = sNode.children[0] as SchemaTreeNode;
-			}			
-			let sql: string = ddlNode.getDDL();
-			let p = fs.mkdtempSync(`${vscode.workspace.rootPath}${path.sep}.tmp_`, 'utf-8');
-			let tempFile = path.join(p, `${sNode.getProject().label}${DDL_FILE_EXT}`);
-			fs.writeFileSync(tempFile, sql);
-			vscode.workspace.openTextDocument(tempFile)
-				.then((a: vscode.TextDocument) => {
-					vscode.window.showTextDocument(a, 1, true)
-						.then( (editor: vscode.TextEditor) => {
-							if (fileToNode.has(tempFile)) {
-								for ( let [key, value] of fileToNode) {
-									if (value === ddlNode) {
-										fs.unlinkSync(key);
-										fs.rmdirSync(path.dirname(key));
-									}
-								}
-							}
-							fileToNode.set(tempFile, ddlNode);
-							fileToEditor.set(tempFile, editor);
-						});
-				});
-		}
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand('datavirt.deploy', (ctx) => {
-		if (ctx instanceof DVProjectTreeNode) {
-			let prjNode: DVProjectTreeNode = ctx;
-			let file: string = prjNode.file;
-			handleDeploy(file);
-		}
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand('datavirt.undeploy', (ctx) => {
-		if (ctx instanceof DVProjectTreeNode) {
-			let prjNode: DVProjectTreeNode = ctx;
-			let file: string = prjNode.file;
-			handleUndeploy(file);
-		}
-	}));
+	// register the commands
+	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.vdb', createVDBCommand));
+	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.datasource', createDataSourceCommand));
+	context.subscriptions.push(vscode.commands.registerCommand('datavirt.delete.datasource', deleteDataSourceCommand));
+	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.datasourceentry', createDataSourceEntryCommand));
+	context.subscriptions.push(vscode.commands.registerCommand('datavirt.edit.datasourceentry', editDataSourceEntryCommand));
+	context.subscriptions.push(vscode.commands.registerCommand('datavirt.delete.datasourceentry', deleteDataSourceEntryCommand));
+	context.subscriptions.push(vscode.commands.registerCommand('datavirt.edit.schema', editSchemaCommand));
+	context.subscriptions.push(vscode.commands.registerCommand('datavirt.deploy', deployVDBCommand));
+	context.subscriptions.push(vscode.commands.registerCommand('datavirt.undeploy', undeployVDBCommand));
 }
 
 export function deactivate(context: vscode.ExtensionContext) {
@@ -283,213 +124,18 @@ function creatDataVirtView(): void {
 	});
 }
 
-function handleVDBCreation(filepath: string, fileName: string): Promise<boolean> {
-	return new Promise<boolean>( (resolve, reject) => {
-		if (fileName && fileName.length>0) {
-			try {
-				let templatePath = path.join(pluginResourcesPath, "vdb_template.yaml");
-				let targetFile: string = path.join(filepath, `${fileName}.yaml`);
-				fs.copyFileSync(templatePath, targetFile);
-				let yamlDoc:IDVConfig = utils.loadModelFromFile(targetFile);
-				yamlDoc.metadata.name = fileName;
-				utils.saveModelToFile(yamlDoc, targetFile);
-				dataVirtProvider.refresh();
-				resolve(true);
-			} catch (error) {
-				log(error);
-				resolve(false);
+function handleVisibleEditorChanges(event) {
+	let k: string;
+	for( let [key, value] of fileToEditor) {
+		if (event.indexOf(value) === -1) {
+			let p = path.dirname(key);
+			if (fileToNode.has(key)) {
+				fs.unlinkSync(key);
+				fs.rmdirSync(p);
 			}
-		} else {
-			log("handleVDBCreation: Unable to create the VDB because no name was given...");
-			resolve(false);
-		}		
-	});
-}
-
-function handleDataSourceCreation(ctx, dsName: string, dsType: string): Promise<boolean> {
-	return new Promise<boolean>( (resolve, reject) => {
-		if (dsName && dsType) {
-			try {
-				let yaml: IDVConfig = ctx.getProject().dvConfig;
-				if (yaml) {
-					let dsConfig: IDataSourceConfig = DATASOURCE_TYPES.get(dsType);
-					dsConfig = utils.replaceTemplateName(dsConfig, dsName, TEMPLATE_NAME);
-					utils.mapDSConfigToEnv(dsConfig, yaml);
-					utils.saveModelToFile(yaml, ctx.getProject().getFile());
-					dataVirtProvider.refresh();
-					resolve(true);
-				} else {
-					resolve(false);
-				}				
-			} catch (error) {
-				log(error);
-				resolve(false);
-			}
-		} else {
-			log("handleDataSourceCreation: Unable to create the datasource because no name and type were given...");
-			resolve(false);
-		}		
-	});
-}
-
-function handleDataSourceDeletion(ctx): Promise<boolean> {
-	return new Promise<boolean>( (resolve, reject) => {
-		if (ctx) {
-			try {
-				let ds: DataSourceTreeNode = ctx;
-				let dsConfig: IDataSourceConfig = ds.dsConfig;
-				let yaml: IDVConfig = ds.getProject().dvConfig;
-				let keys: IEnv[] = [];
-				if (yaml) {
-					yaml.spec.env.forEach( (element: IEnv) => {
-						if (element.name.toUpperCase().startsWith(`${utils.generateDataSourceConfigPrefix(dsConfig).toUpperCase()}_`)) {
-							keys.push(element);
-						}
-					});
-					keys.forEach( (key) => {
-						yaml.spec.env.splice(yaml.spec.env.indexOf(key, 1));
-					});
-					utils.saveModelToFile(yaml, ds.getProject().getFile());
-					dataVirtProvider.refresh();
-					resolve(true);
-				} else {
-					resolve(false);
-				}	
-			} catch (error) {
-				log(error);
-				resolve(false);
-			}
-		} else {
-			log("handleDataSourceEdit: Unable to delete the datasource...");
-			resolve(false);
-		}		
-	});
-}
-
-function handleDataSourceEntryCreation(ctx, eName: string, eValue: string): Promise<boolean> {
-	return new Promise<boolean>( (resolve, reject) => {
-		if (ctx) {
-			try {
-				let ds: DataSourceTreeNode = ctx;
-				let yaml: IDVConfig = ctx.getProject().dvConfig;
-				if (yaml) {
-					let dsConfig: IDataSourceConfig = ds.dsConfig;
-					if (!dsConfig.entries.has(eName)) {
-						dsConfig.entries.set(eName, eValue);
-					} else {
-						resolve(false);
-					}
-					utils.mapDSConfigToEnv(dsConfig, yaml);
-					utils.saveModelToFile(yaml, ctx.getProject().getFile());
-					dataVirtProvider.refresh();
-					resolve(true);
-				} else {
-					resolve(false);
-				}				
-			} catch (error) {
-				log(error);
-				resolve(false);
-			}
-		} else {
-			log("handleDataSourceEdit: Unable to delete the datasource...");
-			resolve(false);
-		}		
-	});
-}
-
-function handleDataSourceEntryEdit(ctx, item: DataSourceConfigEntryTreeNode, newValue: string): Promise<boolean> {
-	return new Promise<boolean>( (resolve, reject) => {
-		if (ctx) {
-			try {
-				let yaml: IDVConfig = item.getProject().dvConfig;
-				if (yaml) {
-					let dsP: DataSourceTreeNode = item.getParent();
-					let dsConfig: IDataSourceConfig = dsP.dsConfig;
-					dsConfig.entries.set(item.getKey(), newValue);
-					utils.mapDSConfigToEnv(dsConfig, yaml);
-					utils.saveModelToFile(yaml, ctx.getProject().getFile());
-					dataVirtProvider.refresh();
-					resolve(true);
-				} else {
-					resolve(false);
-				}				
-			} catch (error) {
-				log(error);
-				resolve(false);
-			}
-		} else {
-			log("handleDataSourceEntryEdit: Unable to modify the datasource entry...");
-			resolve(false);
-		}		
-	});
-}
-
-function handleDataSourceEntryDeletion(ctx): Promise<boolean> {
-	return new Promise<boolean>( (resolve, reject) => {
-		if (ctx) {
-			try {
-				let ds: DataSourceConfigEntryTreeNode = ctx;
-				let dsConfig: IDataSourceConfig = ds.getParent().dsConfig;
-				let yaml: IDVConfig = ds.getProject().dvConfig;
-				if (yaml) {
-					yaml.spec.env.forEach( (element: IEnv) => {
-						if (element.name.toUpperCase() === utils.generateFullDataSourceConfigEntryKey(dsConfig, ds.getKey()).toUpperCase()) {
-							yaml.spec.env.splice(yaml.spec.env.indexOf(element, 0), 1);
-						}
-					});
-					utils.saveModelToFile(yaml, ds.getProject().getFile());
-					dataVirtProvider.refresh();
-					resolve(true);
-				} else {
-					resolve(false);
-				}				
-			} catch (error) {
-				log(error);
-				resolve(false);
-			}
-		} else {
-			log("handleDataSourceEntryEdit: Unable to delete the datasource entry...");
-			resolve(false);
-		}		
-	});
-}
-
-function handleSaveDDL(event: vscode.TextDocumentWillSaveEvent): Promise<void> {
-	return new Promise<void>( (resolve, reject) => {
-		let fileName: string = event.document.fileName;
-		let ddl: string = event.document.getText();
-		let sNode: SchemaTreeNode = fileToNode.get(fileName);
-		if (sNode) {
-			sNode.getProject().dvConfig.spec.build.source.ddl = ddl;
-			utils.saveModelToFile(sNode.getProject().dvConfig, sNode.getProject().getFile());
-			dataVirtProvider.refresh();
-			resolve();
-			return;
+			k = key;
 		}
-		reject();
-	});
-}
-
-function validateName(name: string): string {
-	if (/^[a-z0-9]{4,253}$/.test(name)) {
-		return undefined;
-	} else {
-		return "The entered name does not comply with the naming conventions. [a-z0-9]";
 	}
-}
-
-function validateFileNotExisting(name: string): string {
-	let fp: string = path.join(vscode.workspace.rootPath, `${name}.yaml`);
-	if (fs.existsSync(fp)) {
-		return 'There is already a file with the same name. Please choose a different name.';
-	}
-	return undefined;
-}
-
-function handleDeploy(filepath: string): void {
-	log("\nDEPLOY: Selected File: " + filepath + "\n");
-}
-
-function handleUndeploy(filepath: string): void {
-	log("\nUNDEPLOY: Selected File: " + filepath + "\n");
+	fileToEditor.delete(k);
+	fileToNode.delete(k);
 }
