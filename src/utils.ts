@@ -14,6 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as vscode from 'vscode';
+import * as path from 'path';
 import * as fs from 'fs';
 import { IDataSourceConfig, IDVConfig, IEnv } from './model/DataVirtModel';
 
@@ -36,6 +38,7 @@ export function mapDSConfigToEnv(dsConfig: IDataSourceConfig, yaml: IDVConfig): 
 			}
 		});
 		if (!found) {
+			envEntry.name = generateFullDataSourceConfigEntryKey(dsConfig, envEntry.name);
 			yaml.spec.env.push(envEntry);
 		}
 	}
@@ -84,4 +87,20 @@ export function replaceTemplateName(dsConfig: IDataSourceConfig, dsName: string,
 	});
 
 	return dsConfigNew;
+}
+
+export function validateName(name: string): string {
+	if (/^[a-z0-9]{4,253}$/.test(name)) {
+		return undefined;
+	} else {
+		return "The entered name does not comply with the naming conventions. [a-z0-9]";
+	}
+}
+
+export function validateFileNotExisting(name: string): string {
+	let fp: string = path.join(vscode.workspace.rootPath, `${name}.yaml`);
+	if (fs.existsSync(fp)) {
+		return 'There is already a file with the same name. Please choose a different name.';
+	}
+	return undefined;
 }
