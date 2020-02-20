@@ -30,7 +30,7 @@ export function mapDSConfigToEnv(dsConfig: IDataSourceConfig, yaml: IDVConfig): 
 		};
 		let found: boolean = false;
 		yaml.spec.env.forEach( (element: IEnv) => {
-			if (element.name === envEntry.name) {
+			if (element.name === generateFullDataSourceConfigEntryKey(dsConfig, envEntry.name)) {
 				element.value = envEntry.value;
 				found = true;
 			}
@@ -46,8 +46,8 @@ export function generateDataSourceConfigPrefix(dsConfig: IDataSourceConfig): str
 }
 
 export function generateFullDataSourceConfigEntryKey(dsConfig: IDataSourceConfig, key: string): string {
-	return key;
-	//return `${generateDataSourceConfigPrefix(dsConfig)}_${key}`;
+//	return key;
+	return `${generateDataSourceConfigPrefix(dsConfig)}_${key}`;
 }
 
 export function loadModelFromFile(file: string): IDVConfig {
