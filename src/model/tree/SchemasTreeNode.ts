@@ -35,7 +35,7 @@ export class SchemasTreeNode extends DVTreeItem {
 	}
 
 	initialize(): void {
-		let newItem = new SchemaTreeNode("ddl", this.getProject().dvConfig.spec.build.source.ddl);
+		let newItem = new SchemaTreeNode("DDL", this.getProject().dvConfig.spec.build.source.ddl);
 		newItem.setProject(this.getProject());
 		newItem.parent = this;
 		if (this.children.indexOf(newItem) < 0) {

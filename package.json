@@ -44,11 +44,6 @@
 				"category": "dv"
 			},
 			{
-				"title": "Modify Datasource",
-				"command": "datavirt.edit.datasource",
-				"category": "dv"
-			},
-			{
 				"title": "Delete Datasource",
 				"command": "datavirt.delete.datasource",
 				"category": "dv"
@@ -69,18 +64,8 @@
 				"category": "dv"
 			},
 			{
-				"title": "Create a Schema",
-				"command": "datavirt.create.schema",
-				"category": "dv"
-			},
-			{
 				"title": "Modify Schema",
 				"command": "datavirt.edit.schema",
-				"category": "dv"
-			},
-			{
-				"title": "Delete Schema",
-				"command": "datavirt.delete.schema",
 				"category": "dv"
 			}
 		],
@@ -112,11 +97,6 @@
 				},
 				{
 					"group": "dv",
-					"command": "datavirt.edit.datasource",
-					"when": "viewItem == dv.datasource"
-				},
-				{
-					"group": "dv",
 					"command": "datavirt.delete.datasource",
 					"when": "viewItem == dv.datasource"
 				},
@@ -138,7 +118,7 @@
 				{
 					"group": "dv",
 					"command": "datavirt.edit.schema",
-					"when": "viewItem == dv.schema"
+					"when": "viewItem == dv.schemas || viewItem == dv.schema"
 				}
 			]
 		}

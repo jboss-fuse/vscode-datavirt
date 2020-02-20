@@ -30,6 +30,8 @@ import { MongoDBDataSource } from './model/datasources/MongoDBDataSource';
 import { SalesForceDataSource } from './model/datasources/SalesForceDataSource';
 import { GoogleSheetsDataSource } from './model/datasources/GoogleSheetsDataSource';
 import { RestBasedDataSource } from './model/datasources/RestBasedDataSource';
+import { SchemasTreeNode } from './model/tree/SchemasTreeNode';
+import { DVProjectTreeNode } from './model/tree/DVProjectTreeNode';
 
 let dataVirtExtensionOutputChannel: vscode.OutputChannel;
 let dataVirtTreeView : vscode.TreeView<vscode.TreeItem>;
@@ -93,11 +95,12 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.vdb', (ctx) => {
 		if (workspaceReady) {
 			vscode.window.showInputBox( {validateInput: (name: string) => {
-				if (/^[a-z0-9]{4,253}$/.test(name)) {
-					return undefined;
-				} else {
-					return "The entered name does not comply with the naming conventions. [a-z0-9-.]";
+				let res: string = validateName(name);
+				if (!res) {
+					// check if file already exists
+					res = validateFileNotExisting(name);
 				}
+				return res;
 			}, placeHolder: "Enter the name of the new VDB config"})
 				.then( (fileName: string) => {
 					handleVDBCreation(vscode.workspace.rootPath, fileName)
@@ -121,7 +124,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.datasource', (ctx) => {
-		vscode.window.showInputBox( {placeHolder: "Enter the name of the new datasource"})
+		vscode.window.showInputBox( {validateInput: validateName, placeHolder: "Enter the name of the new datasource"})
 			.then( async (dsName: string) => {
 				await vscode.window.showQuickPick( Array.from(DATASOURCE_TYPES.keys()), {canPickMany: false, placeHolder: "Select the datasource type" })
 					.then( (dsType: string) => {
@@ -131,24 +134,6 @@ export function activate(context: vscode.ExtensionContext) {
 									vscode.window.showInformationMessage(`New datasource ${dsName} has been created successfully...`);
 								} else {
 									vscode.window.showErrorMessage(`An error occured when trying to create a new datasource...`);
-								}
-							});
-					});
-			});
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand('datavirt.edit.datasource', (ctx) => {
-		let ds: DataSourceTreeNode = ctx;
-		vscode.window.showInputBox( {value: ds.getKey().split(' ')[0]})
-			.then( async (dsName: string) => {
-				await vscode.window.showQuickPick( Array.from(DATASOURCE_TYPES.keys()), {canPickMany: false, placeHolder: ds.type })
-					.then( (dsType: string) => {
-						handleDataSourceEdit(ctx, dsName, dsType)
-							.then( (success: boolean) => {
-								if (success) {
-									vscode.window.showInformationMessage(`DataSource has been modified...`);
-								} else {
-									vscode.window.showErrorMessage(`An error occured when trying to modify the datasource...`);
 								}
 							});
 					});
@@ -167,7 +152,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.datasourceentry', (ctx) => {
-		vscode.window.showInputBox( {placeHolder: "Enter the name of the new entry"})
+		vscode.window.showInputBox( {validateInput: validateName, placeHolder: "Enter the name of the new entry"})
 			.then( (eName: string) => {
 				vscode.window.showInputBox( {placeHolder: "Enter the value of the new entry"})
 					.then( (eValue: string) => {
@@ -185,7 +170,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.edit.datasourceentry', (ctx) => {
 		let item: DataSourceConfigEntryTreeNode = ctx;
-		vscode.window.showInputBox( {value: item.getValue()})
+		vscode.window.showInputBox( {validateInput: validateName, value: item.getValue()})
 			.then( ( newValue: string) => {
 				handleDataSourceEntryEdit(ctx, item, newValue)
 					.then( (success: boolean) => {
@@ -210,49 +195,59 @@ export function activate(context: vscode.ExtensionContext) {
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.edit.schema', (ctx) => {
-		let sNode: SchemaTreeNode = ctx;
-		let sql: string = sNode.getDDL();
-		let p = fs.mkdtempSync(`${vscode.workspace.rootPath}${path.sep}.tmp_`, 'utf-8');
-		let tempFile = path.join(p, `${sNode.getProject().label}${DDL_FILE_EXT}`);
-		fs.writeFileSync(tempFile, sql);
-		vscode.workspace.openTextDocument(tempFile)
-			.then((a: vscode.TextDocument) => {
-				vscode.window.showTextDocument(a, 1, true)
-					.then( (editor: vscode.TextEditor) => {
-						if (fileToNode.has(tempFile)) {
-							for ( let [key, value] of fileToNode) {
-								if (value === sNode) {
-									fs.unlinkSync(key);
-									fs.rmdirSync(path.dirname(key));
+		let sNode: SchemasTreeNode;
+		let ddlNode: SchemaTreeNode;
+
+		if (ctx instanceof SchemasTreeNode) {
+			sNode = ctx;
+		} else if (ctx instanceof SchemaTreeNode) {
+			ddlNode = ctx;
+			sNode = ddlNode.getParent();
+		} else {
+			log(`Unsupported type for schema modification: ${ctx}`);
+			return;
+		}
+		if (sNode && sNode.children && sNode.children.length>0) {
+			if (!ddlNode) {
+				ddlNode = sNode.children[0] as SchemaTreeNode;
+			}			
+			let sql: string = ddlNode.getDDL();
+			let p = fs.mkdtempSync(`${vscode.workspace.rootPath}${path.sep}.tmp_`, 'utf-8');
+			let tempFile = path.join(p, `${sNode.getProject().label}${DDL_FILE_EXT}`);
+			fs.writeFileSync(tempFile, sql);
+			vscode.workspace.openTextDocument(tempFile)
+				.then((a: vscode.TextDocument) => {
+					vscode.window.showTextDocument(a, 1, true)
+						.then( (editor: vscode.TextEditor) => {
+							if (fileToNode.has(tempFile)) {
+								for ( let [key, value] of fileToNode) {
+									if (value === ddlNode) {
+										fs.unlinkSync(key);
+										fs.rmdirSync(path.dirname(key));
+									}
 								}
 							}
-						}
-						fileToNode.set(tempFile, sNode);
-						fileToEditor.set(tempFile, editor);
-					});
-			});
+							fileToNode.set(tempFile, ddlNode);
+							fileToEditor.set(tempFile, editor);
+						});
+				});
+		}
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.deploy', (ctx) => {
-		let file: string;
-		if (ctx && ctx.fsPath) {
-			file = ctx.fsPath;
-		} else {
-			file = undefined;
+		if (ctx instanceof DVProjectTreeNode) {
+			let prjNode: DVProjectTreeNode = ctx;
+			let file: string = prjNode.file;
+			handleDeploy(file);
 		}
-
-		handleDeploy(file);
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.undeploy', (ctx) => {
-		let file: string;
-		if (ctx && ctx.fsPath) {
-			file = ctx.fsPath;
-		} else {
-			file = undefined;
+		if (ctx instanceof DVProjectTreeNode) {
+			let prjNode: DVProjectTreeNode = ctx;
+			let file: string = prjNode.file;
+			handleUndeploy(file);
 		}
-
-		handleUndeploy(file);
 	}));
 }
 
@@ -332,40 +327,6 @@ function handleDataSourceCreation(ctx, dsName: string, dsType: string): Promise<
 			}
 		} else {
 			log("handleDataSourceCreation: Unable to create the datasource because no name and type were given...");
-			resolve(false);
-		}		
-	});
-}
-
-function handleDataSourceEdit(ctx, dsName: string, dsType: string): Promise<boolean> {
-	return new Promise<boolean>( (resolve, reject) => {
-		if (ctx) {
-			try {
-				let ds: DataSourceTreeNode = ctx;
-				let yaml: IDVConfig = ctx.getProject().dvConfig;
-				if (yaml) {
-					let dsConfig: IDataSourceConfig = ds.dsConfig;
-					let oldPrefix: string = utils.generateDataSourceConfigPrefix(dsConfig);
-					dsConfig.name = dsName;
-					dsConfig.type = dsType;
-					let newPrefix: string = utils.generateDataSourceConfigPrefix(dsConfig);
-					yaml.spec.env.forEach( (element: IEnv) => {
-						if (element.name.startsWith(`${oldPrefix}_`)) {
-							element.name = element.name.replace(`${oldPrefix}_`, `${newPrefix}_`);
-						}
-					});
-					utils.saveModelToFile(yaml, ds.getProject().getFile());
-					dataVirtProvider.refresh();
-					resolve(true);
-				} else {
-					resolve(false);
-				}				
-			} catch (error) {
-				log(error);
-				resolve(false);
-			}
-		} else {
-			log("handleDataSourceEdit: Unable to modify the datasource...");
 			resolve(false);
 		}		
 	});
@@ -509,6 +470,21 @@ function handleSaveDDL(event: vscode.TextDocumentWillSaveEvent): Promise<void> {
 	});
 }
 
+function validateName(name: string): string {
+	if (/^[a-z0-9]{4,253}$/.test(name)) {
+		return undefined;
+	} else {
+		return "The entered name does not comply with the naming conventions. [a-z0-9]";
+	}
+}
+
+function validateFileNotExisting(name: string): string {
+	let fp: string = path.join(vscode.workspace.rootPath, `${name}.yaml`);
+	if (fs.existsSync(fp)) {
+		return 'There is already a file with the same name. Please choose a different name.';
+	}
+	return undefined;
+}
 
 function handleDeploy(filepath: string): void {
 	log("\nDEPLOY: Selected File: " + filepath + "\n");
