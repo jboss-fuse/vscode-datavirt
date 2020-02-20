@@ -92,7 +92,7 @@ export function validateName(name: string): string {
 	if (/^[a-z0-9]{4,253}$/.test(name)) {
 		return undefined;
 	} else {
-		return "The entered name does not comply with the naming conventions. [a-z0-9]";
+		return "The entered name does not comply with the naming conventions. ([a-z0-9] and length of 4-253 characters)";
 	}
 }
 
