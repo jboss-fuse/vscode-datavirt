@@ -165,7 +165,7 @@
 		"@types/glob": "^7.1.1",
 		"@types/istanbul": "^0.4.30",
 		"@types/mocha": "^7.0.1",
-		"@types/node": "^13.7.2",
+		"@types/node": "^13.7.4",
 		"@types/sinon": "^7.5.1",
 		"@types/sinon-chai": "^3.2.3",
 		"@types/vscode": "^1.42.0",
