@@ -49,7 +49,6 @@ export function generateDataSourceConfigPrefix(dsConfig: IDataSourceConfig): str
 }
 
 export function generateFullDataSourceConfigEntryKey(dsConfig: IDataSourceConfig, key: string): string {
-//	return key;
 	return `${generateDataSourceConfigPrefix(dsConfig)}_${key}`;
 }
 
