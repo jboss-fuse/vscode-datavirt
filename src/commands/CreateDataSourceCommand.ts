@@ -43,7 +43,7 @@ function handleDataSourceCreation(ctx, dsName: string, dsType: string): Promise<
 				let yaml: IDVConfig = ctx.getProject().dvConfig;
 				if (yaml) {
 					let dsConfig: IDataSourceConfig = extension.DATASOURCE_TYPES.get(dsType);
-					dsConfig = utils.replaceTemplateName(dsConfig, dsName, extension.TEMPLATE_NAME);
+					dsConfig = utils.replaceTemplateName(dsConfig, dsName.toUpperCase(), extension.TEMPLATE_NAME);
 					utils.mapDSConfigToEnv(dsConfig, yaml);
 					utils.saveModelToFile(yaml, ctx.getProject().getFile());
 					extension.dataVirtProvider.refresh();

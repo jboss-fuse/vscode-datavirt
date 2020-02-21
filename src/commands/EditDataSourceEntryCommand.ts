@@ -23,7 +23,7 @@ import { DataSourceConfigEntryTreeNode } from '../model/tree/DataSourceConfigEnt
 
 export function editDataSourceEntryCommand(ctx) {
 	let item: DataSourceConfigEntryTreeNode = ctx;
-	vscode.window.showInputBox( {validateInput: utils.validateName, value: item.getValue()})
+	vscode.window.showInputBox( {value: item.getValue()})
 		.then( ( newValue: string) => {
 			handleDataSourceEntryEdit(ctx, item, newValue)
 				.then( (success: boolean) => {

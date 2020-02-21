@@ -29,10 +29,10 @@ export class GoogleSheetsDataSource implements IDataSourceConfig {
 	}
 
 	initialize() {
-		this.entries.set(`${this.type}_${this.name}_SPREAD_SHEET_NAME`, '');
-		this.entries.set(`${this.type}_${this.name}_SPREAD_SHEET_ID`, '');
-		this.entries.set(`${this.type}_${this.name}_CLIENT_ID`, '');
-		this.entries.set(`${this.type}_${this.name}_CLIENT_SECRET`, '');
-		this.entries.set(`${this.type}_${this.name}_REFRESH_TOKEN`, '');
+		this.entries.set(`SPREAD_SHEET_NAME`, '');
+		this.entries.set(`SPREAD_SHEET_ID`, '');
+		this.entries.set(`CLIENT_ID`, '');
+		this.entries.set(`CLIENT_SECRET`, '');
+		this.entries.set(`REFRESH_TOKEN`, '');
 	}
 }

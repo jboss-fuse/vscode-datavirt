@@ -29,9 +29,9 @@ export class SalesForceDataSource implements IDataSourceConfig {
 	}
 
 	initialize() {
-		this.entries.set(`${this.type}_${this.name}_USER_NAME`, '');
-		this.entries.set(`${this.type}_${this.name}_PASSWORD`, '');
-		this.entries.set(`${this.type}_${this.name}_CLIENT_ID`, '');
-		this.entries.set(`${this.type}_${this.name}_CLIENT_SECRET`, '');
+		this.entries.set(`USER_NAME`, '');
+		this.entries.set(`PASSWORD`, '');
+		this.entries.set(`CLIENT_ID`, '');
+		this.entries.set(`CLIENT_SECRET`, '');
 	}
 }

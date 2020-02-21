@@ -29,9 +29,9 @@ export class RestBasedDataSource implements IDataSourceConfig {
 	}
 	
 	initialize() {
-		this.entries.set(`${this.type}_${this.name}_ENDPOINT`, '');
-		this.entries.set(`${this.type}_${this.name}_SECURITY_TYPE`, '');
-		this.entries.set(`${this.type}_${this.name}_USER_NAME`, '');
-		this.entries.set(`${this.type}_${this.name}_PASSWORD`, '');
+		this.entries.set(`ENDPOINT`, '');
+		this.entries.set(`SECURITY_TYPE`, '');
+		this.entries.set(`USER_NAME`, '');
+		this.entries.set(`PASSWORD`, '');
 	}
 }
