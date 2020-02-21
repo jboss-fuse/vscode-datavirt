@@ -29,11 +29,11 @@ export class MongoDBDataSource implements IDataSourceConfig {
 	}
 	
 	initialize() {
-		this.entries.set(`${this.type}_${this.name}_REMOTE_SERVER_LIST`, '');
-		this.entries.set(`${this.type}_${this.name}_USER`, '');
-		this.entries.set(`${this.type}_${this.name}_PASSWORD`, '');
-		this.entries.set(`${this.type}_${this.name}_DATABASE`, '');
-		this.entries.set(`${this.type}_${this.name}_AUTH_DATABASE`, '');
-		this.entries.set(`${this.type}_${this.name}_SSL`, '');
+		this.entries.set(`REMOTE_SERVER_LIST`, '');
+		this.entries.set(`USER`, '');
+		this.entries.set(`PASSWORD`, '');
+		this.entries.set(`DATABASE`, '');
+		this.entries.set(`AUTH_DATABASE`, '');
+		this.entries.set(`SSL`, '');
 	}
 }

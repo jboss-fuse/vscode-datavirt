@@ -29,10 +29,10 @@ export class SpringDataSource implements IDataSourceConfig {
 	}
 
 	initialize() {
-		this.entries.set(`${this.type}_${this.name}_JDBCURL`, '');
-		this.entries.set(`${this.type}_${this.name}_USERNAME`, '');
-		this.entries.set(`${this.type}_${this.name}_PASSWORD`, '');
-		this.entries.set(`${this.type}_${this.name}_IMPORTER_SCHEMA_NAME`, '');
-		this.entries.set(`${this.type}_${this.name}_DRIVER_CLASS_NAME`, '');
+		this.entries.set(`JDBCURL`, '');
+		this.entries.set(`USERNAME`, '');
+		this.entries.set(`PASSWORD`, '');
+		this.entries.set(`IMPORTER_SCHEMA_NAME`, '');
+		this.entries.set(`DRIVER_CLASS_NAME`, '');
 	}
 }
