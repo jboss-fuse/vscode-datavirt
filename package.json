@@ -141,7 +141,7 @@
 		"yaml": "^1.7.2"
 	},
 	"devDependencies": {
-		"@types/chai": "^4.2.9",
+		"@types/chai": "^4.2.10",
 		"@types/glob": "^7.1.1",
 		"@types/istanbul": "^0.4.30",
 		"@types/mocha": "^7.0.1",
