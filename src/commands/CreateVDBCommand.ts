@@ -33,7 +33,7 @@ export function createVDBCommand() {
 			return res;
 		}, placeHolder: "Enter the name of the new VDB config"})
 			.then( (fileName: string) => {
-				handleVDBCreation(vscode.workspace.rootPath, fileName)
+				handleVDBCreation(vscode.workspace.workspaceFolders[0].uri.fsPath, fileName)
 					.then( (success: boolean) => {
 						if (success) {
 							let node: SchemaTreeNode = extension.dataVirtProvider.getSchemaTreeNodeOfProject(fileName);
@@ -53,17 +53,17 @@ export function createVDBCommand() {
 	}
 }
 
-function handleVDBCreation(filepath: string, fileName: string): Promise<boolean> {
+export function handleVDBCreation(filepath: string, fileName: string, templateFolder?: string): Promise<boolean> {
 	return new Promise<boolean>( (resolve, reject) => {
 		if (fileName && fileName.length>0) {
 			try {
-				let templatePath = path.join(extension.pluginResourcesPath, "vdb_template.yaml");
+				let templatePath = templateFolder ? path.join(templateFolder, "vdb_template.yaml") : path.join(extension.pluginResourcesPath, "vdb_template.yaml");
 				let targetFile: string = path.join(filepath, `${fileName}.yaml`);
 				fs.copyFileSync(templatePath, targetFile);
 				let yamlDoc:IDVConfig = utils.loadModelFromFile(targetFile);
 				yamlDoc.metadata.name = fileName;
 				utils.saveModelToFile(yamlDoc, targetFile);
-				extension.dataVirtProvider.refresh();
+				if (extension.dataVirtProvider) extension.dataVirtProvider.refresh();
 				resolve(true);
 			} catch (error) {
 				extension.log(error);

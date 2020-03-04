@@ -62,14 +62,6 @@ export function saveModelToFile(dvConfig: IDVConfig, file: string): void {
 	fs.writeFileSync(file, YAML.stringify(dvConfig));
 }
 
-export function getLabelFromKey(key: string, dsName: string, dsType: string): string {
-	let searchStr: string = `${dsType}_${dsName}_`;
-	if (key.toUpperCase().startsWith(searchStr.toUpperCase())) {
-		return key.substring(searchStr.length+1);
-	}
-	return key;
-}
-
 export function replaceTemplateName(dsConfig: IDataSourceConfig, dsName: string, TEMPLATE_NAME: string): IDataSourceConfig {
 	let dsConfigNew : IDataSourceConfig = {
 		name: dsName,
