@@ -138,7 +138,7 @@
 	"dependencies": {
 		"fs": "^0.0.1-security",
 		"path": "^0.12.7",
-		"yaml": "^1.8.0"
+		"yaml": "^1.8.2"
 	},
 	"devDependencies": {
 		"@types/chai": "^4.2.10",
