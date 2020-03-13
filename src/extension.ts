@@ -37,6 +37,7 @@ import { deleteDataSourceEntryCommand } from './commands/DeleteDataSourceEntryCo
 import { editSchemaCommand, handleSaveDDL } from './commands/EditSchemaCommand';
 import { deployVDBCommand } from './commands/DeployVDBCommand';
 import { undeployVDBCommand } from './commands/UndeployVDBCommand';
+import * as languageServer from './languageServer';
 
 export let dataVirtProvider : DataVirtNodeProvider;
 export let pluginResourcesPath: string;
@@ -90,6 +91,8 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.edit.schema', editSchemaCommand));
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.deploy', deployVDBCommand));
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.undeploy', undeployVDBCommand));
+
+	languageServer.activate(context);
 }
 
 export function deactivate(context: vscode.ExtensionContext) {

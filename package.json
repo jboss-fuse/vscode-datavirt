@@ -121,7 +121,15 @@
 					"when": "viewItem == dv.schemas || viewItem == dv.schema"
 				}
 			]
-		}
+		},
+		"languages": [
+			{
+				"id": "ddl",
+				"extensions": [
+					".ddl"
+				]
+			}
+		]
 	},
 	"activationEvents": [
 		"*"
@@ -130,6 +138,7 @@
 		"vscode:prepublish": "tsc -p ./",
 		"compile": "tsc -p ./",
 		"watch": "tsc -w -p ./",
+		"postinstall": "node ./scripts/postinstall.js",
 		"clean": "rm -rf out || rmdir out /s /q",
 		"test": "node ./out/test/runTest.js",
 		"update-deps": "npm update",
@@ -138,6 +147,7 @@
 	"dependencies": {
 		"fs": "^0.0.1-security",
 		"path": "^0.12.7",
+		"vscode-languageclient": "^6.1.1",
 		"yaml": "^1.8.2"
 	},
 	"devDependencies": {
@@ -149,6 +159,7 @@
 		"@types/sinon": "^7.5.2",
 		"@types/sinon-chai": "^3.2.3",
 		"@types/vscode": "^1.43.0",
+		"async-wait-until": "^1.2.4",
 		"chai": "^4.2.0",
 		"decache": "^4.5.1",
 		"gulp": "^4.0.2",
@@ -156,6 +167,7 @@
 		"istanbul": "^0.4.5",
 		"mocha": "^7.1.0",
 		"mocha-jenkins-reporter": "^0.4.2",
+		"mvn-artifact-download": "^4.1.0",
 		"remap-istanbul": "^0.13.0",
 		"sinon": "^9.0.1",
 		"sinon-chai": "^3.5.0",
