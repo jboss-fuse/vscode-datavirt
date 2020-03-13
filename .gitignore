@@ -9,3 +9,4 @@ target
 *.log
 test-resources/
 coverage
+jars/*.jar
