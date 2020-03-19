@@ -2,5 +2,8 @@
 	"rules": {
 		"indent": [true, "tabs"],
 		"semicolon": [true, "always"]
+	},
+	"linterOptions": {
+		"exclude": [ "test-resources" ]
 	}
 }

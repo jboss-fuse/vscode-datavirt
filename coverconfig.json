@@ -1,10 +1,11 @@
 {
     "enabled": true,
-	"relativeSourcePath": "../out",
-	"relativeCoverageDir": "../coverage",
+	"relativeSourcePath": "../../../out",
+    "relativeCoverageDir": "../../../coverage",
     "ignorePatterns": [
         "**/node_modules/**",
-		"**/src/test/**"
+		"**/src/test/**",
+		"**/src/ui-test/**"
     ],
     "includePid": false,
     "reports": [
