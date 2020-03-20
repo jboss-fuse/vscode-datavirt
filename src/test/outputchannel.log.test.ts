@@ -14,36 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use strict";
+'use strict';
 
-import * as chai from "chai";
-import { log, disposeExtensionOutputChannel } from "../extension";
-import * as sinon from "sinon";
-import * as sinonChai from "sinon-chai";
-import * as vscode from "vscode";
+import * as chai from 'chai';
+import { log, disposeExtensionOutputChannel } from '../extension';
+import * as sinon from 'sinon';
+import * as sinonChai from 'sinon-chai';
+import * as vscode from 'vscode';
 
-const expect = chai.expect;
 chai.use(sinonChai);
+const should = chai.should();
 
-describe("Test Extension OutputChannel", function() {
+describe('Extension OutputChannel', () => {
+	context('OutputChannelLogger', () => {
+		let windowSpy: sinon.SinonSpy;
 
-	let sandbox: sinon.SinonSandbox;
-	let createOutputChannelSpy: sinon.SinonSpy;
+		before(() => {
+			disposeExtensionOutputChannel();
+			windowSpy = sinon.spy(vscode.window, 'createOutputChannel');
+		});
 
-	before(function() {
-		sandbox = sinon.createSandbox();
-		createOutputChannelSpy = sinon.spy(vscode.window, "createOutputChannel");
-		disposeExtensionOutputChannel();
-	});
+		after(() => {
+			windowSpy.restore();
+		});
 
-	after(function() {
-		createOutputChannelSpy.restore();
-		sandbox.restore();
-	});
-
-	it("Test output channel creation on new log entry", function() {
-		expect(createOutputChannelSpy.called).to.be.false;
-		log("This is a test!");
-		expect(createOutputChannelSpy.called).to.be.true;
+		it('should call output channel creation on new log entry', () => {
+			log('This is a test!');
+			windowSpy
+				.should.have.been.calledOnce
+				.and.been.calledWith('DataVirt Extension');
+		});
 	});
 });

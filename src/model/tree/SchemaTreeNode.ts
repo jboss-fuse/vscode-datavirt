@@ -21,24 +21,24 @@ import { DVTreeItem } from './DVTreeItem';
 // simple tree node for a schema
 export class SchemaTreeNode extends DVTreeItem {
 	ddl: string;
-	
+
 	constructor(label: string, ddl: string) {
-		super("dv.schema", label, vscode.TreeItemCollapsibleState.None);
+		super('dv.schema', label, vscode.TreeItemCollapsibleState.None);
 		this.ddl = ddl;
 	}
-	
+
 	getIconName(): string {
-		return "dv_schema.svg";
+		return 'dv_schema.svg';
 	}
-	
+
 	getToolTip(): string {
 		return `Schema: ${this.label}`;
 	}
-	
+
 	getDDL(): string {
 		return this.ddl;
 	}
-	
+
 	setDDL(ddl: string): void {
 		this.ddl = ddl;
 	}

@@ -18,37 +18,37 @@ import * as vscode from 'vscode';
 
 import { IDataSourceConfig } from '../DataVirtModel';
 import { DVTreeItem } from './DVTreeItem';
-import { DataSourceConfigEntryTreeNode } from "./DataSourceConfigEntryTreeNode";
+import { DataSourceConfigEntryTreeNode } from './DataSourceConfigEntryTreeNode';
 import * as utils from '../../utils';
 
 // simple tree node for datasource
 export class DataSourceTreeNode extends DVTreeItem {
 	dsConfig: IDataSourceConfig;
-	
+
 	constructor(dsConfig: IDataSourceConfig) {
-		super("dv.datasource", `${dsConfig.name} (${dsConfig.type})`, vscode.TreeItemCollapsibleState.Collapsed);
+		super('dv.datasource', `${dsConfig.name} (${dsConfig.type})`, vscode.TreeItemCollapsibleState.Collapsed);
 		this.dsConfig = dsConfig;
 	}
-	
+
 	getIconName(): string {
 		return `dv_datasource.gif`;
 	}
-	
+
 	getToolTip(): string {
 		return `Data Source: ${this.label}`;
 	}
-	
+
 	getKey(): string {
 		return this.label;
 	}
-	
+
 	setKey(key: string): void {
 		this.label = key;
 	}
-	
+
 	initialize(): void {
-		for (let [key, value] of this.dsConfig.entries) {
-			let newItem: DataSourceConfigEntryTreeNode = new DataSourceConfigEntryTreeNode(key, value);
+		for (const [key, value] of this.dsConfig.entries) {
+			const newItem: DataSourceConfigEntryTreeNode = new DataSourceConfigEntryTreeNode(key, value);
 			newItem.setProject(this.getProject());
 			newItem.parent = this;
 			if (this.children.indexOf(newItem) < 0) {

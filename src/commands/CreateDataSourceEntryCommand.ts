@@ -21,9 +21,9 @@ import { IDVConfig, IDataSourceConfig, IEnv } from '../model/DataVirtModel';
 import { DataSourceTreeNode } from '../model/tree/DataSourceTreeNode';
 
 export function createDataSourceEntryCommand(ctx) {
-	vscode.window.showInputBox( {validateInput: utils.validateName, placeHolder: "Enter the name of the new entry"})
+	vscode.window.showInputBox( {validateInput: utils.validateName, placeHolder: 'Enter the name of the new entry'})
 		.then( (eName: string) => {
-			vscode.window.showInputBox( {placeHolder: "Enter the value of the new entry"})
+			vscode.window.showInputBox( {placeHolder: 'Enter the value of the new entry'})
 				.then( (eValue: string) => {
 					handleDataSourceEntryCreation(ctx, eName, eValue)
 						.then( (success: boolean) => {
@@ -41,10 +41,10 @@ function handleDataSourceEntryCreation(ctx, eName: string, eValue: string): Prom
 	return new Promise<boolean>( (resolve) => {
 		if (ctx) {
 			try {
-				let ds: DataSourceTreeNode = ctx;
-				let yaml: IDVConfig = ctx.getProject().dvConfig;
+				const ds: DataSourceTreeNode = ctx;
+				const yaml: IDVConfig = ctx.getProject().dvConfig;
 				if (yaml) {
-					let dsConfig: IDataSourceConfig = ds.dsConfig;
+					const dsConfig: IDataSourceConfig = ds.dsConfig;
 					if (!dsConfig.entries.has(eName.toUpperCase())) {
 						dsConfig.entries.set(eName.toUpperCase(), eValue);
 					} else {
@@ -56,14 +56,14 @@ function handleDataSourceEntryCreation(ctx, eName: string, eValue: string): Prom
 					resolve(true);
 				} else {
 					resolve(false);
-				}				
+				}
 			} catch (error) {
 				extension.log(error);
 				resolve(false);
 			}
 		} else {
-			extension.log("handleDataSourceEdit: Unable to delete the datasource...");
+			extension.log('handleDataSourceEdit: Unable to delete the datasource...');
 			resolve(false);
-		}		
+		}
 	});
 }

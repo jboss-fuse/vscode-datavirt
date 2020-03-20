@@ -35,10 +35,10 @@ function handleDataSourceDeletion(ctx): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
 		if (ctx) {
 			try {
-				let ds: DataSourceTreeNode = ctx;
-				let dsConfig: IDataSourceConfig = ds.dsConfig;
-				let yaml: IDVConfig = ds.getProject().dvConfig;
-				let keys: IEnv[] = [];
+				const ds: DataSourceTreeNode = ctx;
+				const dsConfig: IDataSourceConfig = ds.dsConfig;
+				const yaml: IDVConfig = ds.getProject().dvConfig;
+				const keys: IEnv[] = [];
 				if (yaml) {
 					yaml.spec.env.forEach( (element: IEnv) => {
 						if (element.name.toUpperCase().startsWith(`${utils.generateDataSourceConfigPrefix(dsConfig).toUpperCase()}_`)) {
@@ -53,14 +53,14 @@ function handleDataSourceDeletion(ctx): Promise<boolean> {
 					resolve(true);
 				} else {
 					resolve(false);
-				}	
+				}
 			} catch (error) {
 				extension.log(error);
 				resolve(false);
 			}
 		} else {
-			extension.log("handleDataSourceEdit: Unable to delete the datasource...");
+			extension.log('handleDataSourceEdit: Unable to delete the datasource...');
 			resolve(false);
-		}		
+		}
 	});
 }

@@ -18,7 +18,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 
 import { DataVirtNodeProvider } from './DataVirtNodeProvider';
-import { DVProjectTreeNode } from "./DVProjectTreeNode";
+import { DVProjectTreeNode } from './DVProjectTreeNode';
 
 export class DVTreeItem extends vscode.TreeItem {
 	type: string;
@@ -26,7 +26,7 @@ export class DVTreeItem extends vscode.TreeItem {
 	parent: DVTreeItem;
 	label: string;
 	project: DVProjectTreeNode;
-	
+
 	constructor(type: string, label: string, collapsibleState: vscode.TreeItemCollapsibleState, parent: DVTreeItem = undefined, children: DVTreeItem[] = []) {
 		super(label, collapsibleState);
 		this.contextValue = type;
@@ -39,17 +39,17 @@ export class DVTreeItem extends vscode.TreeItem {
 		this.tooltip = this.getToolTip();
 	}
 	getToolTip(): string {
-		return "";
+		return '';
 	}
 	getParent(): any {
 		return this.parent;
 	}
 	getIconName(): string {
-		return "undefined";
+		return 'undefined';
 	}
 	getIcon(extContext: vscode.ExtensionContext): vscode.Uri | undefined {
-		let newIcon: vscode.Uri | undefined = undefined;
-		let name: string = this.getIconName();
+		let newIcon: vscode.Uri | undefined;
+		const name: string = this.getIconName();
 		if (extContext) {
 			const iconPath = path.join(extContext.extensionPath, `/icons/${name}`);
 			newIcon = vscode.Uri.file(iconPath);

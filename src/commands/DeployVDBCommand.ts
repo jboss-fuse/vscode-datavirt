@@ -19,12 +19,12 @@ import { DVProjectTreeNode } from '../model/tree/DVProjectTreeNode';
 
 export function deployVDBCommand(ctx) {
 	if (ctx instanceof DVProjectTreeNode) {
-		let prjNode: DVProjectTreeNode = ctx;
-		let file: string = prjNode.file;
+		const prjNode: DVProjectTreeNode = ctx;
+		const file: string = prjNode.file;
 		handleDeploy(file);
 	}
 }
 
 function handleDeploy(filepath: string): void {
-	extension.log("\nDEPLOY: Selected File: " + filepath + "\n");
+	extension.log(`\nDEPLOY: Selected File: ${filepath}\n`);
 }

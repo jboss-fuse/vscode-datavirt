@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use strict";
+'use strict';
 
 import * as vscode from 'vscode';
 import * as path from 'path';
@@ -71,7 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	vscode.window.onDidChangeVisibleTextEditors(handleVisibleEditorChanges);
 
-	vscode.workspace.onWillSaveTextDocument(event => {
+	vscode.workspace.onWillSaveTextDocument( (event) => {
 		event.waitUntil(handleSaveDDL(event));
 	});
 
@@ -97,7 +97,7 @@ export function deactivate(context: vscode.ExtensionContext) {
 
 export function log(text) {
 	if (!dataVirtExtensionOutputChannel) {
-		dataVirtExtensionOutputChannel = vscode.window.createOutputChannel("DataVirt Extension");
+		dataVirtExtensionOutputChannel = vscode.window.createOutputChannel('DataVirt Extension');
 	}
 	dataVirtExtensionOutputChannel.show();
 	dataVirtExtensionOutputChannel.append(text.toString());
@@ -118,16 +118,16 @@ function creatDataVirtView(): void {
 	});
 	dataVirtTreeView.onDidChangeVisibility(async () => {
 		if (dataVirtTreeView.visible === true) {
-			await dataVirtProvider.refresh().catch(err => console.log(err));
+			await dataVirtProvider.refresh().catch((err) => console.log(err));
 		}
 	});
 }
 
 function handleVisibleEditorChanges(event) {
 	let k: string;
-	for( let [key, value] of fileToEditor) {
+	for( const [key, value] of fileToEditor) {
 		if (event.indexOf(value) === -1) {
-			let p = path.dirname(key);
+			const p = path.dirname(key);
 			if (fileToNode.has(key)) {
 				fs.unlinkSync(key);
 				fs.rmdirSync(p);
