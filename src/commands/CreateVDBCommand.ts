@@ -31,15 +31,15 @@ export function createVDBCommand() {
 				res = utils.validateFileNotExisting(name);
 			}
 			return res;
-		}, placeHolder: "Enter the name of the new VDB config"})
+		}, placeHolder: 'Enter the name of the new VDB config'})
 			.then( (fileName: string) => {
 				handleVDBCreation(vscode.workspace.workspaceFolders[0].uri.fsPath, fileName)
 					.then( (success: boolean) => {
 						if (success) {
-							let node: SchemaTreeNode = extension.dataVirtProvider.getSchemaTreeNodeOfProject(fileName);
+							const node: SchemaTreeNode = extension.dataVirtProvider.getSchemaTreeNodeOfProject(fileName);
 							if (node) {
 								vscode.commands.executeCommand('datavirt.edit.schema', node);
-							}								
+							}
 							vscode.window.showInformationMessage(`New VDB ${fileName} has been created successfully...`);
 						} else {
 							vscode.window.showErrorMessage(`An error occured when trying to create a new VDB...`);
@@ -57,10 +57,10 @@ export function handleVDBCreation(filepath: string, fileName: string, templateFo
 	return new Promise<boolean>( (resolve, reject) => {
 		if (fileName && fileName.length>0) {
 			try {
-				let templatePath = templateFolder ? path.join(templateFolder, "vdb_template.yaml") : path.join(extension.pluginResourcesPath, "vdb_template.yaml");
-				let targetFile: string = path.join(filepath, `${fileName}.yaml`);
+				const templatePath = templateFolder ? path.join(templateFolder, 'vdb_template.yaml') : path.join(extension.pluginResourcesPath, 'vdb_template.yaml');
+				const targetFile: string = path.join(filepath, `${fileName}.yaml`);
 				fs.copyFileSync(templatePath, targetFile);
-				let yamlDoc:IDVConfig = utils.loadModelFromFile(targetFile);
+				const yamlDoc:IDVConfig = utils.loadModelFromFile(targetFile);
 				yamlDoc.metadata.name = fileName;
 				utils.saveModelToFile(yamlDoc, targetFile);
 				if (extension.dataVirtProvider) extension.dataVirtProvider.refresh();
@@ -70,8 +70,8 @@ export function handleVDBCreation(filepath: string, fileName: string, templateFo
 				resolve(false);
 			}
 		} else {
-			extension.log("handleVDBCreation: Unable to create the VDB because no name was given...");
+			extension.log('handleVDBCreation: Unable to create the VDB because no name was given...');
 			resolve(false);
-		}		
+		}
 	});
 }

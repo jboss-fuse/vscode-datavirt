@@ -18,19 +18,19 @@ import * as vscode from 'vscode';
 import * as extension from '../../extension';
 import { IEnv, IDataSourceConfig } from '../DataVirtModel';
 import { DVTreeItem } from './DVTreeItem';
-import { DataSourceTreeNode } from "./DataSourceTreeNode";
+import { DataSourceTreeNode } from './DataSourceTreeNode';
 
 // simple tree node for datasources
 export class DataSourcesTreeNode extends DVTreeItem {
 	env: IEnv[];
-	
+
 	constructor(label: string, env: IEnv[]) {
-		super("dv.datasources", label, vscode.TreeItemCollapsibleState.Collapsed);
+		super('dv.datasources', label, vscode.TreeItemCollapsibleState.Collapsed);
 		this.env = env;
 	}
 
 	getIconName(): string {
-		return "dv_datasources.svg";
+		return 'dv_datasources.svg';
 	}
 
 	getToolTip(): string {
@@ -38,27 +38,27 @@ export class DataSourcesTreeNode extends DVTreeItem {
 	}
 
 	initialize(): void {
-		let nodes: Map<string, IDataSourceConfig> = new Map();
+		const nodes: Map<string, IDataSourceConfig> = new Map();
 		if (this.env) {
-			this.env.forEach(element => {
+			this.env.forEach( (element) => {
 				let nodeName: string;
 				let nkey: string;
 				let type: string;
-				let value = element.value;
+				const value = element.value;
 
 				extension.DATASOURCE_TYPES.forEach( (dsConfig: IDataSourceConfig, key: string ) => {
-					let prefix: string = `${dsConfig.type}_`;
+					const prefix: string = `${dsConfig.type}_`;
 					if (element.name.startsWith(prefix)) {
 						type = dsConfig.type;
 						nodeName = element.name.substring(prefix.length, element.name.indexOf('_', prefix.length));
 						nkey = element.name.substring(element.name.indexOf(`_${nodeName}_`) + `_${nodeName}_`.length);
 					}
 				});
-								
+
 				let node: IDataSourceConfig = {
-					name: "",
-					type: "",
-					entries: new Map
+					name: '',
+					type: '',
+					entries: new Map()
 				};
 				if (nodes.has(nodeName)) {
 					node = nodes.get(nodeName);
@@ -72,8 +72,8 @@ export class DataSourcesTreeNode extends DVTreeItem {
 				nodes.set(nodeName, node);
 			});
 		}
-		nodes.forEach(element => {
-			let newItem = new DataSourceTreeNode(element);
+		nodes.forEach( (element) => {
+			const newItem = new DataSourceTreeNode(element);
 			newItem.setProject(this.getProject());
 			newItem.parent = this;
 			newItem.initialize();

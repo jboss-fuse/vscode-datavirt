@@ -38,23 +38,23 @@ export class DVProjectTreeNode extends DVTreeItem {
 	getIconName(): string {
 		return 'dv_type.svg';
 	}
-	
+
 	getToolTip(): string {
 		return `Data Virtualization Configuration File`;
 	}
-	
+
 	getDataSourcesNode(): DataSourcesTreeNode {
 		return this.dataSourcesNode;
 	}
-	
+
 	getSchemasNode(): SchemasTreeNode {
 		return this.schemasNode;
 	}
-	
+
 	getFile(): string {
 		return this.file;
 	}
-	
+
 	initialize(): void {
 		this.setProject(this);
 		this.dataSourcesNode = new DataSourcesTreeNode('Data Sources', this.dvConfig.spec.env);

@@ -14,20 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { IDataSourceConfig } from "../DataVirtModel";
+import { IDataSourceConfig } from '../DataVirtModel';
 
 export class RestBasedDataSource implements IDataSourceConfig {
 
 	name: string;
 	type: string;
 	entries: Map<string, string> = new Map();
-	
+
 	constructor(name: string) {
 		this.name = name;
 		this.type = 'SPRING_TEIID_REST';
 		this.initialize();
 	}
-	
+
 	initialize() {
 		this.entries.set(`ENDPOINT`, '');
 		this.entries.set(`SECURITY_TYPE`, '');

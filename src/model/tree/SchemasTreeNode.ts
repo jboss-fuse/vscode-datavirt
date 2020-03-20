@@ -17,17 +17,17 @@
 import * as vscode from 'vscode';
 
 import { DVTreeItem } from './DVTreeItem';
-import { SchemaTreeNode } from "./SchemaTreeNode";
+import { SchemaTreeNode } from './SchemaTreeNode';
 
 // simple tree node for schemas
 export class SchemasTreeNode extends DVTreeItem {
-	
+
 	constructor(label: string) {
-		super("dv.schemas", label, vscode.TreeItemCollapsibleState.Collapsed);
+		super('dv.schemas', label, vscode.TreeItemCollapsibleState.Collapsed);
 	}
 
 	getIconName(): string {
-		return "dv_schemas.svg";
+		return 'dv_schemas.svg';
 	}
 
 	getToolTip(): string {
@@ -35,7 +35,7 @@ export class SchemasTreeNode extends DVTreeItem {
 	}
 
 	initialize(): void {
-		let newItem = new SchemaTreeNode("DDL", this.getProject().dvConfig.spec.build.source.ddl);
+		const newItem = new SchemaTreeNode('DDL', this.getProject().dvConfig.spec.build.source.ddl);
 		newItem.setProject(this.getProject());
 		newItem.parent = this;
 		if (this.children.indexOf(newItem) < 0) {

@@ -2,5 +2,6 @@
 	"editor.insertSpaces": false,
 	"editor.detectIndentation": false,
 	"prettier.tabWidth": 4,
-	"prettier.useTabs": true
+	"prettier.useTabs": true,
+	"typescript.tsdk": "node_modules/typescript/lib",
 }

@@ -19,12 +19,12 @@ import { DVProjectTreeNode } from '../model/tree/DVProjectTreeNode';
 
 export function undeployVDBCommand(ctx) {
 	if (ctx instanceof DVProjectTreeNode) {
-		let prjNode: DVProjectTreeNode = ctx;
-		let file: string = prjNode.file;
+		const prjNode: DVProjectTreeNode = ctx;
+		const file: string = prjNode.file;
 		handleUndeploy(file);
 	}
 }
 
 function handleUndeploy(filepath: string): void {
-	extension.log("\nUNDEPLOY: Selected File: " + filepath + "\n");
+	extension.log(`\nUNDEPLOY: Selected File: ${filepath}\n`);
 }

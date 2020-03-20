@@ -14,20 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { IDataSourceConfig } from "../DataVirtModel";
+import { IDataSourceConfig } from '../DataVirtModel';
 
 export class MongoDBDataSource implements IDataSourceConfig {
 
 	name: string;
 	type: string;
 	entries: Map<string, string> = new Map();
-	
+
 	constructor(name: string) {
 		this.name = name;
 		this.type = 'SPRING_TEIID_DATA_MONGODB';
 		this.initialize();
 	}
-	
+
 	initialize() {
 		this.entries.set(`REMOTE_SERVER_LIST`, '');
 		this.entries.set(`USER`, '');

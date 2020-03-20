@@ -20,9 +20,9 @@ import * as extension from '../extension';
 import { IDVConfig, IDataSourceConfig } from '../model/DataVirtModel';
 
 export function createDataSourceCommand(ctx) {
-	vscode.window.showInputBox( {validateInput: utils.validateName, placeHolder: "Enter the name of the new datasource"})
+	vscode.window.showInputBox( {validateInput: utils.validateName, placeHolder: 'Enter the name of the new datasource'})
 		.then( async (dsName: string) => {
-			await vscode.window.showQuickPick( Array.from(extension.DATASOURCE_TYPES.keys()), {canPickMany: false, placeHolder: "Select the datasource type" })
+			await vscode.window.showQuickPick( Array.from(extension.DATASOURCE_TYPES.keys()), {canPickMany: false, placeHolder: 'Select the datasource type' })
 				.then( (dsType: string) => {
 					handleDataSourceCreation(ctx, dsName, dsType)
 						.then( (success: boolean) => {
@@ -40,7 +40,7 @@ function handleDataSourceCreation(ctx, dsName: string, dsType: string): Promise<
 	return new Promise<boolean>( (resolve) => {
 		if (dsName && dsType) {
 			try {
-				let yaml: IDVConfig = ctx.getProject().dvConfig;
+				const yaml: IDVConfig = ctx.getProject().dvConfig;
 				if (yaml) {
 					let dsConfig: IDataSourceConfig = extension.DATASOURCE_TYPES.get(dsType);
 					dsConfig = utils.replaceTemplateName(dsConfig, dsName.toUpperCase(), extension.TEMPLATE_NAME);
@@ -50,14 +50,14 @@ function handleDataSourceCreation(ctx, dsName: string, dsType: string): Promise<
 					resolve(true);
 				} else {
 					resolve(false);
-				}				
+				}
 			} catch (error) {
 				extension.log(error);
 				resolve(false);
 			}
 		} else {
-			extension.log("handleDataSourceCreation: Unable to create the datasource because no name and type were given...");
+			extension.log('handleDataSourceCreation: Unable to create the datasource because no name and type were given...');
 			resolve(false);
-		}		
+		}
 	});
 }

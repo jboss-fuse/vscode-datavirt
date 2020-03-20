@@ -30,7 +30,7 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 	readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined> = this._onDidChangeTreeData.event;
 
 	protected treeNodes: DVProjectTreeNode[] = [];
-	
+
 	static context : vscode.ExtensionContext | undefined;
 	private workspace: string;
 
@@ -66,11 +66,11 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 			if (oldNodes) {
 				oldNodes.push(newNode);
 				if (!disableRefresh) {
-					await this.refresh().catch(err => reject(err));
+					await this.refresh().catch( (err) => reject(err));
 				}
 				resolve(oldNodes);
 			}
-			reject(new Error("Internal problem. TreeView is not initialized correctly."));
+			reject(new Error('Internal problem. TreeView is not initialized correctly.'));
 		});
 	}
 
@@ -82,12 +82,12 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 				if (index !== -1) {
 					oldNodes.splice(index, 1);
 					if (!disableRefresh) {
-						await this.refresh().catch(err => reject(err));
+						await this.refresh().catch( (err) => reject(err));
 					}
 				}
 				resolve(oldNodes);
 			}
-			reject(new Error("Internal problem. TreeView is not initialized correctly."));
+			reject(new Error('Internal problem. TreeView is not initialized correctly.'));
 		});
 	}
 
@@ -96,8 +96,8 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 		return new Promise<void>( async (resolve, reject) => {
 			this.resetList();
 
-			fs.readdirSync(this.workspace).forEach(file => {
-				if (file.toLowerCase().endsWith(".yaml")) {
+			fs.readdirSync(this.workspace).forEach( (file) => {
+				if (file.toLowerCase().endsWith('.yaml')) {
 					this.processFile(this.workspace, file);
 				}
 			});
@@ -111,7 +111,7 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 	}
 
 	getSchemaTreeNodeOfProject(name: string): SchemaTreeNode {
-		const projectNode:DVProjectTreeNode = this.treeNodes.find(node => node.label === name);
+		const projectNode:DVProjectTreeNode = this.treeNodes.find( (node) => node.label === name);
 		if (projectNode && projectNode.schemasNode && projectNode.schemasNode.children && projectNode.schemasNode.children.length>0) {
 			return projectNode.schemasNode.children[0] as SchemaTreeNode;
 		}
@@ -123,7 +123,7 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 	}
 
 	doesNodeExist(oldNodes: vscode.TreeItem[], newNode: vscode.TreeItem): boolean {
-		for (let node of oldNodes) {
+		for (const node of oldNodes) {
 			if (node.label === newNode.label) {
 				return true;
 			}
@@ -135,13 +135,13 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 	processDataVirtYAML(fullPath: string, name: string, yaml : IDVConfig): void {
 		if (yaml) {
 			try {
-				if (yaml.kind === "VirtualDatabase") {
+				if (yaml.kind === 'VirtualDatabase') {
 					// found a DV config file -> put to tree
 					let title = name;
 					if (yaml.metadata.name) {
 						title = yaml.metadata.name;
 					}
-					let newItem = new DVProjectTreeNode(title, fullPath, yaml);
+					const newItem = new DVProjectTreeNode(title, fullPath, yaml);
 					if (!this.doesNodeExist(this.treeNodes, newItem)) {
 						this.addChild(this.treeNodes, newItem, true);
 					}
@@ -153,8 +153,8 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 	}
 
 	processFile(folder: string, file: string) {
-		let fullPath: string = path.join(folder, file);
-		let yamlDoc:IDVConfig = utils.loadModelFromFile(fullPath);
+		const fullPath: string = path.join(folder, file);
+		const yamlDoc:IDVConfig = utils.loadModelFromFile(fullPath);
 		this.processDataVirtYAML(fullPath, file, yamlDoc);
 	}
 }

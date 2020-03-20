@@ -22,7 +22,7 @@ import { DataSourceTreeNode } from '../model/tree/DataSourceTreeNode';
 import { DataSourceConfigEntryTreeNode } from '../model/tree/DataSourceConfigEntryTreeNode';
 
 export function editDataSourceEntryCommand(ctx) {
-	let item: DataSourceConfigEntryTreeNode = ctx;
+	const item: DataSourceConfigEntryTreeNode = ctx;
 	vscode.window.showInputBox( {value: item.getValue()})
 		.then( ( newValue: string) => {
 			handleDataSourceEntryEdit(ctx, item, newValue)
@@ -40,10 +40,10 @@ function handleDataSourceEntryEdit(ctx, item: DataSourceConfigEntryTreeNode, new
 	return new Promise<boolean>( (resolve) => {
 		if (ctx) {
 			try {
-				let yaml: IDVConfig = item.getProject().dvConfig;
+				const yaml: IDVConfig = item.getProject().dvConfig;
 				if (yaml) {
-					let dsP: DataSourceTreeNode = item.getParent();
-					let dsConfig: IDataSourceConfig = dsP.dsConfig;
+					const dsP: DataSourceTreeNode = item.getParent();
+					const dsConfig: IDataSourceConfig = dsP.dsConfig;
 					dsConfig.entries.set(item.getKey(), newValue);
 					utils.mapDSConfigToEnv(dsConfig, yaml);
 					utils.saveModelToFile(yaml, ctx.getProject().getFile());
@@ -51,14 +51,14 @@ function handleDataSourceEntryEdit(ctx, item: DataSourceConfigEntryTreeNode, new
 					resolve(true);
 				} else {
 					resolve(false);
-				}				
+				}
 			} catch (error) {
 				extension.log(error);
 				resolve(false);
 			}
 		} else {
-			extension.log("handleDataSourceEntryEdit: Unable to modify the datasource entry...");
+			extension.log('handleDataSourceEntryEdit: Unable to modify the datasource entry...');
 			resolve(false);
-		}		
+		}
 	});
 }

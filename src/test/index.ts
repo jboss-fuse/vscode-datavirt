@@ -41,8 +41,8 @@ function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
 	}
 }
 
-let mocha = new Mocha({
-	ui: "bdd",
+const mocha = new Mocha({
+	ui: 'bdd',
 	useColors: true,
 	timeout: 100000,
 	slow: 50000,
@@ -61,11 +61,11 @@ export function run(): Promise<void> {
 			}
 
 			// Add files to the test suite
-			files.forEach(f => mocha.addFile(path.resolve(testsRoot, f)));
+			files.forEach((f) => mocha.addFile(path.resolve(testsRoot, f)));
 
 			try {
 				// Run the mocha test
-				mocha.run(failures => {
+				mocha.run((failures) => {
 					if (failures > 0) {
 						e(new Error(`${failures} tests failed.`));
 					} else {
