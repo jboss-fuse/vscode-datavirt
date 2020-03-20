@@ -1,0 +1,1 @@
+Keep this folder, it will be used as temporary project folder for UI tests use cases
