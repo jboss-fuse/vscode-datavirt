@@ -25,7 +25,6 @@
 				"${workspaceRoot}/testFixture/"],
 			"stopOnEntry": false,
 			"sourceMaps": true,
-			"preLaunchTask": "npm: watch",
 			"outFiles": ["${workspaceRoot}/out/test/**/*.js"]
 		}
 	]
