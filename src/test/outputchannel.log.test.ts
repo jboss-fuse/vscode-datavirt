@@ -25,24 +25,22 @@ import * as vscode from 'vscode';
 chai.use(sinonChai);
 const should = chai.should();
 
-describe('Extension OutputChannel', () => {
-	context('OutputChannelLogger', () => {
-		let windowSpy: sinon.SinonSpy;
+describe('Extension OutputChannel Logger', () => {
+	let windowSpy: sinon.SinonSpy;
 
-		before(() => {
-			disposeExtensionOutputChannel();
-			windowSpy = sinon.spy(vscode.window, 'createOutputChannel');
-		});
+	before(() => {
+		disposeExtensionOutputChannel();
+		windowSpy = sinon.spy(vscode.window, 'createOutputChannel');
+	});
 
-		after(() => {
-			windowSpy.restore();
-		});
+	after(() => {
+		windowSpy.restore();
+	});
 
-		it('should call output channel creation on new log entry', () => {
-			log('This is a test!');
-			windowSpy
-				.should.have.been.calledOnce
-				.and.been.calledWith('DataVirt Extension');
-		});
+	it('should call output channel creation on new log entry', () => {
+		log('This is a test!');
+		windowSpy
+			.should.have.been.calledOnce
+			.and.been.calledWith('DataVirt Extension');
 	});
 });
