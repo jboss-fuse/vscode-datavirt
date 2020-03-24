@@ -144,7 +144,7 @@ describe('Utils', () => {
 	 * disabled because broken probably due to incorrect path for testFixture folder
 	 */
 	context('Load/Save of a VDB file', () => {
-		it.skip('should match the vdb model contents between a save and reload to/from a vdb file', () => {
+		it('should match the vdb model contents between a save and reload to/from a vdb file', () => {
 			const name: string = 'test';
 			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
 			const fpTest: string = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
@@ -154,11 +154,7 @@ describe('Utils', () => {
 			should.exist(utils.validateFileNotExisting(name));
 			const yamlDoc2:IDVConfig = utils.loadModelFromFile(fpTest);
 			should.exist(yamlDoc2);
-			yamlDoc.api_version.should.deep.equal(yamlDoc2.api_version);
-			yamlDoc.kind.should.deep.equal(yamlDoc2.kind);
-			yamlDoc.metadata.name.should.deep.equal(yamlDoc2.metadata.name);
-			yamlDoc.spec.env.length.should.deep.equal(yamlDoc2.spec.env.length);
-			should.exist(yamlDoc2.spec.build.source.ddl);
+			yamlDoc.should.deep.equal(yamlDoc2);
 			fs.unlinkSync(fpTest);
 		});
 	});
