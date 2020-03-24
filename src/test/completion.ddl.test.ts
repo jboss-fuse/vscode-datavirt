@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use strict";
+'use strict';
 
 import * as vscode from 'vscode';
 import * as chai from 'chai';
@@ -37,9 +37,8 @@ async function testCompletion(
 	position: vscode.Position,
 	expectedCompletion: vscode.CompletionItem
 ) {
-	let ddlUri = Uri.parse('untitled:test.ddl');
+	const ddlUri = Uri.parse('untitled:test.ddl');
 	await vscode.workspace.openTextDocument(ddlUri);
-	
 	await checkExpectedCompletion(ddlUri, position, expectedCompletion);
 }
 
@@ -47,9 +46,9 @@ async function checkExpectedCompletion(docUri: vscode.Uri, position: vscode.Posi
 	let hasExpectedCompletion = false;
 	await waitUntil(() => {
 		// Executing the command `vscode.executeCompletionItemProvider` to simulate triggering completion
-		(vscode.commands.executeCommand('vscode.executeCompletionItemProvider', docUri, position)).then(value => {
-			let actualCompletionList = value as vscode.CompletionList;
-			const actualCompletionLabelList = actualCompletionList.items.map(c => { return c.label; });
+		(vscode.commands.executeCommand('vscode.executeCompletionItemProvider', docUri, position)).then( (value) => {
+			const actualCompletionList = value as vscode.CompletionList;
+			const actualCompletionLabelList = actualCompletionList.items.map( (c) => { return c.label; });
 			hasExpectedCompletion = actualCompletionLabelList.includes(expectedCompletion.label);
 		});
 		return hasExpectedCompletion;
