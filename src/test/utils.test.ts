@@ -140,9 +140,6 @@ describe('Utils', () => {
 		});
 	});
 
-	/**
-	 * disabled because broken probably due to incorrect path for testFixture folder
-	 */
 	context('Load/Save of a VDB file', () => {
 		it('should match the vdb model contents between a save and reload to/from a vdb file', () => {
 			const name: string = 'test';
