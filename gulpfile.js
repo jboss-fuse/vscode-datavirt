@@ -1,7 +1,7 @@
-(function() { "use strict"; } ());
+(function() { 'use strict'; } ());
 
-var gulp = require("gulp");
-var gulp_tslint = require("gulp-tslint");
+var gulp = require('gulp');
+var gulp_tslint = require('gulp-tslint');
 
 gulp.task("tslint", () => {
     return gulp.src(['src/**/*.ts', '!**/*.d.ts', '!node_modules/**'])
