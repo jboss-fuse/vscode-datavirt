@@ -35,6 +35,7 @@ export function createVDBCommand() {
 			.then( (fileName: string) => {
 				handleVDBCreation(vscode.workspace.workspaceFolders[0].uri.fsPath, fileName)
 					.then( (success: boolean) => {
+						extension.dataVirtProvider.refresh();
 						if (success) {
 							const node: SchemaTreeNode = extension.dataVirtProvider.getSchemaTreeNodeOfProject(fileName);
 							if (node) {
@@ -63,7 +64,6 @@ export function handleVDBCreation(filepath: string, fileName: string, templateFo
 				const yamlDoc:IDVConfig = utils.loadModelFromFile(targetFile);
 				yamlDoc.metadata.name = fileName;
 				utils.saveModelToFile(yamlDoc, targetFile);
-				if (extension.dataVirtProvider) extension.dataVirtProvider.refresh();
 				resolve(true);
 			} catch (error) {
 				extension.log(error);
