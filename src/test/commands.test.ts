@@ -25,6 +25,7 @@ import * as extension from '../extension';
 import * as utils from '../utils';
 import * as createVDBCommand from '../commands/CreateVDBCommand';
 import * as createDSCommand from '../commands/CreateDataSourceCommand';
+import * as mongoDBDS from '../model/datasources/MongoDBDataSource';
 import { IDVConfig } from '../model/DataVirtModel';
 
 chai.use(sinonChai);
@@ -72,12 +73,15 @@ describe('Commands Tests', () => {
 
 						const dsName: string = 'MyMongoDB';
 						const dsType: string = 'MongoDB';
+						const mongoTempl: mongoDBDS.MongoDBDataSource = new mongoDBDS.MongoDBDataSource(dsName);
+
 						const dvConfig: IDVConfig = utils.loadModelFromFile(f);
 						createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, f)
 							.then( (createdDS) => {
 								if (createdDS) {
 									const dvConfig2: IDVConfig = utils.loadModelFromFile(f);
 									dvConfig2.should.deep.equal(dvConfig);
+									dvConfig2.spec.env.length.should.deep.equal(mongoTempl.entries.size);
 									fs.unlinkSync(f);
 									done();
 								} else {
