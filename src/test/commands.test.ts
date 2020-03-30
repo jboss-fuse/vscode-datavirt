@@ -118,7 +118,9 @@ describe('Commands Tests', () => {
 		});
 
 		afterEach( () => {
-			fs.unlinkSync(f);
+			if (fs.existsSync(f)) {
+				fs.unlinkSync(f);
+			}
 		});
 
 		it('should generate a valid datasource definition inside a VDB when handing over valid parameters', (done) => {
@@ -255,7 +257,9 @@ describe('Commands Tests', () => {
 		});
 
 		afterEach( () => {
-			fs.unlinkSync(f);
+			if (fs.existsSync(f)) {
+				fs.unlinkSync(f);
+			}
 		});
 
 		it('should delete a datasource definition inside a VDB when handing over valid parameters', (done) => {
