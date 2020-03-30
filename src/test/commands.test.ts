@@ -220,8 +220,8 @@ describe('Commands Tests', () => {
 		const name = 'newvdb';
 		const dsName: string = 'MyMongoDB';
 		const dsType: string = 'MongoDB';
+		const prefix: string = 'SPRING_TEIID_DATA_MONGODB_MYMONGODB';
 		const mongoTempl: mongoDBDS.MongoDBDataSource = new mongoDBDS.MongoDBDataSource(dsName);
-		const vals: Map<string, string> = new Map();
 		let f: string;
 
 		beforeEach( (done) => {
@@ -237,9 +237,6 @@ describe('Commands Tests', () => {
 								const dvConfig2: IDVConfig = utils.loadModelFromFile(f);
 								dvConfig2.should.deep.equal(dvConfig);
 								dvConfig2.spec.env.length.should.deep.equal(mongoTempl.entries.size);
-								dvConfig2.spec.env.forEach( (element: IEnv) => {
-									vals.set(element.name, element.value);
-								});
 								done();
 							} else {
 								done(new Error('Execution of the Create DataSource command returned false'));
@@ -259,17 +256,11 @@ describe('Commands Tests', () => {
 
 		afterEach( () => {
 			fs.unlinkSync(f);
-			vals.clear();
 		});
 
 		it('should delete a datasource definition inside a VDB when handing over valid parameters', (done) => {
 			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: dsType,
-				entries: vals
-			};
-			deleteDSCommand.handleDataSourceDeletion(dsConfig, dvConfig, f)
+			deleteDSCommand.handleDataSourceDeletion(prefix, dvConfig, f)
 				.then( (deletedDS) => {
 					if (deletedDS) {
 						dvConfig.spec.env.length.should.equal(0);
@@ -285,7 +276,7 @@ describe('Commands Tests', () => {
 				});
 		});
 
-		it('should not delete a datasource definition when handing over invalid datasource config', (done) => {
+		it('should not delete a datasource definition when handing over invalid prefix', (done) => {
 			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
 			deleteDSCommand.handleDataSourceDeletion(undefined, dvConfig, f)
 				.then( (deletedDS) => {
@@ -301,12 +292,7 @@ describe('Commands Tests', () => {
 		});
 
 		it('should not delete a datasource definition when handing over invalid model', (done) => {
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: dsType,
-				entries: vals
-			};
-			deleteDSCommand.handleDataSourceDeletion(dsConfig, undefined, f)
+			deleteDSCommand.handleDataSourceDeletion(prefix, undefined, f)
 				.then( (deletedDS) => {
 					if (deletedDS) {
 						done(new Error('Execution of the Delete DataSource command returned true, but it should not'));
@@ -321,12 +307,7 @@ describe('Commands Tests', () => {
 
 		it('should not delete a datasource definition when handing over invalid file', (done) => {
 			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: dsType,
-				entries: vals
-			};
-			deleteDSCommand.handleDataSourceDeletion(dsConfig, dvConfig, undefined)
+			deleteDSCommand.handleDataSourceDeletion(prefix, dvConfig, undefined)
 				.then( (deletedDS) => {
 					if (deletedDS) {
 						done(new Error('Execution of the Delete DataSource command returned true, but it should not'));
