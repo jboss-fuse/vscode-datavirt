@@ -23,7 +23,8 @@ import { DataSourceTreeNode } from '../model/tree/DataSourceTreeNode';
 export function deleteDataSourceCommand(ctx): void {
 	if (ctx) {
 		const dsNode: DataSourceTreeNode = ctx;
-		handleDataSourceDeletion(dsNode.dsConfig, dsNode.getProject().dvConfig, dsNode.getProject().file)
+		const prefix: string = utils.generateDataSourceConfigPrefix(dsNode.dsConfig).toUpperCase();
+		handleDataSourceDeletion(prefix, dsNode.getProject().dvConfig, dsNode.getProject().file)
 		.then( (success: boolean) => {
 			extension.dataVirtProvider.refresh();
 			if (success) {
@@ -35,13 +36,13 @@ export function deleteDataSourceCommand(ctx): void {
 	}
 }
 
-export function handleDataSourceDeletion(dsConfig: IDataSourceConfig, dvConfig: IDVConfig, file: string): Promise<boolean> {
+export function handleDataSourceDeletion(prefix: string, dvConfig: IDVConfig, file: string): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
-		if (dsConfig && dvConfig && file) {
+		if (prefix && dvConfig && file) {
 			try {
 				const keys: IEnv[] = [];
 				dvConfig.spec.env.forEach( (element: IEnv) => {
-					if (element.name.toUpperCase().startsWith(`${utils.generateDataSourceConfigPrefix(dsConfig).toUpperCase()}_`)) {
+					if (element.name.toUpperCase().startsWith(`${prefix}_`)) {
 						keys.push(element);
 					}
 				});
