@@ -25,8 +25,12 @@ export function createDataSourceEntryCommand(ctx) {
 		.then( (eName: string) => {
 			vscode.window.showInputBox( {placeHolder: 'Enter the value of the new entry'})
 				.then( (eValue: string) => {
-					handleDataSourceEntryCreation(ctx, eName, eValue)
+					const ds: DataSourceTreeNode = ctx;
+					const yaml: IDVConfig = ds.getProject().dvConfig;
+					const file: string = ds.getProject().file;
+					handleDataSourceEntryCreation(yaml, ds.dsConfig, file, eName, eValue)
 						.then( (success: boolean) => {
+							extension.dataVirtProvider.refresh();
 							if (success) {
 								vscode.window.showInformationMessage(`New datasource entry ${eName} has been created successfully...`);
 							} else {
@@ -37,26 +41,18 @@ export function createDataSourceEntryCommand(ctx) {
 		});
 }
 
-function handleDataSourceEntryCreation(ctx, eName: string, eValue: string): Promise<boolean> {
+export function handleDataSourceEntryCreation(dvConfig: IDVConfig, dsConfig: IDataSourceConfig, file: string, eName: string, eValue: string): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
-		if (ctx) {
+		if (dvConfig && dsConfig && file && eName && eValue) {
 			try {
-				const ds: DataSourceTreeNode = ctx;
-				const yaml: IDVConfig = ctx.getProject().dvConfig;
-				if (yaml) {
-					const dsConfig: IDataSourceConfig = ds.dsConfig;
-					if (!dsConfig.entries.has(eName.toUpperCase())) {
-						dsConfig.entries.set(eName.toUpperCase(), eValue);
-					} else {
-						resolve(false);
-					}
-					utils.mapDSConfigToEnv(dsConfig, yaml);
-					utils.saveModelToFile(yaml, ctx.getProject().getFile());
-					extension.dataVirtProvider.refresh();
-					resolve(true);
+				if (!dsConfig.entries.has(eName.toUpperCase())) {
+					dsConfig.entries.set(eName.toUpperCase(), eValue);
 				} else {
 					resolve(false);
 				}
+				utils.mapDSConfigToEnv(dsConfig, dvConfig);
+				utils.saveModelToFile(dvConfig, file);
+				resolve(true);
 			} catch (error) {
 				extension.log(error);
 				resolve(false);

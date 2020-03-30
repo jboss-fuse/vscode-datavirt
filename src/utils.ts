@@ -45,14 +45,14 @@ export function mapDSConfigToEnv(dsConfig: IDataSourceConfig, yaml: IDVConfig): 
 
 export function generateDataSourceConfigPrefix(dsConfig: IDataSourceConfig): string | undefined {
 	if (dsConfig && dsConfig.type && dsConfig.name) {
-		return `${dsConfig.type}_${dsConfig.name}`;
+		return `${dsConfig.type.toUpperCase()}_${dsConfig.name.toUpperCase()}`;
 	}
 	return undefined;
 }
 
 export function generateFullDataSourceConfigEntryKey(dsConfig: IDataSourceConfig, key: string): string | undefined {
 	if (dsConfig && key) {
-		return `${generateDataSourceConfigPrefix(dsConfig)}_${key}`;
+		return `${generateDataSourceConfigPrefix(dsConfig).toUpperCase()}_${key.toUpperCase()}`;
 	}
 	return undefined;
 }

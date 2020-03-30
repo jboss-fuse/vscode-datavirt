@@ -27,7 +27,7 @@ import * as createVDBCommand from '../commands/CreateVDBCommand';
 import * as createDSCommand from '../commands/CreateDataSourceCommand';
 import * as deleteDSCommand from '../commands/DeleteDataSourceCommand';
 import * as mongoDBDS from '../model/datasources/MongoDBDataSource';
-import { IDVConfig, IDataSourceConfig, IEnv } from '../model/DataVirtModel';
+import { IDVConfig } from '../model/DataVirtModel';
 
 chai.use(sinonChai);
 const should = chai.should();
@@ -42,59 +42,6 @@ describe('Commands Tests', () => {
 		should.exist(p);
 		p.should.contain('testFixture');
 		templFolder = path.join(p, '../resources/');
-	});
-
-	context('Create VDB', () => {
-		it('should generate a valid VDB file when handing over valid parameters', (done) => {
-			const name = 'newvdb';
-			createVDBCommand.handleVDBCreation(p, name, templFolder)
-				.then( (success) => {
-					if (success) {
-						const f = path.join(p, `${name}.yaml`);
-						fs.existsSync(f).should.equal(true);
-						fs.unlinkSync(f);
-						done();
-					} else {
-						done(new Error('Execution of the command returned false'));
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
-		});
-
-		it('should not generate a VDB file when handing over invalid file name', (done) => {
-			const name = undefined;
-			createVDBCommand.handleVDBCreation(p, name, templFolder)
-				.then( (success) => {
-					if (success) {
-						const f = path.join(p, `${name}.yaml`);
-						fs.existsSync(f).should.equal(true);
-						fs.unlinkSync(f);
-						done(new Error('Execution of the command returned true, but should not'));
-					} else {
-						done();
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
-		});
-
-		it('should not generate a VDB file when handing over invalid folder name', (done) => {
-			const name = 'newvdb';
-			createVDBCommand.handleVDBCreation(undefined, name, templFolder)
-				.then( (success) => {
-					if (success) {
-						done(new Error('Execution of the command returned true, but should not'));
-					} else {
-						done();
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
-		});
 	});
 
 	context('Create DataSource', () => {

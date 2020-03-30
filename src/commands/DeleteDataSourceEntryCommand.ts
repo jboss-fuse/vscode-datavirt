@@ -21,35 +21,39 @@ import { IDVConfig, IDataSourceConfig, IEnv } from '../model/DataVirtModel';
 import { DataSourceConfigEntryTreeNode } from '../model/tree/DataSourceConfigEntryTreeNode';
 
 export function deleteDataSourceEntryCommand(ctx) {
-	handleDataSourceEntryDeletion(ctx)
-	.then( (success: boolean) => {
-		if (success) {
-			vscode.window.showInformationMessage(`DataSource entry has been deleted...`);
-		} else {
-			vscode.window.showErrorMessage(`An error occured when trying to delete the datasource entry...`);
-		}
-	});
+	const ds: DataSourceConfigEntryTreeNode = ctx;
+	const dsConfig: IDataSourceConfig = ds.getParent().dsConfig;
+	const dvConfig: IDVConfig = ds.getProject().dvConfig;
+	const file: string = ds.getProject().getFile();
+	const key: string = ds.getKey();
+
+	handleDataSourceEntryDeletion(dvConfig, dsConfig, file, key)
+		.then( (success: boolean) => {
+			extension.dataVirtProvider.refresh();
+			if (success) {
+				vscode.window.showInformationMessage(`DataSource entry has been deleted...`);
+			} else {
+				vscode.window.showErrorMessage(`An error occured when trying to delete the datasource entry...`);
+			}
+		});
 }
 
-function handleDataSourceEntryDeletion(ctx): Promise<boolean> {
+export function handleDataSourceEntryDeletion(dvConfig: IDVConfig, dsConfig: IDataSourceConfig, file: string, key: string): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
-		if (ctx) {
+		if (dvConfig && dsConfig && file && key) {
 			try {
-				const ds: DataSourceConfigEntryTreeNode = ctx;
-				const dsConfig: IDataSourceConfig = ds.getParent().dsConfig;
-				const yaml: IDVConfig = ds.getProject().dvConfig;
-				if (yaml) {
-					yaml.spec.env.forEach( (element: IEnv) => {
-						if (element.name.toUpperCase() === utils.generateFullDataSourceConfigEntryKey(dsConfig, ds.getKey()).toUpperCase()) {
-							yaml.spec.env.splice(yaml.spec.env.indexOf(element, 0), 1);
-						}
-					});
-					utils.saveModelToFile(yaml, ds.getProject().getFile());
-					extension.dataVirtProvider.refresh();
-					resolve(true);
-				} else {
-					resolve(false);
+				let deleted: boolean = false;
+				const fullKey: string = utils.generateFullDataSourceConfigEntryKey(dsConfig, key).toUpperCase();
+				dvConfig.spec.env.forEach( (element: IEnv) => {
+					if (element.name.toUpperCase() === fullKey) {
+						dvConfig.spec.env.splice(dvConfig.spec.env.indexOf(element, 0), 1);
+						deleted = true;
+					}
+				});
+				if (deleted) {
+					utils.saveModelToFile(dvConfig, file);
 				}
+				resolve(deleted);
 			} catch (error) {
 				extension.log(error);
 				resolve(false);
