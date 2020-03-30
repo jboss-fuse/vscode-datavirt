@@ -36,7 +36,7 @@ describe('Utils', () => {
 				entries: new Map()
 			};
 			const prefix:string = utils.generateDataSourceConfigPrefix(dsConfig);
-			prefix.should.deep.equal(`${dsConfig.type}_${dsConfig.name}`);
+			prefix.should.deep.equal(`${dsConfig.type.toUpperCase()}_${dsConfig.name.toUpperCase()}`);
 		});
 
 		it('should return undefined on a null datasource config when trying to obtain the datasource config prefix', () => {
@@ -69,7 +69,7 @@ describe('Utils', () => {
 			};
 			const dsName: string = 'myKey';
 			const key:string = utils.generateFullDataSourceConfigEntryKey(dsConfig, dsName);
-			key.should.deep.equal(`${dsConfig.type}_${dsConfig.name}_${dsName}`);
+			key.should.deep.equal(`${dsConfig.type.toUpperCase()}_${dsConfig.name.toUpperCase()}_${dsName.toUpperCase()}`);
 		});
 	});
 

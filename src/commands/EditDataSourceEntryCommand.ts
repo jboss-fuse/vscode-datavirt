@@ -18,15 +18,15 @@ import * as vscode from 'vscode';
 import * as utils from '../utils';
 import * as extension from '../extension';
 import { IDVConfig, IDataSourceConfig } from '../model/DataVirtModel';
-import { DataSourceTreeNode } from '../model/tree/DataSourceTreeNode';
 import { DataSourceConfigEntryTreeNode } from '../model/tree/DataSourceConfigEntryTreeNode';
 
 export function editDataSourceEntryCommand(ctx) {
 	const item: DataSourceConfigEntryTreeNode = ctx;
 	vscode.window.showInputBox( {value: item.getValue()})
 		.then( ( newValue: string) => {
-			handleDataSourceEntryEdit(ctx, item, newValue)
+			handleDataSourceEntryEdit(item.getProject().dvConfig, item.getParent().dsConfig, item.getProject().getFile(), item.getKey(), newValue)
 				.then( (success: boolean) => {
+					extension.dataVirtProvider.refresh();
 					if (success) {
 						vscode.window.showInformationMessage(`DataSource entry has been modified...`);
 					} else {
@@ -36,20 +36,17 @@ export function editDataSourceEntryCommand(ctx) {
 		});
 }
 
-function handleDataSourceEntryEdit(ctx, item: DataSourceConfigEntryTreeNode, newValue: string): Promise<boolean> {
+export function handleDataSourceEntryEdit(dvConfig: IDVConfig, dsConfig: IDataSourceConfig, file: string, key: string, newValue: string): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
-		if (ctx) {
+		if (dvConfig && dsConfig && file && key) {
 			try {
-				const yaml: IDVConfig = item.getProject().dvConfig;
-				if (yaml) {
-					const dsP: DataSourceTreeNode = item.getParent();
-					const dsConfig: IDataSourceConfig = dsP.dsConfig;
-					dsConfig.entries.set(item.getKey(), newValue);
-					utils.mapDSConfigToEnv(dsConfig, yaml);
-					utils.saveModelToFile(yaml, ctx.getProject().getFile());
-					extension.dataVirtProvider.refresh();
+				if (dsConfig.entries.has(key) && newValue !== undefined) {
+					dsConfig.entries.set(key, newValue ? newValue : '');
+					utils.mapDSConfigToEnv(dsConfig, dvConfig);
+					utils.saveModelToFile(dvConfig, file);
 					resolve(true);
 				} else {
+					extension.log(`handleDataSourceEntryEdit: Unable to modify the datasource entry because the key ${key} does not exist...`);
 					resolve(false);
 				}
 			} catch (error) {
