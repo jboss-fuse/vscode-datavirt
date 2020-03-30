@@ -17,6 +17,7 @@
 import * as path from 'path';
 
 import { runTests } from 'vscode-test';
+import { TestOptions } from 'vscode-test/out/runTest';
 
 async function runTest() {
 	try {
@@ -28,8 +29,10 @@ async function runTest() {
 		// Passed to --extensionTestsPath
 		const extensionTestsPath = path.resolve(__dirname, './');
 
+		const testWorkspace = path.resolve(__dirname, '../../../testFixture/');
+
 		// Download VS Code, unzip it and run the integration test
-		await runTests({ extensionDevelopmentPath, extensionTestsPath });
+		await runTests({ extensionDevelopmentPath, extensionTestsPath, launchArgs: [testWorkspace] });
 	} catch (err) {
 		console.error('Failed to run tests');
 		process.exit(1);
