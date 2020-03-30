@@ -18,7 +18,6 @@
 
 import * as chai from 'chai';
 import * as extension from '../extension';
-import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as fs from 'fs';
 import * as path from 'path';

@@ -20,40 +20,36 @@ import * as extension from '../extension';
 import { IDVConfig, IDataSourceConfig, IEnv } from '../model/DataVirtModel';
 import { DataSourceTreeNode } from '../model/tree/DataSourceTreeNode';
 
-export function deleteDataSourceCommand(ctx) {
-	handleDataSourceDeletion(ctx)
+export function deleteDataSourceCommand(ctx): void {
+	if (ctx) {
+		const dsNode: DataSourceTreeNode = ctx;
+		handleDataSourceDeletion(dsNode.dsConfig, dsNode.getProject().dvConfig, dsNode.getProject().file)
 		.then( (success: boolean) => {
+			extension.dataVirtProvider.refresh();
 			if (success) {
 				vscode.window.showInformationMessage(`DataSource has been deleted...`);
 			} else {
 				vscode.window.showErrorMessage(`An error occured when trying to delete the datasource...`);
 			}
 		});
+	}
 }
 
-function handleDataSourceDeletion(ctx): Promise<boolean> {
+export function handleDataSourceDeletion(dsConfig: IDataSourceConfig, dvConfig: IDVConfig, file: string): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
-		if (ctx) {
+		if (dsConfig && dvConfig && file) {
 			try {
-				const ds: DataSourceTreeNode = ctx;
-				const dsConfig: IDataSourceConfig = ds.dsConfig;
-				const yaml: IDVConfig = ds.getProject().dvConfig;
 				const keys: IEnv[] = [];
-				if (yaml) {
-					yaml.spec.env.forEach( (element: IEnv) => {
-						if (element.name.toUpperCase().startsWith(`${utils.generateDataSourceConfigPrefix(dsConfig).toUpperCase()}_`)) {
-							keys.push(element);
-						}
-					});
-					keys.forEach( (key) => {
-						yaml.spec.env.splice(yaml.spec.env.indexOf(key, 1));
-					});
-					utils.saveModelToFile(yaml, ds.getProject().getFile());
-					extension.dataVirtProvider.refresh();
-					resolve(true);
-				} else {
-					resolve(false);
-				}
+				dvConfig.spec.env.forEach( (element: IEnv) => {
+					if (element.name.toUpperCase().startsWith(`${utils.generateDataSourceConfigPrefix(dsConfig).toUpperCase()}_`)) {
+						keys.push(element);
+					}
+				});
+				keys.forEach( (key) => {
+					dvConfig.spec.env.splice(dvConfig.spec.env.indexOf(key, 1));
+				});
+				utils.saveModelToFile(dvConfig, file);
+				resolve(true);
 			} catch (error) {
 				extension.log(error);
 				resolve(false);
