@@ -38,6 +38,7 @@ describe('Extension OutputChannel Logger', () => {
 	});
 
 	it('should call output channel creation on new log entry', () => {
+		windowSpy.callCount.should.be.equal(0);
 		log('This is a test!');
 		windowSpy
 			.should.have.been.calledOnce
