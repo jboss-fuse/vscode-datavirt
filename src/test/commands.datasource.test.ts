@@ -33,15 +33,15 @@ chai.use(sinonChai);
 const should = chai.should();
 
 describe('Commands Tests', () => {
-	let p: string;
+	let workspacePath: string;
 	let templFolder: string;
 
 	before(() => {
 		extension.fillDataTypes();
-		p = vscode.workspace.workspaceFolders[0].uri.fsPath;
-		should.exist(p);
-		p.should.contain('testFixture');
-		templFolder = path.join(p, '../resources/');
+		workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+		should.exist(workspacePath);
+		workspacePath.should.contain('testFixture');
+		templFolder = path.join(workspacePath, '../resources/');
 	});
 
 	context('Create DataSource', () => {
@@ -49,10 +49,10 @@ describe('Commands Tests', () => {
 		let f: string;
 
 		beforeEach( (done) => {
-			createVDBCommand.handleVDBCreation(p, name, templFolder)
+			createVDBCommand.handleVDBCreation(workspacePath, name, templFolder)
 			.then( (createdVDB) => {
 				if (createdVDB) {
-					f = path.join(p, `${name}.yaml`);
+					f = path.join(workspacePath, `${name}.yaml`);
 					fs.existsSync(f).should.equal(true);
 					done();
 				} else {
@@ -174,10 +174,10 @@ describe('Commands Tests', () => {
 		let f: string;
 
 		beforeEach( (done) => {
-			createVDBCommand.handleVDBCreation(p, name, templFolder)
+			createVDBCommand.handleVDBCreation(workspacePath, name, templFolder)
 			.then( (createdVDB) => {
 				if (createdVDB) {
-					f = path.join(p, `${name}.yaml`);
+					f = path.join(workspacePath, `${name}.yaml`);
 					fs.existsSync(f).should.equal(true);
 					const dvConfig: IDVConfig = utils.loadModelFromFile(f);
 					createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, f)

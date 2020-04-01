@@ -17,10 +17,10 @@
 import * as vscode from 'vscode';
 import * as utils from '../utils';
 import * as extension from '../extension';
-import { IDVConfig, IDataSourceConfig, IEnv } from '../model/DataVirtModel';
+import { IDVConfig, IEnv } from '../model/DataVirtModel';
 import { DataSourceTreeNode } from '../model/tree/DataSourceTreeNode';
 
-export function deleteDataSourceCommand(ctx): void {
+export function deleteDataSourceCommand(ctx: DataSourceTreeNode): void {
 	if (ctx) {
 		const dsNode: DataSourceTreeNode = ctx;
 		const prefix: string = utils.generateDataSourceConfigPrefix(dsNode.dsConfig).toUpperCase();

@@ -17,7 +17,6 @@
 import * as path from 'path';
 
 import { runTests } from 'vscode-test';
-import { TestOptions } from 'vscode-test/out/runTest';
 
 async function runTest() {
 	try {

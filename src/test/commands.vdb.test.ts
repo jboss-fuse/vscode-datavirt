@@ -28,24 +28,24 @@ chai.use(sinonChai);
 const should = chai.should();
 
 describe('Commands Tests', () => {
-	let p: string;
+	let workspacePath: string;
 	let templFolder: string;
 
 	before(() => {
 		extension.fillDataTypes();
-		p = vscode.workspace.workspaceFolders[0].uri.fsPath;
-		should.exist(p);
-		p.should.contain('testFixture');
-		templFolder = path.join(p, '../resources/');
+		workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+		should.exist(workspacePath);
+		workspacePath.should.contain('testFixture');
+		templFolder = path.join(workspacePath, '../resources/');
 	});
 
 	context('Create VDB', () => {
 		it('should generate a valid VDB file when handing over valid parameters', (done) => {
 			const name = 'newvdb';
-			createVDBCommand.handleVDBCreation(p, name, templFolder)
+			createVDBCommand.handleVDBCreation(workspacePath, name, templFolder)
 				.then( (success) => {
 					if (success) {
-						const f = path.join(p, `${name}.yaml`);
+						const f = path.join(workspacePath, `${name}.yaml`);
 						fs.existsSync(f).should.equal(true);
 						fs.unlinkSync(f);
 						done();
@@ -60,10 +60,10 @@ describe('Commands Tests', () => {
 
 		it('should not generate a VDB file when handing over invalid file name', (done) => {
 			const name = undefined;
-			createVDBCommand.handleVDBCreation(p, name, templFolder)
+			createVDBCommand.handleVDBCreation(workspacePath, name, templFolder)
 				.then( (success) => {
 					if (success) {
-						const f = path.join(p, `${name}.yaml`);
+						const f = path.join(workspacePath, `${name}.yaml`);
 						fs.existsSync(f).should.equal(true);
 						fs.unlinkSync(f);
 						done(new Error('Execution of the command returned true, but should not'));
