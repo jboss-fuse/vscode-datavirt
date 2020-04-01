@@ -248,5 +248,38 @@ describe('Commands Tests', () => {
 					done(err);
 				});
 		});
+
+		it('should not delete all datasources when deleting 1 of 2 datasources (regression test #45)', (done) => {
+			const newDSName = 'SOURCE2';
+			const prefix2: string = 'SPRING_TEIID_DATA_MONGODB_SOURCE2';
+
+			createDSCommand.handleDataSourceCreation(newDSName, dsType, dvConfig, vdbFile)
+				.then( (createdDS) => {
+					if (createdDS) {
+						dvConfig = utils.loadModelFromFile(vdbFile);
+						dvConfig.spec.env.length.should.deep.equal(mongoTemplate.entries.size*2);
+
+						deleteDSCommand.handleDataSourceDeletion(newDSName, prefix2, dvConfig, vdbFile)
+						.then( (deletedDS) => {
+							if (deletedDS) {
+								dvConfig = utils.loadModelFromFile(vdbFile);
+								dvConfig.spec.env.length.should.deep.equal(mongoTemplate.entries.size);
+
+								done();
+							} else {
+								done(new Error('Execution of the Delete DataSource command returned false'));
+							}
+						})
+						.catch( (err) => {
+							done(err);
+						});
+					} else {
+						done(new Error('Creation of a second data source returned false'));
+					}
+				})
+				.catch( (err) => {
+					done(err);
+				});
+		});
 	});
 });
