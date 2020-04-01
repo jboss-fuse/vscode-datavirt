@@ -24,7 +24,7 @@ export function deleteDataSourceCommand(ctx): void {
 	if (ctx) {
 		const dsNode: DataSourceTreeNode = ctx;
 		const prefix: string = utils.generateDataSourceConfigPrefix(dsNode.dsConfig).toUpperCase();
-		handleDataSourceDeletion(prefix, dsNode.getProject().dvConfig, dsNode.getProject().file)
+		handleDataSourceDeletion(dsNode.label, prefix, dsNode.getProject().dvConfig, dsNode.getProject().file)
 		.then( (success: boolean) => {
 			extension.dataVirtProvider.refresh();
 			if (success) {
@@ -36,7 +36,7 @@ export function deleteDataSourceCommand(ctx): void {
 	}
 }
 
-export function handleDataSourceDeletion(prefix: string, dvConfig: IDVConfig, file: string): Promise<boolean> {
+export function handleDataSourceDeletion(name: string, prefix: string, dvConfig: IDVConfig, file: string): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
 		if (prefix && dvConfig && file) {
 			try {
@@ -56,7 +56,7 @@ export function handleDataSourceDeletion(prefix: string, dvConfig: IDVConfig, fi
 				resolve(false);
 			}
 		} else {
-			extension.log('handleDataSourceEdit: Unable to delete the datasource...');
+			extension.log(`handleDataSourceDeletion: Unable to delete the datasource ${name}...`);
 			resolve(false);
 		}
 	});

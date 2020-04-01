@@ -6,10 +6,7 @@
 
 This project uses EditorConfig to standardize text editor configuration.
 Visit http://editorconfig.org for details.
-Visit https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig for the VSCode Plugin.
-
-This project uses TypeScript TSLint plugin for VSCode.
-Visit https://github.com/Microsoft/typescript-tslint-plugin for details.
+Visit https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig for the VS Code Plugin.
 
 This project uses Mocha and Chai for testing.
 Visit http://mochajs.org and http://chaijs.com for details.

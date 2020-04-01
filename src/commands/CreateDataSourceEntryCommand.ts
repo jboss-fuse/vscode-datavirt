@@ -22,17 +22,17 @@ import { DataSourceTreeNode } from '../model/tree/DataSourceTreeNode';
 
 export function createDataSourceEntryCommand(ctx) {
 	vscode.window.showInputBox( {validateInput: utils.validateName, placeHolder: 'Enter the name of the new entry'})
-		.then( (eName: string) => {
+		.then( (entryName: string) => {
 			vscode.window.showInputBox( {placeHolder: 'Enter the value of the new entry'})
-				.then( (eValue: string) => {
+				.then( (entryValue: string) => {
 					const ds: DataSourceTreeNode = ctx;
 					const yaml: IDVConfig = ds.getProject().dvConfig;
 					const file: string = ds.getProject().file;
-					handleDataSourceEntryCreation(yaml, ds.dsConfig, file, eName, eValue)
+					handleDataSourceEntryCreation(yaml, ds.dsConfig, file, entryName, entryValue)
 						.then( (success: boolean) => {
 							extension.dataVirtProvider.refresh();
 							if (success) {
-								vscode.window.showInformationMessage(`New datasource entry ${eName} has been created successfully...`);
+								vscode.window.showInformationMessage(`New datasource entry ${entryName} has been created successfully...`);
 							} else {
 								vscode.window.showErrorMessage(`An error occured when trying to create a new datasource entry...`);
 							}
@@ -41,12 +41,12 @@ export function createDataSourceEntryCommand(ctx) {
 		});
 }
 
-export function handleDataSourceEntryCreation(dvConfig: IDVConfig, dsConfig: IDataSourceConfig, file: string, eName: string, eValue: string): Promise<boolean> {
+export function handleDataSourceEntryCreation(dvConfig: IDVConfig, dsConfig: IDataSourceConfig, file: string, entryName: string, entryValue: string): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
-		if (dvConfig && dsConfig && file && eName && eValue) {
+		if (dvConfig && dsConfig && file && entryName && entryValue) {
 			try {
-				if (!dsConfig.entries.has(eName.toUpperCase())) {
-					dsConfig.entries.set(eName.toUpperCase(), eValue);
+				if (!dsConfig.entries.has(entryName.toUpperCase())) {
+					dsConfig.entries.set(entryName.toUpperCase(), entryValue);
 				} else {
 					resolve(false);
 				}
@@ -58,7 +58,7 @@ export function handleDataSourceEntryCreation(dvConfig: IDVConfig, dsConfig: IDa
 				resolve(false);
 			}
 		} else {
-			extension.log('handleDataSourceEdit: Unable to delete the datasource...');
+			extension.log('handleDataSourceEntryCreation: Unable to create the datasource entry...');
 			resolve(false);
 		}
 	});

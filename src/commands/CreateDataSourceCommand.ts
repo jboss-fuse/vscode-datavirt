@@ -56,7 +56,7 @@ export function handleDataSourceCreation(dsName: string, dsType: string, dvConfi
 				resolve(false);
 			}
 		} else {
-			extension.log('handleDataSourceCreation: Unable to create the datasource because of missing parameters...');
+			extension.log('handleDataSourceCreation: Unable to create the datasource because of missing parameter(s)...');
 			resolve(false);
 		}
 	});
