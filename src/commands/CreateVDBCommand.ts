@@ -63,6 +63,7 @@ export function handleVDBCreation(filepath: string, fileName: string, templateFo
 				fs.copyFileSync(templatePath, targetFile);
 				const yamlDoc:IDVConfig = utils.loadModelFromFile(targetFile);
 				yamlDoc.metadata.name = fileName;
+				yamlDoc.spec.build.source.ddl = utils.replaceDDLNamePlaceholder(yamlDoc.spec.build.source.ddl, extension.DDL_NAME_PLACEHOLDER, fileName.toUpperCase());
 				utils.saveModelToFile(yamlDoc, targetFile);
 				resolve(true);
 			} catch (error) {

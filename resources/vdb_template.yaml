@@ -1,7 +1,7 @@
 apiVersion: teiid.io/v1alpha1
 kind: VirtualDatabase
 metadata:
-  name: ${name}
+  name: $!DUMMY!$
 spec:
   replicas: 1
   env:
@@ -9,10 +9,10 @@ spec:
   build:
     source:
       ddl: |
-        CREATE DATABASE {name} OPTIONS (ANNOTATION 'provide your description here..');
-        USE DATABASE {name};
+        CREATE DATABASE $!DUMMY!$ OPTIONS (ANNOTATION 'provide your description here..');
+        USE DATABASE $!DUMMY!$;
 
-        CREATE VIRTUAL SCHEMA {name};
-        SET SCHEMA {name};
+        CREATE VIRTUAL SCHEMA $!DUMMY!$;
+        SET SCHEMA $!DUMMY!$;
 
         CREATE VIEW SAMPLE AS SELECT 1 as valid;

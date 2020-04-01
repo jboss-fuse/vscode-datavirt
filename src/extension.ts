@@ -43,10 +43,11 @@ export let pluginResourcesPath: string;
 export let workspaceReady : boolean = true;
 export const DDL_FILE_EXT: string = '.ddl';
 export const TEMPLATE_NAME: string = '$!TEMPLATE!$';
+export const DDL_NAME_PLACEHOLDER: string = '$!DUMMY!$';
+export const DATASOURCE_TYPES: Map<string, IDataSourceConfig> = new Map();
+
 export let fileToNode: Map<string, SchemaTreeNode> = new Map();
 export let fileToEditor: Map<string, vscode.TextEditor> = new Map();
-
-export const DATASOURCE_TYPES: Map<string, IDataSourceConfig> = new Map();
 
 let dataVirtExtensionOutputChannel: vscode.OutputChannel;
 let dataVirtTreeView : vscode.TreeView<vscode.TreeItem>;
