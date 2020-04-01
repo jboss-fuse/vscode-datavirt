@@ -47,7 +47,7 @@ export function handleDataSourceDeletion(name: string, prefix: string, dvConfig:
 					}
 				});
 				keys.forEach( (key) => {
-					dvConfig.spec.env.splice(dvConfig.spec.env.indexOf(key, 1));
+					dvConfig.spec.env.splice(dvConfig.spec.env.indexOf(key), 1);
 				});
 				utils.saveModelToFile(dvConfig, file);
 				resolve(true);
