@@ -140,7 +140,7 @@ function handleVisibleEditorChanges(event) {
 }
 
 export function fillDataTypes(): void {
-	DATASOURCE_TYPES.set('SpringBoot', new SpringDataSource(TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('Spring Boot', new SpringDataSource(TEMPLATE_NAME));
 	DATASOURCE_TYPES.set('MongoDB', new MongoDBDataSource(TEMPLATE_NAME));
 	DATASOURCE_TYPES.set('Salesforce', new SalesForceDataSource(TEMPLATE_NAME));
 	DATASOURCE_TYPES.set('Google Sheets', new GoogleSheetsDataSource(TEMPLATE_NAME));

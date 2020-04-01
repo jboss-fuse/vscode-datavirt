@@ -59,7 +59,7 @@ export function handleDataSourceEntryDeletion(dvConfig: IDVConfig, dsConfig: IDa
 				resolve(false);
 			}
 		} else {
-			extension.log('handleDataSourceEntryEdit: Unable to delete the datasource entry...');
+			extension.log('handleDataSourceEntryDeletion: Unable to delete the datasource entry...');
 			resolve(false);
 		}
 	});

@@ -67,8 +67,8 @@ export function saveModelToFile(dvConfig: IDVConfig, file: string): void {
 	fs.writeFileSync(file, YAML.stringify(dvConfig));
 }
 
-export function replaceTemplateName(dsConfig: IDataSourceConfig, dsName: string, TEMPLATE_NAME: string): IDataSourceConfig | undefined {
-	if (dsName && dsConfig && TEMPLATE_NAME) {
+export function replaceTemplateName(dsConfig: IDataSourceConfig, dsName: string, templateName: string): IDataSourceConfig | undefined {
+	if (dsName && dsConfig && templateName) {
 		const dsConfigNew : IDataSourceConfig = {
 			name: dsName,
 			type: dsConfig.type,
@@ -76,8 +76,8 @@ export function replaceTemplateName(dsConfig: IDataSourceConfig, dsName: string,
 		};
 
 		dsConfig.entries.forEach( (value: string, key: string) => {
-			if (key.indexOf(TEMPLATE_NAME) !== -1) {
-				dsConfigNew.entries.set(key.replace(TEMPLATE_NAME, dsName.toUpperCase()), value);
+			if (key.indexOf(templateName) !== -1) {
+				dsConfigNew.entries.set(key.replace(templateName, dsName.toUpperCase()), value);
 			} else {
 				dsConfigNew.entries.set(key, value);
 			}

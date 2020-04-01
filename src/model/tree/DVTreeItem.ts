@@ -45,12 +45,12 @@ export class DVTreeItem extends vscode.TreeItem {
 		return this.parent;
 	}
 	getIconName(): string {
-		return 'undefined';
+		return undefined;
 	}
 	getIcon(extContext: vscode.ExtensionContext): vscode.Uri | undefined {
 		let newIcon: vscode.Uri | undefined;
 		const name: string = this.getIconName();
-		if (extContext) {
+		if (extContext && name) {
 			const iconPath = path.join(extContext.extensionPath, `/icons/${name}`);
 			newIcon = vscode.Uri.file(iconPath);
 		}
