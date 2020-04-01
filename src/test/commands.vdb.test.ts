@@ -28,26 +28,37 @@ chai.use(sinonChai);
 const should = chai.should();
 
 describe('Commands Tests', () => {
+	const name = 'newvdb';
+
 	let workspacePath: string;
-	let templFolder: string;
+	let templateFolder: string;
+	let vdbFile: string;
 
 	before(() => {
 		extension.fillDataTypes();
 		workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 		should.exist(workspacePath);
 		workspacePath.should.contain('testFixture');
-		templFolder = path.join(workspacePath, '../resources/');
+		templateFolder = path.join(workspacePath, '../resources/');
 	});
 
 	context('Create VDB', () => {
+
+		beforeEach( () => {
+			vdbFile = path.join(workspacePath, `${name}.yaml`);
+		});
+
+		afterEach( () => {
+			if (vdbFile && fs.existsSync(vdbFile)) {
+				fs.unlinkSync(vdbFile);
+			}
+		});
+
 		it('should generate a valid VDB file when handing over valid parameters', (done) => {
-			const name = 'newvdb';
-			createVDBCommand.handleVDBCreation(workspacePath, name, templFolder)
+			createVDBCommand.handleVDBCreation(workspacePath, name, templateFolder)
 				.then( (success) => {
 					if (success) {
-						const f = path.join(workspacePath, `${name}.yaml`);
-						fs.existsSync(f).should.equal(true);
-						fs.unlinkSync(f);
+						fs.existsSync(vdbFile).should.equal(true);
 						done();
 					} else {
 						done(new Error('Execution of the command returned false'));
@@ -59,13 +70,9 @@ describe('Commands Tests', () => {
 		});
 
 		it('should not generate a VDB file when handing over invalid file name', (done) => {
-			const name = undefined;
-			createVDBCommand.handleVDBCreation(workspacePath, name, templFolder)
+			createVDBCommand.handleVDBCreation(workspacePath, undefined, templateFolder)
 				.then( (success) => {
 					if (success) {
-						const f = path.join(workspacePath, `${name}.yaml`);
-						fs.existsSync(f).should.equal(true);
-						fs.unlinkSync(f);
 						done(new Error('Execution of the command returned true, but should not'));
 					} else {
 						done();
@@ -77,8 +84,7 @@ describe('Commands Tests', () => {
 		});
 
 		it('should not generate a VDB file when handing over invalid folder name', (done) => {
-			const name = 'newvdb';
-			createVDBCommand.handleVDBCreation(undefined, name, templFolder)
+			createVDBCommand.handleVDBCreation(undefined, name, templateFolder)
 				.then( (success) => {
 					if (success) {
 						done(new Error('Execution of the command returned true, but should not'));
