@@ -22,7 +22,7 @@ import * as sinonChai from 'sinon-chai';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as utils from '../utils';
-import { IDataSourceConfig, IDVConfig, IEnv } from '../model/DataVirtModel';
+import { IDataSourceConfig, IDVConfig } from '../model/DataVirtModel';
 
 chai.use(sinonChai);
 const should = chai.should();

@@ -17,10 +17,8 @@
 'use strict';
 
 import * as vscode from 'vscode';
-import * as chai from 'chai';
 import { Uri } from 'vscode';
 
-const expect = chai.expect;
 const waitUntil = require('async-wait-until');
 
 describe('Should do completion for ddl file', () => {
@@ -46,9 +44,9 @@ async function checkExpectedCompletion(docUri: vscode.Uri, position: vscode.Posi
 	let hasExpectedCompletion = false;
 	await waitUntil(() => {
 		// Executing the command `vscode.executeCompletionItemProvider` to simulate triggering completion
-		(vscode.commands.executeCommand('vscode.executeCompletionItemProvider', docUri, position)).then( (value) => {
+		vscode.commands.executeCommand('vscode.executeCompletionItemProvider', docUri, position).then( (value) => {
 			const actualCompletionList = value as vscode.CompletionList;
-			const actualCompletionLabelList = actualCompletionList.items.map( (c) => { return c.label; });
+			const actualCompletionLabelList = actualCompletionList.items.map( (completion) => completion.label);
 			hasExpectedCompletion = actualCompletionLabelList.includes(expectedCompletion.label);
 		});
 		return hasExpectedCompletion;

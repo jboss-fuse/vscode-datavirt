@@ -41,33 +41,55 @@ describe('Commands Tests', () => {
 	const prefix: string = 'SPRING_TEIID_DATA_MONGODB_MYMONGODB';
 	const mongoTempl: mongoDBDS.MongoDBDataSource = new mongoDBDS.MongoDBDataSource(dsName);
 	const mongoDSType: string = mongoTempl.type;
-	let f: string;
-	let p: string;
-	let templFolder: string;
+	let vdbFile: string;
+	let workspacePath: string;
+	let templateFolder: string;
+
+	function prepareDataSource(dvConfig: IDVConfig, dataSourceName: string, dataSourceType: string): IDataSourceConfig {
+		let datasourceConfig = {
+			name: dataSourceName,
+			type: dataSourceType,
+			entries: new Map()
+		};
+		dvConfig.spec.env.forEach( (element: IEnv) => {
+			const key: string = element.name.slice(prefix.length+1);
+			datasourceConfig.entries.set(key, element.value);
+		});
+		return datasourceConfig;
+	}
 
 	before(() => {
 		extension.fillDataTypes();
-		p = vscode.workspace.workspaceFolders[0].uri.fsPath;
-		should.exist(p);
-		p.should.contain('testFixture');
-		templFolder = path.join(p, '../resources/');
+		workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+		should.exist(workspacePath);
+		workspacePath.should.contain('testFixture');
+		templateFolder = path.join(workspacePath, '../resources/');
 	});
 
 	context('Create DataSource Entry', () => {
+		const entryName: string = 'NEWKEY';
+		const entryValue: string = 'NEWVALUE';
+
+		let dvConfig: IDVConfig;
+		let dsConfig: IDataSourceConfig;
 
 		beforeEach( (done) => {
-			createVDBCommand.handleVDBCreation(p, name, templFolder)
+			createVDBCommand.handleVDBCreation(workspacePath, name, templateFolder)
 			.then( (createdVDB) => {
 				if (createdVDB) {
-					f = path.join(p, `${name}.yaml`);
-					fs.existsSync(f).should.equal(true);
-					const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-					createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, f)
+					vdbFile = path.join(workspacePath, `${name}.yaml`);
+					fs.existsSync(vdbFile).should.equal(true);
+					dvConfig = utils.loadModelFromFile(vdbFile);
+					createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, vdbFile)
 						.then( (createdDS) => {
 							if (createdDS) {
-								const dvConfig2: IDVConfig = utils.loadModelFromFile(f);
+								const dvConfig2: IDVConfig = utils.loadModelFromFile(vdbFile);
 								dvConfig2.should.deep.equal(dvConfig);
 								dvConfig2.spec.env.length.should.deep.equal(mongoTempl.entries.size);
+
+								dvConfig = utils.loadModelFromFile(vdbFile);
+								dsConfig = prepareDataSource(dvConfig, dsName, mongoDSType);
+
 								done();
 							} else {
 								done(new Error('Execution of the Create DataSource command returned false'));
@@ -86,31 +108,19 @@ describe('Commands Tests', () => {
 		});
 
 		afterEach( () => {
-			if (fs.existsSync(f)) {
-				fs.unlinkSync(f);
+			if (fs.existsSync(vdbFile)) {
+				fs.unlinkSync(vdbFile);
 			}
 		});
 
 		it('should create a datasource entry inside a datasource when handing over valid parameters', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
 			const oldLen: number = dvConfig.spec.env.length;
-			const eName: string = 'NEWKEY';
-			const eValue: string = 'NEWVALUE';
-			createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, f, eName, eValue)
+			createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, entryName, entryValue)
 				.then( (created) => {
 					if (created) {
 						dvConfig.spec.env.length.should.equal(oldLen+1);
 						should.exist(dvConfig.spec.env.find( (element) => {
-							return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, eName) && element.value === eValue;
+							return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, entryName) && element.value === entryValue;
 						}));
 						done();
 					} else {
@@ -123,19 +133,7 @@ describe('Commands Tests', () => {
 		});
 
 		it('should not create a datasource entry inside a datasource when handing over invalid model', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
-			const eName: string = 'NEWKEY';
-			const eValue: string = 'NEWVALUE';
-			createDSEntryCommand.handleDataSourceEntryCreation(undefined, dsConfig, f, eName, eValue)
+			createDSEntryCommand.handleDataSourceEntryCreation(undefined, dsConfig, vdbFile, entryName, entryValue)
 				.then( (created) => {
 					if (created) {
 						done(new Error('Execution of the Create DataSource Entry command returned true, but should not.'));
@@ -149,19 +147,7 @@ describe('Commands Tests', () => {
 		});
 
 		it('should not create a datasource entry inside a datasource when handing over invalid datasource config', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
-			const eName: string = 'NEWKEY';
-			const eValue: string = 'NEWVALUE';
-			createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, undefined, f, eName, eValue)
+			createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, undefined, vdbFile, entryName, entryValue)
 				.then( (created) => {
 					if (created) {
 						done(new Error('Execution of the Create DataSource Entry command returned true, but should not.'));
@@ -175,19 +161,7 @@ describe('Commands Tests', () => {
 		});
 
 		it('should not create a datasource entry inside a datasource when handing over invalid file', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
-			const eName: string = 'NEWKEY';
-			const eValue: string = 'NEWVALUE';
-			createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, undefined, eName, eValue)
+			createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, undefined, entryName, entryValue)
 				.then( (created) => {
 					if (created) {
 						done(new Error('Execution of the Create DataSource Entry command returned true, but should not.'));
@@ -201,18 +175,7 @@ describe('Commands Tests', () => {
 		});
 
 		it('should not create a datasource entry inside a datasource when handing over invalid entry key', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
-			const eValue: string = 'NEWVALUE';
-			createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, f, undefined, eValue)
+			createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, undefined, entryValue)
 				.then( (created) => {
 					if (created) {
 						done(new Error('Execution of the Create DataSource Entry command returned true, but should not.'));
@@ -226,18 +189,7 @@ describe('Commands Tests', () => {
 		});
 
 		it('should not create a datasource entry inside a datasource when handing over invalid entry value', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
-			const eName: string = 'NEWKEY';
-			createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, f, eName, undefined)
+			createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, entryName, undefined)
 				.then( (created) => {
 					if (created) {
 						done(new Error('Execution of the Create DataSource Entry command returned true, but should not.'));
@@ -252,40 +204,38 @@ describe('Commands Tests', () => {
 	});
 
 	context('Modify DataSource Entry', () => {
-		const eName: string = 'NEWKEY';
-		const eValue: string = 'NEWVALUE';
+		const entryName: string = 'NEWKEY';
+		const entryValue: string = 'NEWVALUE';
+
+		let dvConfig: IDVConfig;
+		let dsConfig: IDataSourceConfig;
 
 		beforeEach( (done) => {
-			createVDBCommand.handleVDBCreation(p, name, templFolder)
+			createVDBCommand.handleVDBCreation(workspacePath, name, templateFolder)
 			.then( (createdVDB) => {
 				if (createdVDB) {
-					f = path.join(p, `${name}.yaml`);
-					fs.existsSync(f).should.equal(true);
-					const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-					createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, f)
+					vdbFile = path.join(workspacePath, `${name}.yaml`);
+					fs.existsSync(vdbFile).should.equal(true);
+					dvConfig = utils.loadModelFromFile(vdbFile);
+					createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, vdbFile)
 						.then( (createdDS) => {
 							if (createdDS) {
-								const dvConfig2: IDVConfig = utils.loadModelFromFile(f);
+								const dvConfig2: IDVConfig = utils.loadModelFromFile(vdbFile);
 								dvConfig2.should.deep.equal(dvConfig);
 								dvConfig2.spec.env.length.should.deep.equal(mongoTempl.entries.size);
 
-								const dsConfig: IDataSourceConfig = {
-									name: dsName,
-									type: mongoDSType,
-									entries: new Map()
-								};
-								dvConfig.spec.env.forEach( (element: IEnv) => {
-									const key: string = element.name.slice(prefix.length+1);
-									dsConfig.entries.set(key, element.value);
-								});
+								dvConfig = utils.loadModelFromFile(vdbFile);
+								dsConfig = prepareDataSource(dvConfig, dsName, mongoDSType);
 								const oldLen: number = dvConfig.spec.env.length;
-								createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, f, eName, eValue)
+								createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, entryName, entryValue)
 									.then( (created) => {
 										if (created) {
 											dvConfig.spec.env.length.should.equal(oldLen+1);
 											should.exist(dvConfig.spec.env.find( (element) => {
-												return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, eName) && element.value === eValue;
+												return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, entryName) && element.value === entryValue;
 											}));
+											dvConfig = utils.loadModelFromFile(vdbFile);
+											dsConfig = prepareDataSource(dvConfig, dsName, mongoDSType);
 											done();
 										} else {
 											done(new Error('Execution of the Create DataSource Entry command returned false'));
@@ -311,30 +261,20 @@ describe('Commands Tests', () => {
 		});
 
 		afterEach( () => {
-			if (fs.existsSync(f)) {
-				fs.unlinkSync(f);
+			if (fs.existsSync(vdbFile)) {
+				fs.unlinkSync(vdbFile);
 			}
 		});
 
 		it('should return true when modifying a datasource entry with valid parameters', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
 			const oldLen: number = dvConfig.spec.env.length;
 			const newVal: string = 'XYZVALUE';
-			editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, dsConfig, f, eName, newVal)
+			editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, dsConfig, vdbFile, entryName, newVal)
 				.then( (success) => {
 					if (success) {
 						dvConfig.spec.env.length.should.equal(oldLen);
 						should.exist(dvConfig.spec.env.find( (element) => {
-							return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, eName) && element.value === newVal;
+							return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, entryName) && element.value === newVal;
 						}));
 						done();
 					} else {
@@ -347,24 +287,14 @@ describe('Commands Tests', () => {
 		});
 
 		it('should return true when changing a datasource entry value to an empty string', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
 			const oldLen: number = dvConfig.spec.env.length;
 			const newVal: string = '';
-			editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, dsConfig, f, eName, newVal)
+			editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, dsConfig, vdbFile, entryName, newVal)
 				.then( (success) => {
 					if (success) {
 						dvConfig.spec.env.length.should.equal(oldLen);
 						should.exist(dvConfig.spec.env.find( (element) => {
-							return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, eName) && element.value === newVal;
+							return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, entryName) && element.value === newVal;
 						}));
 						done();
 					} else {
@@ -377,18 +307,8 @@ describe('Commands Tests', () => {
 		});
 
 		it('should return false when changing a datasource entry with an invalid model', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
 			const newVal: string = '';
-			editDSEntryCommand.handleDataSourceEntryEdit(undefined, dsConfig, f, eName, newVal)
+			editDSEntryCommand.handleDataSourceEntryEdit(undefined, dsConfig, vdbFile, entryName, newVal)
 				.then( (success) => {
 					if (success) {
 						done(new Error('Execution of the Edit DataSource command returned true, but should not'));
@@ -402,18 +322,8 @@ describe('Commands Tests', () => {
 		});
 
 		it('should return false when changing a datasource entry with an invalid datasource config', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
 			const newVal: string = '';
-			editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, undefined, f, eName, newVal)
+			editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, undefined, vdbFile, entryName, newVal)
 				.then( (success) => {
 					if (success) {
 						done(new Error('Execution of the Edit DataSource command returned true, but should not'));
@@ -427,18 +337,8 @@ describe('Commands Tests', () => {
 		});
 
 		it('should return false when changing a datasource entry with an file', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
 			const newVal: string = '';
-			editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, dsConfig, undefined, eName, newVal)
+			editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, dsConfig, undefined, entryName, newVal)
 				.then( (success) => {
 					if (success) {
 						done(new Error('Execution of the Edit DataSource command returned true, but should not'));
@@ -452,18 +352,8 @@ describe('Commands Tests', () => {
 		});
 
 		it('should return false when changing a datasource entry with an invalid key', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
 			const newVal: string = '';
-			editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, dsConfig, f, undefined, newVal)
+			editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, dsConfig, vdbFile, undefined, newVal)
 				.then( (success) => {
 					if (success) {
 						done(new Error('Execution of the Edit DataSource command returned true, but should not'));
@@ -477,18 +367,8 @@ describe('Commands Tests', () => {
 		});
 
 		it('should return false when changing a datasource entry with a not existing key', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
 			const newVal: string = '';
-			editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, dsConfig, f, 'NOT_EXISTING', newVal)
+			editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, dsConfig, vdbFile, 'NOT_EXISTING', newVal)
 				.then( (success) => {
 					if (success) {
 						done(new Error('Execution of the Edit DataSource command returned true, but should not'));
@@ -502,17 +382,7 @@ describe('Commands Tests', () => {
 		});
 
 		it('should return false when changing a datasource entry with an invalid value', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
-			editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, dsConfig, f, eName, undefined)
+			editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, dsConfig, vdbFile, entryName, undefined)
 				.then( (success) => {
 					if (success) {
 						done(new Error('Execution of the Edit DataSource command returned true, but should not'));
@@ -527,40 +397,40 @@ describe('Commands Tests', () => {
 	});
 
 	context('Delete DataSource Entry', () => {
-		const eName: string = 'NEWKEY';
-		const eValue: string = 'NEWVALUE';
+		const entryName: string = 'NEWKEY';
+		const entryValue: string = 'NEWVALUE';
+
+		let dvConfig: IDVConfig;
+		let dsConfig: IDataSourceConfig;
 
 		beforeEach( (done) => {
-			createVDBCommand.handleVDBCreation(p, name, templFolder)
+			createVDBCommand.handleVDBCreation(workspacePath, name, templateFolder)
 			.then( (createdVDB) => {
 				if (createdVDB) {
-					f = path.join(p, `${name}.yaml`);
-					fs.existsSync(f).should.equal(true);
-					const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-					createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, f)
+					vdbFile = path.join(workspacePath, `${name}.yaml`);
+					fs.existsSync(vdbFile).should.equal(true);
+					dvConfig = utils.loadModelFromFile(vdbFile);
+					createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, vdbFile)
 						.then( (createdDS) => {
 							if (createdDS) {
-								const dvConfig2: IDVConfig = utils.loadModelFromFile(f);
+								const dvConfig2: IDVConfig = utils.loadModelFromFile(vdbFile);
 								dvConfig2.should.deep.equal(dvConfig);
 								dvConfig2.spec.env.length.should.deep.equal(mongoTempl.entries.size);
 
-								const dsConfig: IDataSourceConfig = {
-									name: dsName,
-									type: mongoDSType,
-									entries: new Map()
-								};
-								dvConfig.spec.env.forEach( (element: IEnv) => {
-									const key: string = element.name.slice(prefix.length+1);
-									dsConfig.entries.set(key, element.value);
-								});
+								dvConfig = utils.loadModelFromFile(vdbFile);
+								dsConfig = prepareDataSource(dvConfig, dsName, mongoDSType);
+
 								const oldLen: number = dvConfig.spec.env.length;
-								createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, f, eName, eValue)
+								createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, entryName, entryValue)
 									.then( (created) => {
 										if (created) {
 											dvConfig.spec.env.length.should.equal(oldLen+1);
 											should.exist(dvConfig.spec.env.find( (element) => {
-												return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, eName) && element.value === eValue;
+												return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, entryName) && element.value === entryValue;
 											}));
+											dvConfig = utils.loadModelFromFile(vdbFile);
+											dsConfig = prepareDataSource(dvConfig, dsName, mongoDSType);
+
 											done();
 										} else {
 											done(new Error('Execution of the Create DataSource Entry command returned false'));
@@ -586,29 +456,19 @@ describe('Commands Tests', () => {
 		});
 
 		afterEach( () => {
-			if (fs.existsSync(f)) {
-				fs.unlinkSync(f);
+			if (fs.existsSync(vdbFile)) {
+				fs.unlinkSync(vdbFile);
 			}
 		});
 
 		it('should return true when modifying a datasource entry with valid parameters', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
 			const oldLen: number = dvConfig.spec.env.length;
-			deleteDSEntryCommand.handleDataSourceEntryDeletion(dvConfig, dsConfig, f, eName)
+			deleteDSEntryCommand.handleDataSourceEntryDeletion(dvConfig, dsConfig, vdbFile, entryName)
 				.then( (success) => {
 					if (success) {
 						dvConfig.spec.env.length.should.equal(oldLen-1);
 						should.not.exist(dvConfig.spec.env.find( (element) => {
-							return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, eName);
+							return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, entryName);
 						}));
 						done();
 					} else {
@@ -621,17 +481,7 @@ describe('Commands Tests', () => {
 		});
 
 		it('should return false when deleting a datasource entry with invalid model', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
-			deleteDSEntryCommand.handleDataSourceEntryDeletion(undefined, dsConfig, f, eName)
+			deleteDSEntryCommand.handleDataSourceEntryDeletion(undefined, dsConfig, vdbFile, entryName)
 				.then( (success) => {
 					if (success) {
 						done(new Error('Execution of the Edit DataSource command returned true, but it should not'));
@@ -645,17 +495,7 @@ describe('Commands Tests', () => {
 		});
 
 		it('should return false when deleting a datasource entry with invalid datasource config', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
-			deleteDSEntryCommand.handleDataSourceEntryDeletion(dvConfig, undefined, f, eName)
+			deleteDSEntryCommand.handleDataSourceEntryDeletion(dvConfig, undefined, vdbFile, entryName)
 				.then( (success) => {
 					if (success) {
 						done(new Error('Execution of the Edit DataSource command returned true, but it should not'));
@@ -669,17 +509,7 @@ describe('Commands Tests', () => {
 		});
 
 		it('should return false when deleting a datasource entry with invalid file', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
-			deleteDSEntryCommand.handleDataSourceEntryDeletion(dvConfig, dsConfig, undefined, eName)
+			deleteDSEntryCommand.handleDataSourceEntryDeletion(dvConfig, dsConfig, undefined, entryName)
 				.then( (success) => {
 					if (success) {
 						done(new Error('Execution of the Edit DataSource command returned true, but it should not'));
@@ -693,17 +523,7 @@ describe('Commands Tests', () => {
 		});
 
 		it('should return false when deleting a datasource entry with invalid key', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
-			deleteDSEntryCommand.handleDataSourceEntryDeletion(dvConfig, dsConfig, f, undefined)
+			deleteDSEntryCommand.handleDataSourceEntryDeletion(dvConfig, dsConfig, vdbFile, undefined)
 				.then( (success) => {
 					if (success) {
 						done(new Error('Execution of the Edit DataSource command returned true, but it should not'));
@@ -717,17 +537,7 @@ describe('Commands Tests', () => {
 		});
 
 		it('should return false when deleting a datasource entry with not existing key', (done) => {
-			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			const dsConfig: IDataSourceConfig = {
-				name: dsName,
-				type: mongoDSType,
-				entries: new Map()
-			};
-			dvConfig.spec.env.forEach( (element: IEnv) => {
-				const key: string = element.name.slice(prefix.length+1);
-				dsConfig.entries.set(key, element.value);
-			});
-			deleteDSEntryCommand.handleDataSourceEntryDeletion(dvConfig, dsConfig, f, 'NOT_EXISTING')
+			deleteDSEntryCommand.handleDataSourceEntryDeletion(dvConfig, dsConfig, vdbFile, 'NOT_EXISTING')
 				.then( (success) => {
 					if (success) {
 						done(new Error('Execution of the Edit DataSource command returned true, but it should not'));

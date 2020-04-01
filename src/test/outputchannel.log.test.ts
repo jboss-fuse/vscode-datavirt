@@ -23,7 +23,6 @@ import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 
 chai.use(sinonChai);
-const should = chai.should();
 
 describe('Extension OutputChannel Logger', () => {
 	let windowSpy: sinon.SinonSpy;
