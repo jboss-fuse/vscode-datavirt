@@ -104,7 +104,7 @@ describe('Utils', () => {
 		it('should replace the name of a datasource template with the given name', () => {
 			const newName: string = 'NEWNAME';
 			extension.fillDataTypes();
-			let dsConfig: IDataSourceConfig = extension.DATASOURCE_TYPES.get('SpringBoot');
+			let dsConfig: IDataSourceConfig = extension.DATASOURCE_TYPES.get('Spring Boot');
 			should.exist(dsConfig);
 			dsConfig = utils.replaceTemplateName(dsConfig, newName, extension.TEMPLATE_NAME);
 			dsConfig.type.should.deep.equal('SPRING_DATASOURCE');
@@ -123,7 +123,7 @@ describe('Utils', () => {
 		it('should return undefined if handing over an undefined name parameter', () => {
 			const newName: string = undefined;
 			extension.fillDataTypes();
-			let dsConfig: IDataSourceConfig = extension.DATASOURCE_TYPES.get('SpringBoot');
+			let dsConfig: IDataSourceConfig = extension.DATASOURCE_TYPES.get('Spring Boot');
 			should.exist(dsConfig);
 			dsConfig = utils.replaceTemplateName(dsConfig, newName, extension.TEMPLATE_NAME);
 			should.not.exist(dsConfig);
@@ -132,7 +132,7 @@ describe('Utils', () => {
 		it('should return undefined if handing over an undefined template name placeholder parameter', () => {
 			const newName: string = 'NEWNAME';
 			extension.fillDataTypes();
-			let dsConfig: IDataSourceConfig = extension.DATASOURCE_TYPES.get('SpringBoot');
+			let dsConfig: IDataSourceConfig = extension.DATASOURCE_TYPES.get('Spring Boot');
 			should.exist(dsConfig);
 			dsConfig = utils.replaceTemplateName(dsConfig, newName, undefined);
 			should.not.exist(dsConfig);
