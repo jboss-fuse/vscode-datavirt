@@ -211,7 +211,7 @@ describe('Commands Tests', () => {
 
 		it('should delete a datasource definition inside a VDB when handing over valid parameters', (done) => {
 			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			deleteDSCommand.handleDataSourceDeletion(prefix, dvConfig, f)
+			deleteDSCommand.handleDataSourceDeletion(dsName, prefix, dvConfig, f)
 				.then( (deletedDS) => {
 					if (deletedDS) {
 						dvConfig.spec.env.length.should.equal(0);
@@ -229,7 +229,7 @@ describe('Commands Tests', () => {
 
 		it('should not delete a datasource definition when handing over invalid prefix', (done) => {
 			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			deleteDSCommand.handleDataSourceDeletion(undefined, dvConfig, f)
+			deleteDSCommand.handleDataSourceDeletion(dsName,undefined, dvConfig, f)
 				.then( (deletedDS) => {
 					if (deletedDS) {
 						done(new Error('Execution of the Delete DataSource command returned true, but it should not'));
@@ -243,7 +243,7 @@ describe('Commands Tests', () => {
 		});
 
 		it('should not delete a datasource definition when handing over invalid model', (done) => {
-			deleteDSCommand.handleDataSourceDeletion(prefix, undefined, f)
+			deleteDSCommand.handleDataSourceDeletion(dsName,prefix, undefined, f)
 				.then( (deletedDS) => {
 					if (deletedDS) {
 						done(new Error('Execution of the Delete DataSource command returned true, but it should not'));
@@ -258,7 +258,7 @@ describe('Commands Tests', () => {
 
 		it('should not delete a datasource definition when handing over invalid file', (done) => {
 			const dvConfig: IDVConfig = utils.loadModelFromFile(f);
-			deleteDSCommand.handleDataSourceDeletion(prefix, dvConfig, undefined)
+			deleteDSCommand.handleDataSourceDeletion(dsName,prefix, dvConfig, undefined)
 				.then( (deletedDS) => {
 					if (deletedDS) {
 						done(new Error('Execution of the Delete DataSource command returned true, but it should not'));
