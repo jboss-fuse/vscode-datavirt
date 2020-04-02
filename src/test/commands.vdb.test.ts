@@ -54,47 +54,20 @@ describe('Commands Tests', () => {
 			}
 		});
 
-		it('should generate a valid VDB file when handing over valid parameters', (done) => {
-			createVDBCommand.handleVDBCreation(workspacePath, name, templateFolder)
-				.then( (success) => {
-					if (success) {
-						fs.existsSync(vdbFile).should.equal(true);
-						done();
-					} else {
-						done(new Error('Execution of the command returned false'));
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
+		it('should generate a valid VDB file when handing over valid parameters', async () => {
+			const success = await createVDBCommand.handleVDBCreation(workspacePath, name, templateFolder);
+			should.equal(true, success, 'Execution of the createVDBCommand returned false');
+			fs.existsSync(vdbFile).should.equal(true);
 		});
 
-		it('should not generate a VDB file when handing over invalid file name', (done) => {
-			createVDBCommand.handleVDBCreation(workspacePath, undefined, templateFolder)
-				.then( (success) => {
-					if (success) {
-						done(new Error('Execution of the command returned true, but should not'));
-					} else {
-						done();
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
+		it('should not generate a VDB file when handing over invalid file name', async () => {
+			const success = await createVDBCommand.handleVDBCreation(workspacePath, undefined, templateFolder);
+			should.equal(false, success, 'Execution of the command returned true, but should not');
 		});
 
-		it('should not generate a VDB file when handing over invalid folder name', (done) => {
-			createVDBCommand.handleVDBCreation(undefined, name, templateFolder)
-				.then( (success) => {
-					if (success) {
-						done(new Error('Execution of the command returned true, but should not'));
-					} else {
-						done();
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
+		it('should not generate a VDB file when handing over invalid folder name', async () => {
+			const success = await createVDBCommand.handleVDBCreation(undefined, name, templateFolder);
+			should.equal(false, success, 'Execution of the command returned true, but should not');
 		});
 	});
 });

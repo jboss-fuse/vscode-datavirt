@@ -43,6 +43,30 @@ describe('Commands Tests', () => {
 	let templateFolder: string;
 	let dvConfig: IDVConfig;
 
+	function cleanupVDB(): void {
+		if (vdbFile && fs.existsSync(vdbFile)) {
+			fs.unlinkSync(vdbFile);
+		}
+	}
+
+	async function createVDB() {
+		const createdVDB = await createVDBCommand.handleVDBCreation(workspacePath, name, templateFolder);
+		should.equal(true, createdVDB, 'Execution of the command Create VDB returned false');
+		vdbFile = path.join(workspacePath, `${name}.yaml`);
+		fs.existsSync(vdbFile).should.equal(true);
+		dvConfig = utils.loadModelFromFile(vdbFile);
+	}
+
+	async function createDataSource() {
+		const createdDS = await createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, vdbFile);
+		should.equal(true, createdDS, 'Execution of the Create DataSource command returned false');
+
+		const dvConfig2: IDVConfig = utils.loadModelFromFile(vdbFile);
+		dvConfig2.should.deep.equal(dvConfig);
+		dvConfig2.spec.env.length.should.deep.equal(mongoTemplate.entries.size);
+		dvConfig = utils.loadModelFromFile(vdbFile);
+	}
+
 	before(() => {
 		extension.fillDataTypes();
 		workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
@@ -53,233 +77,93 @@ describe('Commands Tests', () => {
 
 	context('Create DataSource', () => {
 
-		beforeEach( (done) => {
-			createVDBCommand.handleVDBCreation(workspacePath, name, templateFolder)
-			.then( (createdVDB) => {
-				if (createdVDB) {
-					vdbFile = path.join(workspacePath, `${name}.yaml`);
-					fs.existsSync(vdbFile).should.equal(true);
-					dvConfig = utils.loadModelFromFile(vdbFile);
-					done();
-				} else {
-					done(new Error('Execution of the command Create VDB returned false'));
-				}
-			})
-			.catch( (err) => {
-				done(err);
-			});
+		beforeEach( async () => {
+			await createVDB();
 		});
 
 		afterEach( () => {
-			if (fs.existsSync(vdbFile)) {
-				fs.unlinkSync(vdbFile);
-			}
+			cleanupVDB();
 		});
 
-		it('should generate a valid datasource definition inside a VDB when handing over valid parameters', (done) => {
-			createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, vdbFile)
-				.then( (createdDS) => {
-					if (createdDS) {
-						const dvConfig2: IDVConfig = utils.loadModelFromFile(vdbFile);
-						dvConfig2.should.deep.equal(dvConfig);
-						dvConfig2.spec.env.length.should.deep.equal(mongoTemplate.entries.size);
-						done();
-					} else {
-						done(new Error('Execution of the Create DataSource command returned false'));
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
+		it('should generate a valid datasource definition inside a VDB when handing over valid parameters', async () => {
+			const createdDS = await createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, vdbFile);
+			should.equal(true, createdDS, 'Execution of the Create DataSource command returned false');
+			const dvConfig2: IDVConfig = utils.loadModelFromFile(vdbFile);
+			dvConfig2.should.deep.equal(dvConfig);
+			dvConfig2.spec.env.length.should.deep.equal(mongoTemplate.entries.size);
 		});
 
-		it('should not generate a datasource definition inside a VDB when handing invalid name', (done) => {
-			createDSCommand.handleDataSourceCreation(undefined, dsType, dvConfig, vdbFile)
-				.then( (createdDS) => {
-					if (createdDS) {
-						done(new Error('Execution of the Create DataSource command returned true, but should not'));
-					} else {
-						done();
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
+		it('should not generate a datasource definition inside a VDB when handing invalid name', async () => {
+			const createdDS = await createDSCommand.handleDataSourceCreation(undefined, dsType, dvConfig, vdbFile);
+			should.equal(false, createdDS, 'Execution of the Create DataSource command returned true, but should not');
 		});
 
-		it('should not generate a datasource definition inside a VDB when handing invalid type', (done) => {
-			createDSCommand.handleDataSourceCreation(dsName, undefined, dvConfig, vdbFile)
-				.then( (createdDS) => {
-					if (createdDS) {
-						done(new Error('Execution of the Create DataSource command returned true, but should not'));
-					} else {
-						done();
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
+		it('should not generate a datasource definition inside a VDB when handing invalid type', async () => {
+			const createdDS = await createDSCommand.handleDataSourceCreation(dsName, undefined, dvConfig, vdbFile);
+			should.equal(false, createdDS, 'Execution of the Create DataSource command returned true, but should not');
 		});
 
-		it('should not generate a datasource definition inside a VDB when handing invalid model', (done) => {
-			createDSCommand.handleDataSourceCreation(dsName, dsType, undefined, vdbFile)
-				.then( (createdDS) => {
-					if (createdDS) {
-						done(new Error('Execution of the Create DataSource command returned true, but should not'));
-					} else {
-						done();
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
+		it('should not generate a datasource definition inside a VDB when handing invalid model', async () => {
+			const createdDS = await createDSCommand.handleDataSourceCreation(dsName, dsType, undefined, vdbFile);
+			should.equal(false, createdDS, 'Execution of the Create DataSource command returned true, but should not');
 		});
 
-		it('should not generate a datasource definition inside a VDB when handing invalid file', (done) => {
-			createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, undefined)
-				.then( (createdDS) => {
-					if (createdDS) {
-						done(new Error('Execution of the Create DataSource command returned true, but should not'));
-					} else {
-						done();
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
+		it('should not generate a datasource definition inside a VDB when handing invalid file', async () => {
+			const createdDS = await createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, undefined);
+			should.equal(false, createdDS, 'Execution of the Create DataSource command returned true, but should not');
 		});
 	});
 
 	context('Delete DataSource', () => {
 		const prefix: string = 'SPRING_TEIID_DATA_MONGODB_MYMONGODB';
 
-		beforeEach( (done) => {
-			createVDBCommand.handleVDBCreation(workspacePath, name, templateFolder)
-			.then( (createdVDB) => {
-				if (createdVDB) {
-					vdbFile = path.join(workspacePath, `${name}.yaml`);
-					fs.existsSync(vdbFile).should.equal(true);
-					dvConfig = utils.loadModelFromFile(vdbFile);
-					createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, vdbFile)
-						.then( (createdDS) => {
-							if (createdDS) {
-								const dvConfig2: IDVConfig = utils.loadModelFromFile(vdbFile);
-								dvConfig2.should.deep.equal(dvConfig);
-								dvConfig2.spec.env.length.should.deep.equal(mongoTemplate.entries.size);
-								dvConfig = utils.loadModelFromFile(vdbFile);
-								done();
-							} else {
-								done(new Error('Execution of the Create DataSource command returned false'));
-							}
-						})
-						.catch( (err) => {
-							done(err);
-						});
-				} else {
-					done(new Error('Execution of the command Create VDB returned false'));
-				}
-			})
-			.catch( (err) => {
-				done(err);
-			});
+		beforeEach( async () => {
+			await createVDB();
+			await createDataSource();
 		});
 
 		afterEach( () => {
-			if (fs.existsSync(vdbFile)) {
-				fs.unlinkSync(vdbFile);
-			}
+			cleanupVDB();
 		});
 
-		it('should delete a datasource definition inside a VDB when handing over valid parameters', (done) => {
-			deleteDSCommand.handleDataSourceDeletion(dsName, prefix, dvConfig, vdbFile)
-				.then( (deletedDS) => {
-					if (deletedDS) {
-						dvConfig.spec.env.length.should.equal(0);
-						const dvConfig2: IDVConfig = utils.loadModelFromFile(vdbFile);
-						dvConfig2.spec.env.length.should.equal(0);
-						done();
-					} else {
-						done(new Error('Execution of the Delete DataSource command returned false'));
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
+		it('should delete a datasource definition inside a VDB when handing over valid parameters', async () => {
+			const deletedDS = await deleteDSCommand.handleDataSourceDeletion(dsName, prefix, dvConfig, vdbFile);
+			should.equal(true, deletedDS, 'Execution of the Delete DataSource command returned false');
+			dvConfig.spec.env.length.should.equal(0);
+			const dvConfig2: IDVConfig = utils.loadModelFromFile(vdbFile);
+			dvConfig2.spec.env.length.should.equal(0);
 		});
 
-		it('should not delete a datasource definition when handing over invalid prefix', (done) => {
-			deleteDSCommand.handleDataSourceDeletion(dsName,undefined, dvConfig, vdbFile)
-				.then( (deletedDS) => {
-					if (deletedDS) {
-						done(new Error('Execution of the Delete DataSource command returned true, but it should not'));
-					} else {
-						done();
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
+		it('should not delete a datasource definition when handing over invalid prefix', async () => {
+			const deletedDS = await deleteDSCommand.handleDataSourceDeletion(dsName,undefined, dvConfig, vdbFile);
+			should.equal(false, deletedDS, 'Execution of the Delete DataSource command returned true, but it should not');
 		});
 
-		it('should not delete a datasource definition when handing over invalid model', (done) => {
-			deleteDSCommand.handleDataSourceDeletion(dsName,prefix, undefined, vdbFile)
-				.then( (deletedDS) => {
-					if (deletedDS) {
-						done(new Error('Execution of the Delete DataSource command returned true, but it should not'));
-					} else {
-						done();
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
+		it('should not delete a datasource definition when handing over invalid model', async () => {
+			const deletedDS = await deleteDSCommand.handleDataSourceDeletion(dsName,prefix, undefined, vdbFile);
+			should.equal(false, deletedDS, 'Execution of the Delete DataSource command returned true, but it should not');
 		});
 
-		it('should not delete a datasource definition when handing over invalid file', (done) => {
-			deleteDSCommand.handleDataSourceDeletion(dsName,prefix, dvConfig, undefined)
-				.then( (deletedDS) => {
-					if (deletedDS) {
-						done(new Error('Execution of the Delete DataSource command returned true, but it should not'));
-					} else {
-						done();
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
+		it('should not delete a datasource definition when handing over invalid file', async () => {
+			const deletedDS = await deleteDSCommand.handleDataSourceDeletion(dsName,prefix, dvConfig, undefined);
+			should.equal(false, deletedDS, 'Execution of the Delete DataSource command returned true, but it should not');
 		});
 
-		it('should not delete all datasources when deleting 1 of 2 datasources (regression test #45)', (done) => {
+		it('should not delete all datasources when deleting 1 of 2 datasources (regression test #45)', async () => {
 			const newDSName = 'SOURCE2';
 			const prefix2: string = 'SPRING_TEIID_DATA_MONGODB_SOURCE2';
 
-			createDSCommand.handleDataSourceCreation(newDSName, dsType, dvConfig, vdbFile)
-				.then( (createdDS) => {
-					if (createdDS) {
-						dvConfig = utils.loadModelFromFile(vdbFile);
-						dvConfig.spec.env.length.should.deep.equal(mongoTemplate.entries.size*2);
+			const createdDS = await createDSCommand.handleDataSourceCreation(newDSName, dsType, dvConfig, vdbFile);
+			should.equal(true, createdDS, 'Execution of the Create DataSource command returned false');
 
-						deleteDSCommand.handleDataSourceDeletion(newDSName, prefix2, dvConfig, vdbFile)
-						.then( (deletedDS) => {
-							if (deletedDS) {
-								dvConfig = utils.loadModelFromFile(vdbFile);
-								dvConfig.spec.env.length.should.deep.equal(mongoTemplate.entries.size);
+			dvConfig = utils.loadModelFromFile(vdbFile);
+			dvConfig.spec.env.length.should.deep.equal(mongoTemplate.entries.size*2);
 
-								done();
-							} else {
-								done(new Error('Execution of the Delete DataSource command returned false'));
-							}
-						})
-						.catch( (err) => {
-							done(err);
-						});
-					} else {
-						done(new Error('Creation of a second data source returned false'));
-					}
-				})
-				.catch( (err) => {
-					done(err);
-				});
+			const deletedDS = await deleteDSCommand.handleDataSourceDeletion(newDSName, prefix2, dvConfig, vdbFile);
+			should.equal(true, deletedDS, 'Execution of the Delete DataSource command returned false');
+
+			dvConfig = utils.loadModelFromFile(vdbFile);
+			dvConfig.spec.env.length.should.deep.equal(mongoTemplate.entries.size);
 		});
 	});
 });
