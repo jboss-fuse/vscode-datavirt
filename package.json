@@ -80,6 +80,32 @@
 			]
 		},
 		"menus": {
+			"commandPalette": [
+				{
+					"command": "datavirt.create.datasource",
+					"when": "false"
+				},
+				{
+					"command": "datavirt.delete.datasource",
+					"when": "false"
+				},
+				{
+					"command": "datavirt.create.datasourceentry",
+					"when": "false"
+				},
+				{
+					"command": "datavirt.edit.datasourceentry",
+					"when": "false"
+				},
+				{
+					"command": "datavirt.delete.datasourceentry",
+					"when": "false"
+				},
+				{
+					"command": "datavirt.edit.schema",
+					"when": "false"
+				}
+			],
 			"view/title": [
 				{
 					"group": "dv",
