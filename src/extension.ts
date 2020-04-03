@@ -49,7 +49,8 @@ export let fileToEditor: Map<string, vscode.TextEditor> = new Map();
 export const DATASOURCE_TYPES: Map<string, IDataSourceConfig> = new Map();
 
 let dataVirtExtensionOutputChannel: vscode.OutputChannel;
-let dataVirtTreeView : vscode.TreeView<vscode.TreeItem>;
+let dataVirtTreeView: vscode.TreeView<vscode.TreeItem>;
+let fileSystemWatcher: vscode.FileSystemWatcher;
 
 export function activate(context: vscode.ExtensionContext) {
 	fillDataTypes();
@@ -60,6 +61,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	dataVirtProvider = new DataVirtNodeProvider(vscode.workspace.rootPath, context);
 	creatDataVirtView();
+
+	startFileSystemWatcher();
 
 	vscode.workspace.onDidChangeWorkspaceFolders( () => {
 		if (vscode.workspace.workspaceFolders && vscode.workspace.workspaceFolders.length > 0) {
@@ -93,6 +96,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 export function deactivate(context: vscode.ExtensionContext) {
 	disposeExtensionOutputChannel();
+	fileSystemWatcher.dispose();
 }
 
 export function log(text) {
@@ -137,6 +141,19 @@ function handleVisibleEditorChanges(event) {
 	}
 	fileToEditor.delete(k);
 	fileToNode.delete(k);
+}
+
+function startFileSystemWatcher(): void {
+	fileSystemWatcher = vscode.workspace.createFileSystemWatcher('**/*.yaml');
+	fileSystemWatcher.onDidCreate( () => {
+		dataVirtProvider.refresh();
+	});
+	fileSystemWatcher.onDidDelete( () => {
+		dataVirtProvider.refresh();
+	});
+	fileSystemWatcher.onDidChange( () => {
+		dataVirtProvider.refresh();
+	});
 }
 
 export function fillDataTypes(): void {

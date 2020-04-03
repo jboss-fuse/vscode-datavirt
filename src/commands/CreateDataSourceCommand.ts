@@ -28,7 +28,6 @@ export function createDataSourceCommand(ctx) {
 					if (dvConfig) {
 						handleDataSourceCreation(dsName, dsType, dvConfig, ctx.getProject().getFile())
 							.then( (success: boolean) => {
-								extension.dataVirtProvider.refresh();
 								if (success) {
 									vscode.window.showInformationMessage(`New datasource ${dsName} has been created successfully...`);
 								} else {

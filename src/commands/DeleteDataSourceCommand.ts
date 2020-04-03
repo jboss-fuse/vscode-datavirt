@@ -26,7 +26,6 @@ export function deleteDataSourceCommand(ctx: DataSourceTreeNode): void {
 		const prefix: string = utils.generateDataSourceConfigPrefix(dsNode.dsConfig).toUpperCase();
 		handleDataSourceDeletion(dsNode.label, prefix, dsNode.getProject().dvConfig, dsNode.getProject().file)
 		.then( (success: boolean) => {
-			extension.dataVirtProvider.refresh();
 			if (success) {
 				vscode.window.showInformationMessage(`DataSource has been deleted...`);
 			} else {

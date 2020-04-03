@@ -26,7 +26,6 @@ export function editDataSourceEntryCommand(ctx) {
 		.then( ( newValue: string) => {
 			handleDataSourceEntryEdit(item.getProject().dvConfig, item.getParent().dsConfig, item.getProject().getFile(), item.getKey(), newValue)
 				.then( (success: boolean) => {
-					extension.dataVirtProvider.refresh();
 					if (success) {
 						vscode.window.showInformationMessage(`DataSource entry has been modified...`);
 					} else {

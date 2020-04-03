@@ -29,7 +29,6 @@ export function deleteDataSourceEntryCommand(ctx) {
 
 	handleDataSourceEntryDeletion(dvConfig, dsConfig, file, key)
 		.then( (success: boolean) => {
-			extension.dataVirtProvider.refresh();
 			if (success) {
 				vscode.window.showInformationMessage(`DataSource entry has been deleted...`);
 			} else {

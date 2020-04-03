@@ -70,7 +70,6 @@ export function handleSaveDDL(event: vscode.TextDocumentWillSaveEvent): Promise<
 		if (sNode) {
 			sNode.getProject().dvConfig.spec.build.source.ddl = ddl;
 			utils.saveModelToFile(sNode.getProject().dvConfig, sNode.getProject().getFile());
-			extension.dataVirtProvider.refresh();
 			resolve();
 			return;
 		}

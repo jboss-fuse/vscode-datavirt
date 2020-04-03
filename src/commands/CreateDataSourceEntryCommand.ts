@@ -30,7 +30,6 @@ export function createDataSourceEntryCommand(ctx) {
 					const file: string = ds.getProject().file;
 					handleDataSourceEntryCreation(yaml, ds.dsConfig, file, entryName, entryValue)
 						.then( (success: boolean) => {
-							extension.dataVirtProvider.refresh();
 							if (success) {
 								vscode.window.showInformationMessage(`New datasource entry ${entryName} has been created successfully...`);
 							} else {
