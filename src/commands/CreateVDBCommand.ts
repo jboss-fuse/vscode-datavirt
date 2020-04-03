@@ -35,7 +35,6 @@ export function createVDBCommand() {
 			.then( (fileName: string) => {
 				handleVDBCreation(vscode.workspace.workspaceFolders[0].uri.fsPath, fileName)
 					.then( (success: boolean) => {
-						extension.dataVirtProvider.refresh();
 						if (success) {
 							const node: SchemaTreeNode = extension.dataVirtProvider.getSchemaTreeNodeOfProject(fileName);
 							if (node) {
