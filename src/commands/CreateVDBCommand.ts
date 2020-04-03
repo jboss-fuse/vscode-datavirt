@@ -55,7 +55,7 @@ export function createVDBCommand() {
 }
 
 export function handleVDBCreation(filepath: string, fileName: string, templateFolder?: string): Promise<boolean> {
-	return new Promise<boolean>( (resolve, reject) => {
+	return new Promise<boolean>( (resolve) => {
 		if (fileName && fileName.length>0) {
 			try {
 				const templatePath = templateFolder ? path.join(templateFolder, 'vdb_template.yaml') : path.join(extension.pluginResourcesPath, 'vdb_template.yaml');
@@ -63,7 +63,7 @@ export function handleVDBCreation(filepath: string, fileName: string, templateFo
 				fs.copyFileSync(templatePath, targetFile);
 				const yamlDoc:IDVConfig = utils.loadModelFromFile(targetFile);
 				yamlDoc.metadata.name = fileName;
-				yamlDoc.spec.build.source.ddl = utils.replaceDDLNamePlaceholder(yamlDoc.spec.build.source.ddl, extension.DDL_NAME_PLACEHOLDER, fileName.toUpperCase());
+				yamlDoc.spec.build.source.ddl = utils.replaceDDLNamePlaceholder(yamlDoc.spec.build.source.ddl, extension.DDL_NAME_PLACEHOLDER, fileName);
 				utils.saveModelToFile(yamlDoc, targetFile);
 				resolve(true);
 			} catch (error) {
