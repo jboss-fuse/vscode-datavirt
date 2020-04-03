@@ -20,9 +20,9 @@ spec:
   build:
     source:
       ddl: >
-        CREATE DATABASE {name} OPTIONS (ANNOTATION 'provide your description
+        CREATE DATABASE example OPTIONS (ANNOTATION 'provide your description
         here..');
-        USE DATABASE {name};
-        CREATE VIRTUAL SCHEMA {name};
-        SET SCHEMA {name};
+        USE DATABASE example;
+        CREATE VIRTUAL SCHEMA example;
+        SET SCHEMA example;
         CREATE VIEW SAMPLE AS SELECT 1 as valid;
