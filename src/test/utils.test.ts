@@ -111,6 +111,41 @@ describe('Utils', () => {
 			dsConfig.name.should.deep.equal(newName);
 		});
 
+		it('should replace the name inside VDB DDL template with the given name', () => {
+			const newName: string = 'NEWNAME';
+			const ddl_old: string = `CREATE DATABASE $!DUMMY!$ OPTIONS (ANNOTATION 'provide your description here..');
+			USE DATABASE $!DUMMY!$;
+
+			CREATE VIRTUAL SCHEMA $!DUMMY!$;
+			SET SCHEMA $!DUMMY!$;
+
+			CREATE VIEW SAMPLE AS SELECT 1 as valid;`;
+			const ddl_new: string = `CREATE DATABASE NEWNAME OPTIONS (ANNOTATION 'provide your description here..');
+			USE DATABASE NEWNAME;
+
+			CREATE VIRTUAL SCHEMA NEWNAME;
+			SET SCHEMA NEWNAME;
+
+			CREATE VIEW SAMPLE AS SELECT 1 as valid;`;
+			const result: string = utils.replaceDDLNamePlaceholder(ddl_old, extension.DDL_NAME_PLACEHOLDER, newName);
+			should.equal(result, ddl_new, 'Replacing of the DDL name placeholder failed.');
+		});
+
+		it('should return undefined when calling replaceDDLNamePlaceholder with undefined ddl parameter', () => {
+			const result: string = utils.replaceDDLNamePlaceholder(undefined, extension.DDL_NAME_PLACEHOLDER, 'NEWNAME');
+			should.not.exist(result);
+		});
+
+		it('should return undefined when calling replaceDDLNamePlaceholder with undefined placeholder parameter', () => {
+			const result: string = utils.replaceDDLNamePlaceholder('teststring', undefined, 'NEWNAME');
+			should.not.exist(result);
+		});
+
+		it('should return undefined when calling replaceDDLNamePlaceholder with undefined replacement parameter', () => {
+			const result: string = utils.replaceDDLNamePlaceholder('teststring', extension.DDL_NAME_PLACEHOLDER, undefined);
+			should.not.exist(result);
+		});
+
 		it('should return undefined if handing over an undefined datasource config parameter', () => {
 			const newName: string = 'NEWNAME';
 			extension.fillDataTypes();
