@@ -89,7 +89,10 @@ export function replaceTemplateName(dsConfig: IDataSourceConfig, dsName: string,
 }
 
 export function replaceDDLNamePlaceholder(ddl: string, placeholder: string, replacement: string): string {
-	return ddl.split(placeholder).join(replacement);
+	if (ddl && placeholder && replacement) {
+		return ddl.split(placeholder).join(replacement);
+	}
+	return undefined;
 }
 
 export function validateName(name: string): string {
