@@ -45,6 +45,9 @@ export function createVDBCommand() {
 						} else {
 							vscode.window.showErrorMessage(`An error occured when trying to create a new VDB...`);
 						}
+					})
+					.catch( (error) => {
+						extension.log(error);
 					});
 			});
 	} else {
@@ -67,12 +70,10 @@ export function handleVDBCreation(filepath: string, fileName: string, templateFo
 				utils.saveModelToFile(yamlDoc, targetFile);
 				resolve(true);
 			} catch (error) {
-				extension.log(error);
-				resolve(false);
+				reject(error);
 			}
 		} else {
-			extension.log('handleVDBCreation: Unable to create the VDB because no name was given...');
-			resolve(false);
+			reject(new Error('handleVDBCreation: Unable to create the VDB because no name was given...'));
 		}
 	});
 }
