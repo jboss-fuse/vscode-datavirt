@@ -113,11 +113,11 @@ describe('Utils', () => {
 
 		it('should replace the name inside VDB DDL template with the given name', () => {
 			const newName: string = 'NEWNAME';
-			const ddl_old: string = `CREATE DATABASE $!DUMMY!$ OPTIONS (ANNOTATION 'provide your description here..');
-			USE DATABASE $!DUMMY!$;
+			const ddl_old: string = `CREATE DATABASE $!VDB_NAME_PLACEHOLDER!$ OPTIONS (ANNOTATION 'provide your description here..');
+			USE DATABASE $!VDB_NAME_PLACEHOLDER!$;
 
-			CREATE VIRTUAL SCHEMA $!DUMMY!$;
-			SET SCHEMA $!DUMMY!$;
+			CREATE VIRTUAL SCHEMA $!VDB_NAME_PLACEHOLDER!$;
+			SET SCHEMA $!VDB_NAME_PLACEHOLDER!$;
 
 			CREATE VIEW SAMPLE AS SELECT 1 as valid;`;
 			const ddl_new: string = `CREATE DATABASE NEWNAME OPTIONS (ANNOTATION 'provide your description here..');

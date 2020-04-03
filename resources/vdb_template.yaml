@@ -1,18 +1,18 @@
 apiVersion: teiid.io/v1alpha1
 kind: VirtualDatabase
 metadata:
-  name: $!DUMMY!$
+  name: $!VDB_NAME_PLACEHOLDER!$
 spec:
   replicas: 1
   env:
- 
+
   build:
     source:
       ddl: |
-        CREATE DATABASE $!DUMMY!$ OPTIONS (ANNOTATION 'provide your description here..');
-        USE DATABASE $!DUMMY!$;
+        CREATE DATABASE $!VDB_NAME_PLACEHOLDER!$ OPTIONS (ANNOTATION 'provide your description here..');
+        USE DATABASE $!VDB_NAME_PLACEHOLDER!$;
 
-        CREATE VIRTUAL SCHEMA $!DUMMY!$;
-        SET SCHEMA $!DUMMY!$;
+        CREATE VIRTUAL SCHEMA $!VDB_NAME_PLACEHOLDER!$;
+        SET SCHEMA $!VDB_NAME_PLACEHOLDER!$;
 
         CREATE VIEW SAMPLE AS SELECT 1 as valid;

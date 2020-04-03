@@ -43,7 +43,7 @@ export let pluginResourcesPath: string;
 export let workspaceReady : boolean = true;
 export const DDL_FILE_EXT: string = '.ddl';
 export const TEMPLATE_NAME: string = '$!TEMPLATE!$';
-export const DDL_NAME_PLACEHOLDER: string = '$!DUMMY!$';
+export const DDL_NAME_PLACEHOLDER: string = '$!VDB_NAME_PLACEHOLDER!$';
 export const DATASOURCE_TYPES: Map<string, IDataSourceConfig> = new Map();
 
 export let fileToNode: Map<string, SchemaTreeNode> = new Map();
