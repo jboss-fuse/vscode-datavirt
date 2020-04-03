@@ -22,7 +22,6 @@ import * as fs from 'fs';
 import { DataVirtNodeProvider } from './model/tree/DataVirtNodeProvider';
 import { IDataSourceConfig } from './model/DataVirtModel';
 import { SchemaTreeNode } from './model/tree/SchemaTreeNode';
-import { SpringDataSource } from './model/datasources/SpringDataSource';
 import { MongoDBDataSource } from './model/datasources/MongoDBDataSource';
 import { SalesForceDataSource } from './model/datasources/SalesForceDataSource';
 import { GoogleSheetsDataSource } from './model/datasources/GoogleSheetsDataSource';
@@ -140,7 +139,6 @@ function handleVisibleEditorChanges(event) {
 }
 
 export function fillDataTypes(): void {
-	DATASOURCE_TYPES.set('Spring Boot', new SpringDataSource(TEMPLATE_NAME));
 	DATASOURCE_TYPES.set('MongoDB', new MongoDBDataSource(TEMPLATE_NAME));
 	DATASOURCE_TYPES.set('Salesforce', new SalesForceDataSource(TEMPLATE_NAME));
 	DATASOURCE_TYPES.set('Google Sheets', new GoogleSheetsDataSource(TEMPLATE_NAME));
