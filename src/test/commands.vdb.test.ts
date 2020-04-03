@@ -61,13 +61,19 @@ describe('Commands Tests', () => {
 		});
 
 		it('should not generate a VDB file when handing over invalid file name', async () => {
-			const success = await createVDBCommand.handleVDBCreation(workspacePath, undefined, templateFolder);
-			should.equal(false, success, 'Execution of the command returned true, but should not');
+			try {
+				await createVDBCommand.handleVDBCreation(workspacePath, undefined, templateFolder);
+			} catch (error) {
+				should.exist(error);
+			}
 		});
 
 		it('should not generate a VDB file when handing over invalid folder name', async () => {
-			const success = await createVDBCommand.handleVDBCreation(undefined, name, templateFolder);
-			should.equal(false, success, 'Execution of the command returned true, but should not');
+			try {
+				await createVDBCommand.handleVDBCreation(undefined, name, templateFolder);
+			} catch (error) {
+				should.exist(error);
+			}
 		});
 	});
 });
