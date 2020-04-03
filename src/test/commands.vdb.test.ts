@@ -22,6 +22,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as extension from '../extension';
+import * as utils from '../utils';
 import * as createVDBCommand from '../commands/CreateVDBCommand';
 
 chai.use(sinonChai);
@@ -58,6 +59,10 @@ describe('Commands Tests', () => {
 			const success = await createVDBCommand.handleVDBCreation(workspacePath, name, templateFolder);
 			should.equal(true, success, 'Execution of the createVDBCommand returned false');
 			fs.existsSync(vdbFile).should.equal(true);
+			const dvConfig = utils.loadModelFromFile(vdbFile);
+			should.exist(dvConfig);
+			should.equal(dvConfig.metadata.name, name);
+			dvConfig.spec.build.source.ddl.should.contain(name);
 		});
 
 		it('should not generate a VDB file when handing over invalid file name', async () => {

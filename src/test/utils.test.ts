@@ -102,7 +102,7 @@ describe('Utils', () => {
 
 	context('Replace the name of a template', () => {
 		it('should replace the name of a datasource template with the given name', () => {
-			const newName: string = 'NEWNAME';
+			const newName: string = 'newname';
 			extension.fillDataTypes();
 			let dsConfig: IDataSourceConfig = extension.DATASOURCE_TYPES.get('Spring Boot');
 			should.exist(dsConfig);
@@ -112,7 +112,7 @@ describe('Utils', () => {
 		});
 
 		it('should replace the name inside VDB DDL template with the given name', () => {
-			const newName: string = 'NEWNAME';
+			const newName: string = 'newname';
 			const ddl_old: string = `CREATE DATABASE $!VDB_NAME_PLACEHOLDER!$ OPTIONS (ANNOTATION 'provide your description here..');
 			USE DATABASE $!VDB_NAME_PLACEHOLDER!$;
 
@@ -120,11 +120,11 @@ describe('Utils', () => {
 			SET SCHEMA $!VDB_NAME_PLACEHOLDER!$;
 
 			CREATE VIEW SAMPLE AS SELECT 1 as valid;`;
-			const ddl_new: string = `CREATE DATABASE NEWNAME OPTIONS (ANNOTATION 'provide your description here..');
-			USE DATABASE NEWNAME;
+			const ddl_new: string = `CREATE DATABASE newname OPTIONS (ANNOTATION 'provide your description here..');
+			USE DATABASE newname;
 
-			CREATE VIRTUAL SCHEMA NEWNAME;
-			SET SCHEMA NEWNAME;
+			CREATE VIRTUAL SCHEMA newname;
+			SET SCHEMA newname;
 
 			CREATE VIEW SAMPLE AS SELECT 1 as valid;`;
 			const result: string = utils.replaceDDLNamePlaceholder(ddl_old, extension.DDL_NAME_PLACEHOLDER, newName);
@@ -132,12 +132,12 @@ describe('Utils', () => {
 		});
 
 		it('should return undefined when calling replaceDDLNamePlaceholder with undefined ddl parameter', () => {
-			const result: string = utils.replaceDDLNamePlaceholder(undefined, extension.DDL_NAME_PLACEHOLDER, 'NEWNAME');
+			const result: string = utils.replaceDDLNamePlaceholder(undefined, extension.DDL_NAME_PLACEHOLDER, 'newname');
 			should.not.exist(result);
 		});
 
 		it('should return undefined when calling replaceDDLNamePlaceholder with undefined placeholder parameter', () => {
-			const result: string = utils.replaceDDLNamePlaceholder('teststring', undefined, 'NEWNAME');
+			const result: string = utils.replaceDDLNamePlaceholder('teststring', undefined, 'newname');
 			should.not.exist(result);
 		});
 
@@ -147,7 +147,7 @@ describe('Utils', () => {
 		});
 
 		it('should return undefined if handing over an undefined datasource config parameter', () => {
-			const newName: string = 'NEWNAME';
+			const newName: string = 'newname';
 			extension.fillDataTypes();
 			let dsConfig: IDataSourceConfig;
 			should.not.exist(dsConfig);
@@ -165,7 +165,7 @@ describe('Utils', () => {
 		});
 
 		it('should return undefined if handing over an undefined template name placeholder parameter', () => {
-			const newName: string = 'NEWNAME';
+			const newName: string = 'newname';
 			extension.fillDataTypes();
 			let dsConfig: IDataSourceConfig = extension.DATASOURCE_TYPES.get('Spring Boot');
 			should.exist(dsConfig);
