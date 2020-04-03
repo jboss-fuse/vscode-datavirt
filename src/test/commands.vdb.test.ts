@@ -24,6 +24,7 @@ import * as path from 'path';
 import * as extension from '../extension';
 import * as utils from '../utils';
 import * as createVDBCommand from '../commands/CreateVDBCommand';
+import { fail } from 'assert';
 
 chai.use(sinonChai);
 const should = chai.should();
@@ -68,6 +69,7 @@ describe('Commands Tests', () => {
 		it('should not generate a VDB file when handing over invalid file name', async () => {
 			try {
 				await createVDBCommand.handleVDBCreation(workspacePath, undefined, templateFolder);
+				fail('create command did not throw exception when handing invalid name');
 			} catch (error) {
 				should.exist(error);
 			}
@@ -76,6 +78,7 @@ describe('Commands Tests', () => {
 		it('should not generate a VDB file when handing over invalid folder name', async () => {
 			try {
 				await createVDBCommand.handleVDBCreation(undefined, name, templateFolder);
+				fail('create command did not throw exception when handing invalid workspace path');
 			} catch (error) {
 				should.exist(error);
 			}
