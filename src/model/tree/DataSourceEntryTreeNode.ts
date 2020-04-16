@@ -14,31 +14,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as utils from '../../utils';
 import * as vscode from 'vscode';
 import { DVTreeItem } from './DVTreeItem';
+import { ValueFrom } from '../DataVirtModel';
 
-export class SchemaTreeNode extends DVTreeItem {
+export class DataSourceEntryTreeNode extends DVTreeItem {
 
-	ddl: string;
+	key: string;
+	value: string | ValueFrom;
 
-	constructor(label: string, ddl: string) {
-		super('dv.schema', label, vscode.TreeItemCollapsibleState.None);
-		this.ddl = ddl;
+	constructor(key: string, value: string, ref: ValueFrom) {
+		super('dv.datasourceentry', `${key}: ${utils.generateDataSourceEntryValue(key, value, ref) ? utils.generateDataSourceEntryValue(key, value, ref) : '<empty>'}`, vscode.TreeItemCollapsibleState.None);
+		this.key = key;
+		this.value = value;
 	}
 
 	getIconName(): string {
-		return 'dv_schema.svg';
+		return `dv_datasource_entry.gif`;
 	}
 
 	getToolTip(): string {
-		return `Schema: ${this.label}`;
+		return `Data Source Entry: ${this.label}`;
 	}
 
-	getDDL(): string {
-		return this.ddl;
+	getKey(): string {
+		return this.key;
 	}
 
-	setDDL(ddl: string): void {
-		this.ddl = ddl;
+	setKey(key: string): void {
+		this.key = key;
+		this.label = key;
+	}
+
+	getValue(): string | ValueFrom {
+		return this.value;
+	}
+
+	setValue(value: string): void {
+		this.value = value;
 	}
 }

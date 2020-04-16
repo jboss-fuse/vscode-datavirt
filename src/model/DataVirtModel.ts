@@ -14,38 +14,85 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export interface IDVConfig {
+export class DataVirtConfig {
 	api_version: string;
 	kind: string;
-	metadata: IMetaData;
-	spec: ISpec;
+	metadata: MetaData;
+	spec: Spec;
 }
 
-export interface IMetaData {
+export class MetaData {
 	name: string;
 }
 
-export interface ISpec {
+export class Spec {
 	replicas: number;
-	env: IEnv[];
-	build: IBuild;
+	env: Property[];
+	datasources: DataSourceConfig[];
+	build: Build;
 }
 
-export interface IDataSourceConfig {
+export class DataSourceConfig {
 	name: string;
 	type: string;
-	entries: Map<string, string>;
+	properties: Property[] = new Array();
+
+	constructor(name: string, type: string) {
+		this.name = name;
+		this.type = type;
+	}
 }
 
-export interface IEnv {
+export class ValueFrom {
+	valueFrom: SecretRef | ConfigMapRef;
+
+	constructor(ref: SecretRef | ConfigMapRef) {
+		this.valueFrom = ref;
+	}
+}
+
+export class SecretRef {
+	secretKeyRef: KeyRef;
+
+	constructor(keyRef: KeyRef) {
+		this.secretKeyRef = keyRef;
+	}
+}
+
+export class ConfigMapRef {
+	configMapKeyRef: KeyRef;
+
+	constructor(keyRef: KeyRef) {
+		this.configMapKeyRef = keyRef;
+	}
+}
+
+export class KeyRef {
 	name: string;
-	value: string;
+	key: string;
+
+	constructor(name: string, key: string) {
+		this.name = name;
+		this.key = key;
+	}
 }
 
-export interface IBuild {
-	source: ISource;
+export class Property {
+	name: string;
+	value?: string;
+	valueFrom?: ValueFrom;
+
+	constructor(name: string, value?: string, valueFrom?: ValueFrom) {
+		this.name = name;
+		if (value) this.value = value;
+		if (valueFrom) this.valueFrom = valueFrom;
+	}
 }
 
-export interface ISource {
+export class Build {
+	source: Source;
+}
+
+export class Source {
 	ddl: string;
 }

@@ -14,38 +14,107 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as vscode from 'vscode';
-import * as utils from '../utils';
 import * as extension from '../extension';
-import { IDVConfig, IDataSourceConfig } from '../model/DataVirtModel';
-import { DataSourceConfigEntryTreeNode } from '../model/tree/DataSourceConfigEntryTreeNode';
+import * as utils from '../utils';
+import * as vscode from 'vscode';
+import { DataSourceEntryTreeNode } from '../model/tree/DataSourceEntryTreeNode';
+import { DataVirtConfig, DataSourceConfig, Property, ValueFrom, SecretRef, ConfigMapRef, KeyRef } from '../model/DataVirtModel';
 
-export function editDataSourceEntryCommand(ctx) {
-	const item: DataSourceConfigEntryTreeNode = ctx;
-	vscode.window.showInputBox( {value: item.getValue()})
+export function editDataSourceEntryCommand(dsEntryTreeNode: DataSourceEntryTreeNode) {
+	const dsConfig: DataSourceConfig = dsEntryTreeNode.getParent().dataSourceConfig;
+	const entry: Property = utils.getDataSourceEntryByName(dsEntryTreeNode.getKey(), dsConfig);
+	if (entry.valueFrom) {
+		editReferenceEntryType(dsEntryTreeNode, dsConfig, entry);
+	} else {
+		editValueEntryType(dsEntryTreeNode, dsConfig, entry);
+	}
+}
+
+export function editValueEntryType(dsEntryTreeNode: DataSourceEntryTreeNode, dsConfig: DataSourceConfig, entry: Property) {
+	vscode.window.showInputBox( { prompt: 'Enter a new value', placeHolder: `${entry.value ? entry : '<empty>'}`, value: entry.value })
 		.then( ( newValue: string) => {
-			handleDataSourceEntryEdit(item.getProject().dvConfig, item.getParent().dsConfig, item.getProject().getFile(), item.getKey(), newValue)
+			if (!newValue) {
+				return;
+			}
+			handleDataSourceEntryEdit(dsEntryTreeNode.getProject().dvConfig, dsConfig, dsEntryTreeNode.getProject().getFile(), dsEntryTreeNode.getKey(), newValue)
 				.then( (success: boolean) => {
-					if (success) {
-						vscode.window.showInformationMessage(`DataSource entry has been modified...`);
-					} else {
-						vscode.window.showErrorMessage(`An error occured when trying to modify the datasource entry...`);
-					}
+					showFeedback(success, dsEntryTreeNode.getKey(), dsConfig.name);
 				});
 		});
 }
 
-export function handleDataSourceEntryEdit(dvConfig: IDVConfig, dsConfig: IDataSourceConfig, file: string, key: string, newValue: string): Promise<boolean> {
+export function editReferenceEntryType(dsEntryTreeNode: DataSourceEntryTreeNode, dsConfig: DataSourceConfig, entry: Property) {
+	const ref: ValueFrom = entry.valueFrom;
+	let oldName: string;
+	let oldKey: string;
+	if (utils.isSecretRef(ref.valueFrom)) {
+		const secRef : SecretRef = ref.valueFrom;
+		oldName = secRef.secretKeyRef.name;
+		oldKey = secRef.secretKeyRef.key;
+	} else if (utils.isConfigMapRef(ref.valueFrom)) {
+		const mapRef : ConfigMapRef = ref.valueFrom;
+		oldName = mapRef.configMapKeyRef.name;
+		oldKey = mapRef.configMapKeyRef.key;
+	} else {
+		return;
+	}
+	vscode.window.showInputBox( {prompt: 'Enter the new reference name', value: oldName})
+		.then( (newRefName: string) => {
+			if (!newRefName) {
+				return;
+			}
+			vscode.window.showInputBox( {prompt: 'Enter the new reference key', value: oldKey})
+				.then( (newRefKey: string) => {
+					if (!newRefKey) {
+						return;
+					}
+					let newRef: ValueFrom;
+					let newRefValue: ConfigMapRef | SecretRef;
+					if (utils.isSecretRef(ref.valueFrom)) {
+						newRefValue = new SecretRef(new KeyRef(newRefName, newRefKey));
+					} else if (utils.isConfigMapRef(ref.valueFrom)) {
+						newRefValue = new ConfigMapRef(new KeyRef(newRefName, newRefKey));
+					} else {
+						return;
+					}
+					newRef = new ValueFrom(newRefValue);
+					handleDataSourceEntryEdit(dsEntryTreeNode.getProject().dvConfig, dsConfig, dsEntryTreeNode.getProject().getFile(), dsEntryTreeNode.getKey(), undefined, newRef)
+						.then( (success: boolean) => {
+							showFeedback(success, dsEntryTreeNode.getKey(), dsConfig.name);
+						});
+				});
+		});
+}
+
+function showFeedback(success: boolean, key: string, dsName: string) {
+	if (success) {
+		vscode.window.showInformationMessage(`DataSource entry ${key} has been modified...`);
+	} else {
+		vscode.window.showErrorMessage(`An error occured when trying to modify the datasource entry ${key} in ${dsName}...`);
+	}
+}
+
+export function handleDataSourceEntryEdit(dvConfig: DataVirtConfig, dsConfig: DataSourceConfig, file: string, key: string, newValue: string, valueFrom?: ValueFrom): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
 		if (dvConfig && dsConfig && file && key) {
 			try {
-				if (dsConfig.entries.has(key) && newValue !== undefined) {
-					dsConfig.entries.set(key, newValue ? newValue : '');
-					utils.mapDSConfigToEnv(dsConfig, dvConfig);
+				const entry: Property = utils.getDataSourceEntryByName(key, dsConfig);
+				if (entry) {
+					if (valueFrom) {
+						// its a valueFrom reference
+						entry.valueFrom = valueFrom;
+					} else if (newValue !== undefined) {
+						// its a plain string value
+						entry.value = newValue ? newValue : '';
+					} else {
+						extension.log(`handleDataSourceEntryEdit: Unable to modify the datasource entry ${key} in ${dsConfig ? dsConfig.name : '<Unknown>'} because the key does not exist...`);
+						resolve(false);
+						return false;
+					}
 					utils.saveModelToFile(dvConfig, file);
 					resolve(true);
 				} else {
-					extension.log(`handleDataSourceEntryEdit: Unable to modify the datasource entry because the key ${key} does not exist...`);
+					extension.log(`handleDataSourceEntryEdit: Unable to modify the datasource entry ${key} in ${dsConfig ? dsConfig.name : '<Unknown>'} because the key does not exist...`);
 					resolve(false);
 				}
 			} catch (error) {
@@ -53,7 +122,7 @@ export function handleDataSourceEntryEdit(dvConfig: IDVConfig, dsConfig: IDataSo
 				resolve(false);
 			}
 		} else {
-			extension.log('handleDataSourceEntryEdit: Unable to modify the datasource entry...');
+			extension.log(`handleDataSourceEntryEdit: Unable to modify the datasource entry ${key} in ${dsConfig ? dsConfig.name : '<Unknown>'}...`);
 			resolve(false);
 		}
 	});

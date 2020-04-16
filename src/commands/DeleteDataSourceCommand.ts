@@ -14,40 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as vscode from 'vscode';
-import * as utils from '../utils';
 import * as extension from '../extension';
-import { IDVConfig, IEnv } from '../model/DataVirtModel';
+import * as utils from '../utils';
+import * as vscode from 'vscode';
 import { DataSourceTreeNode } from '../model/tree/DataSourceTreeNode';
+import { DataVirtConfig, DataSourceConfig } from '../model/DataVirtModel';
 
-export function deleteDataSourceCommand(ctx: DataSourceTreeNode): void {
-	if (ctx) {
-		const dsNode: DataSourceTreeNode = ctx;
-		const prefix: string = utils.generateDataSourceConfigPrefix(dsNode.dsConfig).toUpperCase();
-		handleDataSourceDeletion(dsNode.label, prefix, dsNode.getProject().dvConfig, dsNode.getProject().file)
-		.then( (success: boolean) => {
-			if (success) {
-				vscode.window.showInformationMessage(`DataSource has been deleted...`);
-			} else {
-				vscode.window.showErrorMessage(`An error occured when trying to delete the datasource...`);
-			}
+export function deleteDataSourceCommand(dsNode: DataSourceTreeNode): void {
+	if (dsNode) {
+		handleDataSourceDeletion(dsNode.label, dsNode.getProject().dvConfig, dsNode.getProject().file)
+			.then( (success: boolean) => {
+				if (success) {
+					vscode.window.showInformationMessage(`DataSource ${dsNode.label} has been deleted...`);
+				} else {
+					vscode.window.showErrorMessage(`An error occured when trying to delete the datasource ${dsNode.label}...`);
+				}
 		});
 	}
 }
 
-export function handleDataSourceDeletion(name: string, prefix: string, dvConfig: IDVConfig, file: string): Promise<boolean> {
+export function handleDataSourceDeletion(dsName: string, dvConfig: DataVirtConfig, file: string): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
-		if (prefix && dvConfig && file) {
+		if (dsName && dvConfig && file) {
 			try {
-				const keys: IEnv[] = [];
-				dvConfig.spec.env.forEach( (element: IEnv) => {
-					if (element.name.toUpperCase().startsWith(`${prefix}_`)) {
-						keys.push(element);
-					}
+				const index: number = dvConfig.spec.datasources.findIndex( (value: DataSourceConfig) => {
+					return value.name === dsName;
 				});
-				keys.forEach( (key) => {
-					dvConfig.spec.env.splice(dvConfig.spec.env.indexOf(key), 1);
-				});
+				dvConfig.spec.datasources.splice(index, 1);
 				utils.saveModelToFile(dvConfig, file);
 				resolve(true);
 			} catch (error) {
@@ -55,7 +48,7 @@ export function handleDataSourceDeletion(name: string, prefix: string, dvConfig:
 				resolve(false);
 			}
 		} else {
-			extension.log(`handleDataSourceDeletion: Unable to delete the datasource ${name}...`);
+			extension.log(`handleDataSourceDeletion: Unable to delete the datasource ${dsName}...`);
 			resolve(false);
 		}
 	});

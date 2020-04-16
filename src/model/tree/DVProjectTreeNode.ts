@@ -15,20 +15,18 @@
  * limitations under the License.
  */
 import * as vscode from 'vscode';
-
-import { IDVConfig } from '../DataVirtModel';
-import { DVTreeItem } from './DVTreeItem';
-import { SchemasTreeNode } from './SchemasTreeNode';
+import { DataVirtConfig } from '../DataVirtModel';
 import { DataSourcesTreeNode } from './DataSourcesTreeNode';
+import { DVTreeItem } from './DVTreeItem';
+import { SchemaTreeNode } from './SchemaTreeNode';
 
-// simple tree node for datasources
 export class DVProjectTreeNode extends DVTreeItem {
 	dataSourcesNode: DataSourcesTreeNode;
-	schemasNode: SchemasTreeNode;
-	dvConfig: IDVConfig;
+	schemaNode: SchemaTreeNode;
+	dvConfig: DataVirtConfig;
 	file: string;
 
-	constructor(label: string, file: string, dvConfig: IDVConfig) {
+	constructor(label: string, file: string, dvConfig: DataVirtConfig) {
 		super('dv.project', label, vscode.TreeItemCollapsibleState.Collapsed);
 		this.dvConfig = dvConfig;
 		this.file = file;
@@ -47,8 +45,8 @@ export class DVProjectTreeNode extends DVTreeItem {
 		return this.dataSourcesNode;
 	}
 
-	getSchemasNode(): SchemasTreeNode {
-		return this.schemasNode;
+	getSchemaNode(): SchemaTreeNode {
+		return this.schemaNode;
 	}
 
 	getFile(): string {
@@ -57,15 +55,16 @@ export class DVProjectTreeNode extends DVTreeItem {
 
 	initialize(): void {
 		this.setProject(this);
-		this.dataSourcesNode = new DataSourcesTreeNode('Data Sources', this.dvConfig.spec.env);
+
+		this.dataSourcesNode = new DataSourcesTreeNode('Data Sources', this.dvConfig.spec.datasources);
 		this.dataSourcesNode.setProject(this.getProject());
 		this.dataSourcesNode.parent = this;
 		this.dataSourcesNode.initialize();
 		this.children.push(this.dataSourcesNode);
-		this.schemasNode = new SchemasTreeNode('Schemas');
-		this.schemasNode.setProject(this.getProject());
-		this.schemasNode.parent = this;
-		this.schemasNode.initialize();
-		this.children.push(this.schemasNode);
+
+		this.schemaNode = new SchemaTreeNode('Schema', this.getProject().dvConfig.spec.build.source.ddl);
+		this.schemaNode.setProject(this.getProject());
+		this.schemaNode.parent = this;
+		this.children.push(this.schemaNode);
 	}
 }

@@ -14,14 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as vscode from 'vscode';
-import * as path from 'path';
+import * as constants from '../../constants';
 import * as extension from '../../extension';
 import * as fs from 'fs';
-import { IDVConfig } from '../DataVirtModel';
-import { DVTreeItem } from './DVTreeItem';
-import { DVProjectTreeNode } from './DVProjectTreeNode';
+import * as path from 'path';
 import * as utils from '../../utils';
+import * as vscode from 'vscode';
+import { DataVirtConfig } from '../DataVirtModel';
+import { DVProjectTreeNode } from './DVProjectTreeNode';
+import { DVTreeItem } from './DVTreeItem';
 import { SchemaTreeNode } from './SchemaTreeNode';
 
 export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.TreeItem> {
@@ -111,9 +112,10 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 	}
 
 	getSchemaTreeNodeOfProject(name: string): SchemaTreeNode {
+		this.refresh();
 		const projectNode:DVProjectTreeNode = this.treeNodes.find( (node) => node.label === name);
-		if (projectNode && projectNode.schemasNode && projectNode.schemasNode.children && projectNode.schemasNode.children.length>0) {
-			return projectNode.schemasNode.children[0] as SchemaTreeNode;
+		if (projectNode && projectNode.schemaNode) {
+			return projectNode.schemaNode;
 		}
 		return undefined;
 	}
@@ -132,10 +134,10 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 	}
 
 	// process the JSON we get back from the kube rest API
-	processDataVirtYAML(fullPath: string, name: string, yaml : IDVConfig): void {
+	processDataVirtYAML(fullPath: string, name: string, yaml : DataVirtConfig): void {
 		if (yaml) {
 			try {
-				if (yaml.kind === 'VirtualDatabase') {
+				if (yaml.kind === constants.VDB_KIND) {
 					// found a DV config file -> put to tree
 					let title = name;
 					if (yaml.metadata.name) {
@@ -154,7 +156,7 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 
 	processFile(folder: string, file: string) {
 		const fullPath: string = path.join(folder, file);
-		const yamlDoc:IDVConfig = utils.loadModelFromFile(fullPath);
+		const yamlDoc:DataVirtConfig = utils.loadModelFromFile(fullPath);
 		this.processDataVirtYAML(fullPath, file, yamlDoc);
 	}
 }

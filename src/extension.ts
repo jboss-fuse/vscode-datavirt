@@ -16,35 +16,40 @@
  */
 'use strict';
 
-import * as vscode from 'vscode';
-import * as path from 'path';
 import * as fs from 'fs';
-import { DataVirtNodeProvider } from './model/tree/DataVirtNodeProvider';
-import { IDataSourceConfig } from './model/DataVirtModel';
-import { SchemaTreeNode } from './model/tree/SchemaTreeNode';
-import { MongoDBDataSource } from './model/datasources/MongoDBDataSource';
-import { SalesForceDataSource } from './model/datasources/SalesForceDataSource';
-import { GoogleSheetsDataSource } from './model/datasources/GoogleSheetsDataSource';
-import { RestBasedDataSource } from './model/datasources/RestBasedDataSource';
-import { createVDBCommand } from './commands/CreateVDBCommand';
+import * as path from 'path';
+import * as vscode from 'vscode';
+import { AmazonS3DataSource } from './model/datasources/AmazonS3DataSource';
+import * as constants from './constants';
 import { createDataSourceCommand } from './commands/CreateDataSourceCommand';
-import { deleteDataSourceCommand } from './commands/DeleteDataSourceCommand';
 import { createDataSourceEntryCommand } from './commands/CreateDataSourceEntryCommand';
-import { editDataSourceEntryCommand } from './commands/EditDataSourceEntryCommand';
+import { createVDBCommand } from './commands/CreateVDBCommand';
+import { DataVirtNodeProvider } from './model/tree/DataVirtNodeProvider';
+import { DataSourceConfig } from './model/DataVirtModel';
+import { deleteDataSourceCommand } from './commands/DeleteDataSourceCommand';
 import { deleteDataSourceEntryCommand } from './commands/DeleteDataSourceEntryCommand';
-import { editSchemaCommand, handleSaveDDL } from './commands/EditSchemaCommand';
 import { deployVDBCommand } from './commands/DeployVDBCommand';
-import { undeployVDBCommand } from './commands/UndeployVDBCommand';
+import { editDataSourceEntryCommand } from './commands/EditDataSourceEntryCommand';
+import { editSchemaCommand, handleSaveDDL } from './commands/EditSchemaCommand';
+import { FTPBasedDataSource } from './model/datasources/FTPBasedDataSource';
+import { GoogleSheetsDataSource } from './model/datasources/GoogleSheetsDataSource';
+import { InfinispanDataSource } from './model/datasources/InfinispanDataSource';
 import * as languageServer from './languageServer';
+import { MongoDBDataSource } from './model/datasources/MongoDBDataSource';
+import { ODataBasedDataSource } from './model/datasources/ODataBasedDataSource';
+import { OData4BasedDataSource } from './model/datasources/OData4BasedDataSource';
+import { OpenAPIBasedDataSource } from './model/datasources/OpenAPIBasedDataSource';
+import { RelationalDBDataSource } from './model/datasources/RelationalDBDataSource';
+import { RestBasedDataSource } from './model/datasources/RestBasedDataSource';
+import { SalesForceDataSource } from './model/datasources/SalesForceDataSource';
+import { SAPGatewayBasedDataSource } from './model/datasources/SAPGatewayBasedDataSource';
+import { SchemaTreeNode } from './model/tree/SchemaTreeNode';
+import { undeployVDBCommand } from './commands/UndeployVDBCommand';
 
+export const DATASOURCE_TYPES: Map<string, DataSourceConfig> = new Map();
 export let dataVirtProvider : DataVirtNodeProvider;
 export let pluginResourcesPath: string;
 export let workspaceReady : boolean = true;
-export const DDL_FILE_EXT: string = '.ddl';
-export const TEMPLATE_NAME: string = '$!TEMPLATE!$';
-export const DDL_NAME_PLACEHOLDER: string = '$!VDB_NAME_PLACEHOLDER!$';
-export const DATASOURCE_TYPES: Map<string, IDataSourceConfig> = new Map();
-
 export let fileToNode: Map<string, SchemaTreeNode> = new Map();
 export let fileToEditor: Map<string, vscode.TextEditor> = new Map();
 
@@ -156,9 +161,24 @@ function startFileSystemWatcher(): void {
 	});
 }
 
+export function createTempFile(vdbName: string, sql: string): string {
+	const p = fs.mkdtempSync(`${vscode.workspace.rootPath}${path.sep}.tmp_`, 'utf-8');
+	const tempFile: string = path.join(p, `${vdbName}${constants.DDL_FILE_EXT}`);
+	fs.writeFileSync(tempFile, sql);
+	return tempFile;
+}
+
 export function fillDataTypes(): void {
-	DATASOURCE_TYPES.set('MongoDB', new MongoDBDataSource(TEMPLATE_NAME));
-	DATASOURCE_TYPES.set('Salesforce', new SalesForceDataSource(TEMPLATE_NAME));
-	DATASOURCE_TYPES.set('Google Sheets', new GoogleSheetsDataSource(TEMPLATE_NAME));
-	DATASOURCE_TYPES.set('Rest Based', new RestBasedDataSource(TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('Amazon S3', new AmazonS3DataSource(constants.TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('FTP', new FTPBasedDataSource(constants.TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('Google Sheets', new GoogleSheetsDataSource(constants.TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('Infinispan', new InfinispanDataSource(constants.TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('MongoDB', new MongoDBDataSource(constants.TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('OData', new ODataBasedDataSource(constants.TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('OData4', new OData4BasedDataSource(constants.TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('OpenAPI', new OpenAPIBasedDataSource(constants.TEMPLATE_NAME));
+	DATASOURCE_TYPES.set(constants.RELATIONAL_DB_KEY, new RelationalDBDataSource(constants.TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('Rest Based', new RestBasedDataSource(constants.TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('Salesforce', new SalesForceDataSource(constants.TEMPLATE_NAME));
+	DATASOURCE_TYPES.set('SAP Gateway', new SAPGatewayBasedDataSource(constants.TEMPLATE_NAME));
 }

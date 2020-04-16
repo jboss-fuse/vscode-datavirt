@@ -17,10 +17,10 @@
 'use strict';
 
 import * as chai from 'chai';
-import { log, disposeExtensionOutputChannel } from '../extension';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
+import { log, disposeExtensionOutputChannel } from '../extension';
 
 chai.use(sinonChai);
 

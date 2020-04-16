@@ -14,78 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as vscode from 'vscode';
-import * as path from 'path';
 import * as fs from 'fs';
-import { IDataSourceConfig, IDVConfig, IEnv } from './model/DataVirtModel';
+import * as path from 'path';
+import * as vscode from 'vscode';
+import { DataSourceConfig, DataVirtConfig, ValueFrom, SecretRef, ConfigMapRef, Property } from './model/DataVirtModel';
+import { log } from './extension';
+
 const YAML = require('yaml');
 
-export function mapDSConfigToEnv(dsConfig: IDataSourceConfig, yaml: IDVConfig): void {
-	if (!yaml.spec.env) {
-		yaml.spec.env = [];
-	}
-	for (const [key, val] of dsConfig.entries) {
-		const envEntry: IEnv = {
-			name: key.toUpperCase(),
-			value: val
-		};
-		let found: boolean = false;
-		yaml.spec.env.forEach( (element: IEnv) => {
-			if (element.name === generateFullDataSourceConfigEntryKey(dsConfig, envEntry.name)) {
-				element.value = envEntry.value;
-				found = true;
-			}
-		});
-		if (!found) {
-			envEntry.name = generateFullDataSourceConfigEntryKey(dsConfig, envEntry.name);
-			yaml.spec.env.push(envEntry);
-		}
-	}
-}
-
-export function generateDataSourceConfigPrefix(dsConfig: IDataSourceConfig): string | undefined {
-	if (dsConfig && dsConfig.type && dsConfig.name) {
-		return `${dsConfig.type.toUpperCase()}_${dsConfig.name.toUpperCase()}`;
+export function loadModelFromFile(file: string): DataVirtConfig | undefined {
+	try {
+		const f = fs.readFileSync(file, 'utf8');
+		const yamlDoc:DataVirtConfig = YAML.parse(f);
+		return yamlDoc;
+	} catch (err) {
+		log(err);
 	}
 	return undefined;
 }
 
-export function generateFullDataSourceConfigEntryKey(dsConfig: IDataSourceConfig, key: string): string | undefined {
-	if (dsConfig && key) {
-		return `${generateDataSourceConfigPrefix(dsConfig).toUpperCase()}_${key.toUpperCase()}`;
-	}
-	return undefined;
-}
-
-export function loadModelFromFile(file: string): IDVConfig {
-	const f = fs.readFileSync(file, 'utf8');
-	const yamlDoc:IDVConfig = YAML.parse(f);
-	return yamlDoc;
-}
-
-export function saveModelToFile(dvConfig: IDVConfig, file: string): void {
+export function saveModelToFile(dvConfig: DataVirtConfig, file: string): void {
 	fs.writeFileSync(file, YAML.stringify(dvConfig));
-}
-
-export function replaceTemplateName(dsConfig: IDataSourceConfig, dsName: string, templateName: string): IDataSourceConfig | undefined {
-	if (dsName && dsConfig && templateName) {
-		const dsConfigNew : IDataSourceConfig = {
-			name: dsName,
-			type: dsConfig.type,
-			entries: new Map<string, string>()
-		};
-
-		dsConfig.entries.forEach( (value: string, key: string) => {
-			if (key.indexOf(templateName) !== -1) {
-				dsConfigNew.entries.set(key.replace(templateName, dsName.toUpperCase()), value);
-			} else {
-				dsConfigNew.entries.set(key, value);
-			}
-		});
-
-		return dsConfigNew;
-	}
-	return undefined;
 }
 
 export function replaceDDLNamePlaceholder(ddl: string, placeholder: string, replacement: string): string {
@@ -109,4 +58,48 @@ export function validateFileNotExisting(name: string): string {
 		return 'There is already a file with the same name. Please choose a different name.';
 	}
 	return undefined;
+}
+
+export function generateDataSourceEntryValue(key: string, value: string, ref: ValueFrom): string {
+	if (ref) {
+		if (isSecretRef(ref.valueFrom)) {
+			const secretRef: SecretRef = ref.valueFrom;
+			return `${secretRef.secretKeyRef.key} @ ${secretRef.secretKeyRef.name}`;
+		} else if (isConfigMapRef(ref.valueFrom)) {
+			const configMapRef: ConfigMapRef = ref.valueFrom;
+			return `${configMapRef.configMapKeyRef.key} @ ${configMapRef.configMapKeyRef.name}`;
+		}
+	}
+	return value;
+}
+
+export function getDataSourceEntryByName(name: string, datasource: DataSourceConfig): Property | undefined {
+	return datasource.properties.find( (value: Property) => {
+		return value.name === name;
+	});
+}
+
+export function getDataSourceByName(dvConfig: DataVirtConfig, name: string): DataSourceConfig | undefined {
+	return dvConfig.spec.datasources.find( (value: DataSourceConfig) => {
+		return value.name === name;
+	});
+}
+
+export function isSecretRef(ref: SecretRef | ConfigMapRef): ref is SecretRef {
+	return ref && (ref as SecretRef).secretKeyRef !== undefined;
+}
+
+export function isConfigMapRef(ref: SecretRef | ConfigMapRef): ref is ConfigMapRef {
+	return ref && (ref as ConfigMapRef).configMapKeyRef !== undefined;
+}
+
+export function checkForValue(value: any, valueName: string, missing: string): string {
+	let text: string = missing;
+	if (!value) {
+		if (text) {
+			text += ', ';
+		}
+		text += valueName;
+	}
+	return text;
 }

@@ -15,19 +15,17 @@
  * limitations under the License.
  */
 import * as vscode from 'vscode';
-
-import { IDataSourceConfig } from '../DataVirtModel';
+import { DataSourceConfig, Property } from '../DataVirtModel';
+import { DataSourceEntryTreeNode } from './DataSourceEntryTreeNode';
 import { DVTreeItem } from './DVTreeItem';
-import { DataSourceConfigEntryTreeNode } from './DataSourceConfigEntryTreeNode';
-import * as utils from '../../utils';
 
-// simple tree node for datasource
 export class DataSourceTreeNode extends DVTreeItem {
-	dsConfig: IDataSourceConfig;
 
-	constructor(dsConfig: IDataSourceConfig) {
-		super('dv.datasource', `${dsConfig.name} (${dsConfig.type})`, vscode.TreeItemCollapsibleState.Collapsed);
-		this.dsConfig = dsConfig;
+	dataSourceConfig: DataSourceConfig;
+
+	constructor(dataSourceConfig: DataSourceConfig) {
+		super('dv.datasource', `${dataSourceConfig.name} (${dataSourceConfig.type})`, vscode.TreeItemCollapsibleState.Collapsed);
+		this.dataSourceConfig = dataSourceConfig;
 	}
 
 	getIconName(): string {
@@ -47,13 +45,15 @@ export class DataSourceTreeNode extends DVTreeItem {
 	}
 
 	initialize(): void {
-		for (const [key, value] of this.dsConfig.entries) {
-			const newItem: DataSourceConfigEntryTreeNode = new DataSourceConfigEntryTreeNode(key, value);
-			newItem.setProject(this.getProject());
-			newItem.parent = this;
-			if (this.children.indexOf(newItem) < 0) {
-				this.children.push(newItem);
-			}
+		if (this.dataSourceConfig && this.dataSourceConfig.properties) {
+			this.dataSourceConfig.properties.forEach( (element: Property) => {
+				const newItem: DataSourceEntryTreeNode = new DataSourceEntryTreeNode(element.name, element.value, element.valueFrom);
+				newItem.setProject(this.getProject());
+				newItem.parent = this;
+				if (this.children.indexOf(newItem) < 0) {
+					this.children.push(newItem);
+				}
+			});
 		}
 	}
 }

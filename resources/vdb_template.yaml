@@ -5,14 +5,12 @@ metadata:
 spec:
   replicas: 1
   env:
-
+  datasources:
   build:
     source:
       ddl: |
         CREATE DATABASE $!VDB_NAME_PLACEHOLDER!$ OPTIONS (ANNOTATION 'provide your description here..');
         USE DATABASE $!VDB_NAME_PLACEHOLDER!$;
-
         CREATE VIRTUAL SCHEMA $!VDB_NAME_PLACEHOLDER!$;
         SET SCHEMA $!VDB_NAME_PLACEHOLDER!$;
-
         CREATE VIEW SAMPLE AS SELECT 1 as valid;

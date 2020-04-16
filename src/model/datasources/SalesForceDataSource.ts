@@ -14,24 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { IDataSourceConfig } from '../DataVirtModel';
+import { DataSourceConfig, Property } from '../DataVirtModel';
 
-export class SalesForceDataSource implements IDataSourceConfig {
-
-	name: string;
-	type: string;
-	entries: Map<string, string> = new Map();
+export class SalesForceDataSource extends DataSourceConfig {
 
 	constructor(name: string) {
-		this.name = name;
-		this.type = 'SPRING_TEIID_DATA_SALESFORCE';
+		super(name, 'salesforce');
 		this.initialize();
 	}
 
 	initialize() {
-		this.entries.set(`USER_NAME`, '');
-		this.entries.set(`PASSWORD`, '');
-		this.entries.set(`CLIENT_ID`, '');
-		this.entries.set(`CLIENT_SECRET`, '');
+		this.properties.push(new Property(`url`, 'https://login.salesforce.com/services/Soap/u/45.0'));
+		this.properties.push(new Property(`userName`, ''));
+		this.properties.push(new Property(`password`, ''));
+		this.properties.push(new Property(`clientId`, ''));
+		this.properties.push(new Property(`clientSecret`, ''));
+		this.properties.push(new Property(`refreshToken`, ''));
 	}
 }

@@ -26,5 +26,5 @@ export function undeployVDBCommand(ctx) {
 }
 
 function handleUndeploy(filepath: string): void {
-	extension.log(`\nUNDEPLOY: Selected File: ${filepath}\n`);
+	extension.log(`UNDEPLOY: Selected File: ${filepath}`);
 }

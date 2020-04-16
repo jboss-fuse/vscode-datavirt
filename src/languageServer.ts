@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-"use strict";
+'use strict';
 
 import { workspace , ExtensionContext} from 'vscode';
 import { LanguageClient, LanguageClientOptions, Executable } from 'vscode-languageclient';
@@ -22,7 +22,6 @@ import { LanguageClient, LanguageClientOptions, Executable } from 'vscode-langua
 const LANGUAGE_CLIENT_ID = 'LANGUAGE_ID_TEIID';
 
 export function activate(context: ExtensionContext) {
-
 	var path = require('path');
 	var camelLanguageServerPath = context.asAbsolutePath(path.join('jars', 'language-server.jar'));
 	console.log(camelLanguageServerPath);
