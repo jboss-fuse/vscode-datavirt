@@ -17,61 +17,17 @@
 'use strict';
 
 import * as chai from 'chai';
-import * as extension from '../extension';
 import * as sinonChai from 'sinon-chai';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as constants from '../constants';
 import * as utils from '../utils';
-import { IDataSourceConfig, IDVConfig } from '../model/DataVirtModel';
+import { DataVirtConfig } from '../model/DataVirtModel';
 
 chai.use(sinonChai);
 const should = chai.should();
 
 describe('Utils', () => {
-	context('DataSource Handling', () => {
-		it('should generate a valid prefix for a datasource config', () => {
-			const dsConfig: IDataSourceConfig = {
-				name: 'example',
-				type: 'fuse',
-				entries: new Map()
-			};
-			const prefix:string = utils.generateDataSourceConfigPrefix(dsConfig);
-			prefix.should.deep.equal(`${dsConfig.type.toUpperCase()}_${dsConfig.name.toUpperCase()}`);
-		});
-
-		it('should return undefined on a null datasource config when trying to obtain the datasource config prefix', () => {
-			should.not.exist(utils.generateDataSourceConfigPrefix(undefined));
-		});
-
-		it('should return undefined on a datasource config with no name when trying to obtain the datasource config prefix', () => {
-			const dsConfig: IDataSourceConfig = {
-				name: undefined,
-				type: 'fuse',
-				entries: new Map()
-			};
-			should.not.exist(utils.generateDataSourceConfigPrefix(dsConfig));
-		});
-
-		it('should return undefined on a datasource config with no type when trying to obtain the datasource config prefix', () => {
-			const dsConfig: IDataSourceConfig = {
-				name: 'example',
-				type: undefined,
-				entries: new Map()
-			};
-			should.not.exist(utils.generateDataSourceConfigPrefix(dsConfig));
-		});
-
-		it('should generate a valid datasource config entry key when using a valid datasource configuration', () => {
-			const dsConfig: IDataSourceConfig = {
-				name: 'example',
-				type: 'fuse',
-				entries: new Map()
-			};
-			const dsName: string = 'myKey';
-			const key:string = utils.generateFullDataSourceConfigEntryKey(dsConfig, dsName);
-			key.should.deep.equal(`${dsConfig.type.toUpperCase()}_${dsConfig.name.toUpperCase()}_${dsName.toUpperCase()}`);
-		});
-	});
 
 	context('Validate the length and content of an OS resource name', () => {
 		it('should return a validation error message when handing over an undefined parameter', () => {
@@ -101,15 +57,6 @@ describe('Utils', () => {
 	});
 
 	context('Replace the name of a template', () => {
-		it('should replace the name of a datasource template with the given name', () => {
-			const newName: string = 'newname';
-			extension.fillDataTypes();
-			let dsConfig: IDataSourceConfig = extension.DATASOURCE_TYPES.get('MongoDB');
-			should.exist(dsConfig);
-			dsConfig = utils.replaceTemplateName(dsConfig, newName, extension.TEMPLATE_NAME);
-			dsConfig.type.should.deep.equal('SPRING_TEIID_DATA_MONGODB');
-			dsConfig.name.should.deep.equal(newName);
-		});
 
 		it('should replace the name inside VDB DDL template with the given name', () => {
 			const newName: string = 'newname';
@@ -127,12 +74,12 @@ describe('Utils', () => {
 			SET SCHEMA newname;
 
 			CREATE VIEW SAMPLE AS SELECT 1 as valid;`;
-			const result: string = utils.replaceDDLNamePlaceholder(ddl_old, extension.DDL_NAME_PLACEHOLDER, newName);
+			const result: string = utils.replaceDDLNamePlaceholder(ddl_old, constants.DDL_NAME_PLACEHOLDER, newName);
 			should.equal(result, ddl_new, 'Replacing of the DDL name placeholder failed.');
 		});
 
 		it('should return undefined when calling replaceDDLNamePlaceholder with undefined ddl parameter', () => {
-			const result: string = utils.replaceDDLNamePlaceholder(undefined, extension.DDL_NAME_PLACEHOLDER, 'newname');
+			const result: string = utils.replaceDDLNamePlaceholder(undefined, constants.DDL_NAME_PLACEHOLDER, 'newname');
 			should.not.exist(result);
 		});
 
@@ -142,35 +89,8 @@ describe('Utils', () => {
 		});
 
 		it('should return undefined when calling replaceDDLNamePlaceholder with undefined replacement parameter', () => {
-			const result: string = utils.replaceDDLNamePlaceholder('teststring', extension.DDL_NAME_PLACEHOLDER, undefined);
+			const result: string = utils.replaceDDLNamePlaceholder('teststring', constants.DDL_NAME_PLACEHOLDER, undefined);
 			should.not.exist(result);
-		});
-
-		it('should return undefined if handing over an undefined datasource config parameter', () => {
-			const newName: string = 'newname';
-			extension.fillDataTypes();
-			let dsConfig: IDataSourceConfig;
-			should.not.exist(dsConfig);
-			dsConfig = utils.replaceTemplateName(dsConfig, newName, extension.TEMPLATE_NAME);
-			should.not.exist(dsConfig);
-		});
-
-		it('should return undefined if handing over an undefined name parameter', () => {
-			const newName: string = undefined;
-			extension.fillDataTypes();
-			let dsConfig: IDataSourceConfig = extension.DATASOURCE_TYPES.get('MongoDB');
-			should.exist(dsConfig);
-			dsConfig = utils.replaceTemplateName(dsConfig, newName, extension.TEMPLATE_NAME);
-			should.not.exist(dsConfig);
-		});
-
-		it('should return undefined if handing over an undefined template name placeholder parameter', () => {
-			const newName: string = 'newname';
-			extension.fillDataTypes();
-			let dsConfig: IDataSourceConfig = extension.DATASOURCE_TYPES.get('MongoDB');
-			should.exist(dsConfig);
-			dsConfig = utils.replaceTemplateName(dsConfig, newName, undefined);
-			should.not.exist(dsConfig);
 		});
 	});
 
@@ -179,11 +99,11 @@ describe('Utils', () => {
 			const name: string = 'test';
 			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
 			const fpTest: string = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
-			const yamlDoc:IDVConfig = utils.loadModelFromFile(fpOrig);
+			const yamlDoc:DataVirtConfig = utils.loadModelFromFile(fpOrig);
 			should.exist(yamlDoc);
 			utils.saveModelToFile(yamlDoc, fpTest);
 			should.exist(utils.validateFileNotExisting(name));
-			const yamlDoc2:IDVConfig = utils.loadModelFromFile(fpTest);
+			const yamlDoc2:DataVirtConfig = utils.loadModelFromFile(fpTest);
 			should.exist(yamlDoc2);
 			yamlDoc.should.deep.equal(yamlDoc2);
 			fs.unlinkSync(fpTest);

@@ -116,12 +116,12 @@
 				{
 					"group": "dv",
 					"command": "datavirt.create.vdb",
-					"when": "viewItem == dv.project"
+					"when": "viewItem == undefined"
 				},
 				{
 					"group": "dv",
 					"command": "datavirt.create.datasource",
-					"when": "viewItem == dv.project || viewItem == dv.datasources"
+					"when": "viewItem == dv.datasources"
 				},
 				{
 					"group": "dv",
@@ -146,7 +146,7 @@
 				{
 					"group": "dv",
 					"command": "datavirt.edit.schema",
-					"when": "viewItem == dv.schemas || viewItem == dv.schema"
+					"when": "viewItem == dv.schema"
 				}
 			]
 		},

@@ -14,32 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as vscode from 'vscode';
+import { DataSourceConfig, Property } from '../DataVirtModel';
 
-import { DVTreeItem } from './DVTreeItem';
-import { SchemaTreeNode } from './SchemaTreeNode';
+export class FTPBasedDataSource extends DataSourceConfig {
 
-// simple tree node for schemas
-export class SchemasTreeNode extends DVTreeItem {
-
-	constructor(label: string) {
-		super('dv.schemas', label, vscode.TreeItemCollapsibleState.Collapsed);
+	constructor(name: string) {
+		super(name, 'ftp');
+		this.initialize();
 	}
 
-	getIconName(): string {
-		return 'dv_schemas.svg';
-	}
-
-	getToolTip(): string {
-		return `Defined Schemas`;
-	}
-
-	initialize(): void {
-		const newItem = new SchemaTreeNode('DDL', this.getProject().dvConfig.spec.build.source.ddl);
-		newItem.setProject(this.getProject());
-		newItem.parent = this;
-		if (this.children.indexOf(newItem) < 0) {
-			this.children.push(newItem);
-		}
+	initialize() {
+		this.properties.push(new Property(`host`, ''));
+		this.properties.push(new Property(`port`, '21'));
+		this.properties.push(new Property(`username`, ''));
+		this.properties.push(new Property(`password`, ''));
+		this.properties.push(new Property(`parentDirectory`, ''));
+		this.properties.push(new Property(`isFtps`, 'false'));
 	}
 }

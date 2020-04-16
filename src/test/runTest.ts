@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 import * as path from 'path';
-
 import { runTests } from 'vscode-test';
 
 async function runTest() {

@@ -31,10 +31,7 @@ describe('Should do completion for ddl file', () => {
 
 });
 
-async function testCompletion(
-	position: vscode.Position,
-	expectedCompletion: vscode.CompletionItem
-) {
+async function testCompletion(position: vscode.Position, expectedCompletion: vscode.CompletionItem) {
 	const ddlUri = Uri.parse('untitled:test.ddl');
 	await vscode.workspace.openTextDocument(ddlUri);
 	await checkExpectedCompletion(ddlUri, position, expectedCompletion);
@@ -42,13 +39,14 @@ async function testCompletion(
 
 async function checkExpectedCompletion(docUri: vscode.Uri, position: vscode.Position, expectedCompletion: vscode.CompletionItem) {
 	let hasExpectedCompletion = false;
-	await waitUntil(() => {
+	await waitUntil( () => {
 		// Executing the command `vscode.executeCompletionItemProvider` to simulate triggering completion
-		vscode.commands.executeCommand('vscode.executeCompletionItemProvider', docUri, position).then( (value) => {
-			const actualCompletionList = value as vscode.CompletionList;
-			const actualCompletionLabelList = actualCompletionList.items.map( (completion) => completion.label);
-			hasExpectedCompletion = actualCompletionLabelList.includes(expectedCompletion.label);
-		});
+		vscode.commands.executeCommand('vscode.executeCompletionItemProvider', docUri, position)
+			.then( (value) => {
+				const actualCompletionList = value as vscode.CompletionList;
+				const actualCompletionLabelList = actualCompletionList.items.map( (completion) => completion.label);
+				hasExpectedCompletion = actualCompletionLabelList.includes(expectedCompletion.label);
+			});
 		return hasExpectedCompletion;
 	}, 10000, 500);
 }

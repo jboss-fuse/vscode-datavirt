@@ -16,15 +16,15 @@
  */
 'use strict';
 
+import { fail } from 'assert';
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
-import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as sinonChai from 'sinon-chai';
+import * as vscode from 'vscode';
+import * as createVDBCommand from '../commands/CreateVDBCommand';
 import * as extension from '../extension';
 import * as utils from '../utils';
-import * as createVDBCommand from '../commands/CreateVDBCommand';
-import { fail } from 'assert';
 
 chai.use(sinonChai);
 const should = chai.should();

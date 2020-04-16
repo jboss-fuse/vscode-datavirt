@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 import * as fs from 'fs';
-import * as path from 'path';
-import * as Mocha from 'mocha';
 import * as glob from 'glob';
+import * as Mocha from 'mocha';
+import * as path from 'path';
 import { TestRunnerOptions, CoverageRunner } from './coverage';
 
 // Linux: prevent a weird NPE when mocha on Linux requires the window size from the TTY

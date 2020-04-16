@@ -14,35 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as vscode from 'vscode';
-import * as path from 'path';
-import * as fs from 'fs';
-import * as utils from '../utils';
+import * as constants from '../constants';
 import * as extension from '../extension';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as utils from '../utils';
+import * as vscode from 'vscode';
+import { DataVirtConfig } from '../model/DataVirtModel';
 import { SchemaTreeNode } from '../model/tree/SchemaTreeNode';
-import { IDVConfig } from '../model/DataVirtModel';
 
 export function createVDBCommand() {
 	if (extension.workspaceReady) {
-		vscode.window.showInputBox( {validateInput: (name: string) => {
+		vscode.window.showInputBox( { validateInput: (name: string) => {
 			let res: string = utils.validateName(name);
 			if (!res) {
-				// check if file already exists
 				res = utils.validateFileNotExisting(name);
 			}
 			return res;
-		}, placeHolder: 'Enter the name of the new VDB config'})
-			.then( (fileName: string) => {
-				handleVDBCreation(vscode.workspace.workspaceFolders[0].uri.fsPath, fileName)
+		}, placeHolder: 'Enter the name of the new VDB config' })
+			.then( (vdbName: string) => {
+				if (!vdbName) {
+					return;
+				}
+				handleVDBCreation(vscode.workspace.workspaceFolders[0].uri.fsPath, vdbName)
 					.then( (success: boolean) => {
 						if (success) {
-							const node: SchemaTreeNode = extension.dataVirtProvider.getSchemaTreeNodeOfProject(fileName);
-							if (node) {
-								vscode.commands.executeCommand('datavirt.edit.schema', node);
-							}
-							vscode.window.showInformationMessage(`New VDB ${fileName} has been created successfully...`);
+							openDDLEditor(vdbName);
+							vscode.window.showInformationMessage(`New VDB ${vdbName} has been created successfully...`);
 						} else {
-							vscode.window.showErrorMessage(`An error occured when trying to create a new VDB...`);
+							vscode.window.showErrorMessage(`An error occured when trying to create a new VDB with name ${vdbName}...`);
 						}
 					})
 					.catch( (error) => {
@@ -63,9 +63,9 @@ export function handleVDBCreation(filepath: string, fileName: string, templateFo
 				const templatePath = templateFolder ? path.join(templateFolder, 'vdb_template.yaml') : path.join(extension.pluginResourcesPath, 'vdb_template.yaml');
 				const targetFile: string = path.join(filepath, `${fileName}.yaml`);
 				fs.copyFileSync(templatePath, targetFile);
-				const yamlDoc:IDVConfig = utils.loadModelFromFile(targetFile);
+				const yamlDoc:DataVirtConfig = utils.loadModelFromFile(targetFile);
 				yamlDoc.metadata.name = fileName;
-				yamlDoc.spec.build.source.ddl = utils.replaceDDLNamePlaceholder(yamlDoc.spec.build.source.ddl, extension.DDL_NAME_PLACEHOLDER, fileName);
+				yamlDoc.spec.build.source.ddl = utils.replaceDDLNamePlaceholder(yamlDoc.spec.build.source.ddl, constants.DDL_NAME_PLACEHOLDER, fileName);
 				utils.saveModelToFile(yamlDoc, targetFile);
 				resolve(true);
 			} catch (error) {
@@ -75,4 +75,11 @@ export function handleVDBCreation(filepath: string, fileName: string, templateFo
 			reject(new Error('handleVDBCreation: Unable to create the VDB because no name was given...'));
 		}
 	});
+}
+
+function openDDLEditor(vdbName: string) {
+	const node: SchemaTreeNode = extension.dataVirtProvider.getSchemaTreeNodeOfProject(vdbName);
+	if (node) {
+		vscode.commands.executeCommand('datavirt.edit.schema', node);
+	}
 }

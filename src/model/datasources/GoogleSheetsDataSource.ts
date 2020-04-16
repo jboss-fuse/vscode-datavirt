@@ -14,25 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { IDataSourceConfig } from '../DataVirtModel';
+import { DataSourceConfig, Property } from '../DataVirtModel';
 
-export class GoogleSheetsDataSource implements IDataSourceConfig {
-
-	name: string;
-	type: string;
-	entries: Map<string, string> = new Map();
+export class GoogleSheetsDataSource extends DataSourceConfig {
 
 	constructor(name: string) {
-		this.name = name;
-		this.type = 'SPRING_TEIID_DATA_GOOGLE_SHEETS';
+		super(name, 'google-spreadsheet');
 		this.initialize();
 	}
 
 	initialize() {
-		this.entries.set(`SPREAD_SHEET_NAME`, '');
-		this.entries.set(`SPREAD_SHEET_ID`, '');
-		this.entries.set(`CLIENT_ID`, '');
-		this.entries.set(`CLIENT_SECRET`, '');
-		this.entries.set(`REFRESH_TOKEN`, '');
+		this.properties.push(new Property(`spreadSheetName`, ''));
+		this.properties.push(new Property(`spreadSheetId`, ''));
+		this.properties.push(new Property(`clientId`, ''));
+		this.properties.push(new Property(`clientSecret`, ''));
+		this.properties.push(new Property(`refreshToken`, ''));
 	}
 }

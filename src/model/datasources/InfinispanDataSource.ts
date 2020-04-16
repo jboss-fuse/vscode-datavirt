@@ -14,35 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as vscode from 'vscode';
+import { DataSourceConfig, Property } from '../DataVirtModel';
 
-import { DVTreeItem } from './DVTreeItem';
+export class InfinispanDataSource extends DataSourceConfig {
 
-export class DataSourceConfigEntryTreeNode extends DVTreeItem {
-	key: string;
-	value: string;
-	constructor(key: string, value: string) {
-		super('dv.datasourceentry', key, vscode.TreeItemCollapsibleState.None);
-		this.key = key;
-		this.value = value;
+	constructor(name: string) {
+		super(name, 'infinispan-hotrod');
+		this.initialize();
 	}
-	getIconName(): string {
-		return `dv_datasource_entry.gif`;
-	}
-	getToolTip(): string {
-		return `Data Source Entry: ${this.label}`;
-	}
-	getKey(): string {
-		return this.key;
-	}
-	setKey(key: string): void {
-		this.key = key;
-		this.label = key;
-	}
-	getValue(): string {
-		return this.value;
-	}
-	setValue(value: string): void {
-		this.value = value;
+
+	initialize() {
+		this.properties.push(new Property(`url`, ''));
+		this.properties.push(new Property(`username`, ''));
+		this.properties.push(new Property(`password`, ''));
+		this.properties.push(new Property(`cacheName`, ''));
+		this.properties.push(new Property(`authenticationRealm`, ''));
+		this.properties.push(new Property(`authenticationServerName`, ''));
 	}
 }

@@ -14,52 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as vscode from 'vscode';
-import * as path from 'path';
-import * as fs from 'fs';
-import * as utils from '../utils';
 import * as extension from '../extension';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as utils from '../utils';
+import * as vscode from 'vscode';
 import { SchemaTreeNode } from '../model/tree/SchemaTreeNode';
-import { SchemasTreeNode } from '../model/tree/SchemasTreeNode';
 
-export function editSchemaCommand(ctx) {
-	let sNode: SchemasTreeNode;
-	let ddlNode: SchemaTreeNode;
-
-	if (ctx instanceof SchemasTreeNode) {
-		sNode = ctx;
-	} else if (ctx instanceof SchemaTreeNode) {
-		ddlNode = ctx;
-		sNode = ddlNode.getParent();
-	} else {
-		extension.log(`Unsupported type for schema modification: ${ctx}`);
-		return;
-	}
-	if (sNode && sNode.children && sNode.children.length>0) {
-		if (!ddlNode) {
-			ddlNode = sNode.children[0] as SchemaTreeNode;
-		}
-		const sql: string = ddlNode.getDDL();
-		const p = fs.mkdtempSync(`${vscode.workspace.rootPath}${path.sep}.tmp_`, 'utf-8');
-		const tempFile = path.join(p, `${sNode.getProject().label}${extension.DDL_FILE_EXT}`);
-		fs.writeFileSync(tempFile, sql);
-		vscode.workspace.openTextDocument(tempFile)
-			.then((a: vscode.TextDocument) => {
-				vscode.window.showTextDocument(a, 1, true)
-					.then( (editor: vscode.TextEditor) => {
-						if (extension.fileToNode.has(tempFile)) {
-							for ( const [key, value] of extension.fileToNode) {
-								if (value === ddlNode) {
-									fs.unlinkSync(key);
-									fs.rmdirSync(path.dirname(key));
-								}
+export function editSchemaCommand(ddlNode: SchemaTreeNode) {
+	const sql: string = ddlNode.getDDL();
+	const tempFile = extension.createTempFile(ddlNode.getProject().label, sql);
+	vscode.workspace.openTextDocument(tempFile)
+		.then((textDocument: vscode.TextDocument) => {
+			vscode.window.showTextDocument(textDocument, 1, true)
+				.then( (editor: vscode.TextEditor) => {
+					if (extension.fileToNode.has(tempFile)) {
+						for ( const [key, value] of extension.fileToNode) {
+							if (value === ddlNode) {
+								fs.unlinkSync(key);
+								fs.rmdirSync(path.dirname(key));
 							}
 						}
-						extension.fileToNode.set(tempFile, ddlNode);
-						extension.fileToEditor.set(tempFile, editor);
-					});
-			});
-	}
+					}
+					extension.fileToNode.set(tempFile, ddlNode);
+					extension.fileToEditor.set(tempFile, editor);
+				});
+		});
 }
 
 export function handleSaveDDL(event: vscode.TextDocumentWillSaveEvent): Promise<void> {

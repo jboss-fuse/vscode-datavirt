@@ -14,31 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as vscode from 'vscode';
-import { DVTreeItem } from './DVTreeItem';
+import { DataSourceConfig, Property } from '../DataVirtModel';
 
-export class SchemaTreeNode extends DVTreeItem {
+export class SAPGatewayBasedDataSource extends DataSourceConfig {
 
-	ddl: string;
-
-	constructor(label: string, ddl: string) {
-		super('dv.schema', label, vscode.TreeItemCollapsibleState.None);
-		this.ddl = ddl;
+	constructor(name: string) {
+		super(name, 'sap-gateway');
+		this.initialize();
 	}
 
-	getIconName(): string {
-		return 'dv_schema.svg';
-	}
-
-	getToolTip(): string {
-		return `Schema: ${this.label}`;
-	}
-
-	getDDL(): string {
-		return this.ddl;
-	}
-
-	setDDL(ddl: string): void {
-		this.ddl = ddl;
+	initialize() {
+		this.properties.push(new Property(`endpoint`, ''));
+		this.properties.push(new Property(`securityType`, 'http_basic'));
+		this.properties.push(new Property(`userName`, ''));
+		this.properties.push(new Property(`password`, ''));
 	}
 }

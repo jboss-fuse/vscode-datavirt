@@ -14,24 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { IDataSourceConfig } from '../DataVirtModel';
+import { DataSourceConfig, Property } from '../DataVirtModel';
 
-export class RestBasedDataSource implements IDataSourceConfig {
-
-	name: string;
-	type: string;
-	entries: Map<string, string> = new Map();
+export class RestBasedDataSource extends DataSourceConfig {
 
 	constructor(name: string) {
-		this.name = name;
-		this.type = 'SPRING_TEIID_REST';
+		super(name, 'rest');
 		this.initialize();
 	}
 
 	initialize() {
-		this.entries.set(`ENDPOINT`, '');
-		this.entries.set(`SECURITY_TYPE`, '');
-		this.entries.set(`USER_NAME`, '');
-		this.entries.set(`PASSWORD`, '');
+		this.properties.push(new Property(`endpoint`, ''));
+		this.properties.push(new Property(`securityType`, 'openid-connect'));
+		this.properties.push(new Property(`userName`, ''));
+		this.properties.push(new Property(`password`, ''));
+		this.properties.push(new Property(`clientId`, ''));
+		this.properties.push(new Property(`clientSecret`, ''));
+		this.properties.push(new Property(`authorizeUrl`, ''));
+		this.properties.push(new Property(`accessTokenUrl`, ''));
+		this.properties.push(new Property(`scope`, ''));
 	}
 }

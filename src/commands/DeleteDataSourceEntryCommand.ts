@@ -14,39 +14,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as vscode from 'vscode';
-import * as utils from '../utils';
 import * as extension from '../extension';
-import { IDVConfig, IDataSourceConfig, IEnv } from '../model/DataVirtModel';
-import { DataSourceConfigEntryTreeNode } from '../model/tree/DataSourceConfigEntryTreeNode';
+import * as utils from '../utils';
+import * as vscode from 'vscode';
+import { DataSourceEntryTreeNode } from '../model/tree/DataSourceEntryTreeNode';
+import { DataVirtConfig, DataSourceConfig, Property } from '../model/DataVirtModel';
 
-export function deleteDataSourceEntryCommand(ctx) {
-	const ds: DataSourceConfigEntryTreeNode = ctx;
-	const dsConfig: IDataSourceConfig = ds.getParent().dsConfig;
-	const dvConfig: IDVConfig = ds.getProject().dvConfig;
+export function deleteDataSourceEntryCommand(ds: DataSourceEntryTreeNode) {
+	const dsConfig: DataSourceConfig = ds.getParent().dataSourceConfig;
+	const dvConfig: DataVirtConfig = ds.getProject().dvConfig;
 	const file: string = ds.getProject().getFile();
 	const key: string = ds.getKey();
 
 	handleDataSourceEntryDeletion(dvConfig, dsConfig, file, key)
 		.then( (success: boolean) => {
 			if (success) {
-				vscode.window.showInformationMessage(`DataSource entry has been deleted...`);
+				vscode.window.showInformationMessage(`DataSource entry ${key} has been deleted from ${dsConfig.name}...`);
 			} else {
-				vscode.window.showErrorMessage(`An error occured when trying to delete the datasource entry...`);
+				vscode.window.showErrorMessage(`An error occured when trying to delete the datasource entry ${key} from ${dsConfig ? dsConfig.name : '<Unknown>'}...`);
 			}
 		});
 }
 
-export function handleDataSourceEntryDeletion(dvConfig: IDVConfig, dsConfig: IDataSourceConfig, file: string, key: string): Promise<boolean> {
+export function handleDataSourceEntryDeletion(dvConfig: DataVirtConfig, dsConfig: DataSourceConfig, file: string, key: string): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
 		if (dvConfig && dsConfig && file && key) {
 			try {
 				let deleted: boolean = false;
-				const fullKey: string = utils.generateFullDataSourceConfigEntryKey(dsConfig, key).toUpperCase();
-				dvConfig.spec.env.forEach( (element: IEnv) => {
-					if (element.name.toUpperCase() === fullKey) {
-						dvConfig.spec.env.splice(dvConfig.spec.env.indexOf(element, 0), 1);
-						deleted = true;
+				dvConfig.spec.datasources.forEach( (element: DataSourceConfig) => {
+					if (element.name === dsConfig.name) {
+						const idx: number = element.properties.findIndex( (value: Property) => {
+							return value.name === key;
+						});
+						if (idx !== -1) {
+							element.properties.splice(idx, 1);
+							deleted = true;
+						}
 					}
 				});
 				if (deleted) {
@@ -58,7 +61,7 @@ export function handleDataSourceEntryDeletion(dvConfig: IDVConfig, dsConfig: IDa
 				resolve(false);
 			}
 		} else {
-			extension.log('handleDataSourceEntryDeletion: Unable to delete the datasource entry...');
+			extension.log(`handleDataSourceEntryDeletion: Unable to delete the datasource entry ${key} from ${dsConfig ? dsConfig.name : '<Unknown>'}...`);
 			resolve(false);
 		}
 	});

@@ -14,9 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as vscode from 'vscode';
 import * as path from 'path';
-
+import * as vscode from 'vscode';
 import { DataVirtNodeProvider } from './DataVirtNodeProvider';
 import { DVProjectTreeNode } from './DVProjectTreeNode';
 
@@ -38,15 +37,19 @@ export class DVTreeItem extends vscode.TreeItem {
 		}
 		this.tooltip = this.getToolTip();
 	}
+
 	getToolTip(): string {
 		return '';
 	}
+
 	getParent(): any {
 		return this.parent;
 	}
+
 	getIconName(): string {
 		return undefined;
 	}
+
 	getIcon(extContext: vscode.ExtensionContext): vscode.Uri | undefined {
 		let newIcon: vscode.Uri | undefined;
 		const name: string = this.getIconName();
@@ -56,9 +59,11 @@ export class DVTreeItem extends vscode.TreeItem {
 		}
 		return newIcon;
 	}
+
 	setProject(prj: DVProjectTreeNode): void {
 		this.project = prj;
 	}
+
 	getProject(): DVProjectTreeNode {
 		return this.project;
 	}

@@ -26,5 +26,5 @@ export function deployVDBCommand(ctx) {
 }
 
 function handleDeploy(filepath: string): void {
-	extension.log(`\nDEPLOY: Selected File: ${filepath}\n`);
+	extension.log(`DEPLOY: Selected File: ${filepath}`);
 }

@@ -17,19 +17,21 @@
 'use strict';
 
 import * as chai from 'chai';
-import * as sinonChai from 'sinon-chai';
-import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as extension from '../extension';
-import * as utils from '../utils';
+import * as sinonChai from 'sinon-chai';
+import * as vscode from 'vscode';
+
+import * as constants from '../constants';
 import * as createVDBCommand from '../commands/CreateVDBCommand';
 import * as createDSCommand from '../commands/CreateDataSourceCommand';
 import * as createDSEntryCommand from '../commands/CreateDataSourceEntryCommand';
+import { DataVirtConfig, DataSourceConfig, Property } from '../model/DataVirtModel';
 import * as deleteDSEntryCommand from '../commands/DeleteDataSourceEntryCommand';
 import * as editDSEntryCommand from '../commands/EditDataSourceEntryCommand';
+import * as extension from '../extension';
 import * as mongoDBDS from '../model/datasources/MongoDBDataSource';
-import { IDVConfig, IDataSourceConfig, IEnv } from '../model/DataVirtModel';
+import * as utils from '../utils';
 
 chai.use(sinonChai);
 const should = chai.should();
@@ -38,36 +40,21 @@ describe('Commands Tests', () => {
 	const name = 'newvdb';
 	const dsName: string = 'MyMongoDB';
 	const dsType: string = 'MongoDB';
-	const prefix: string = 'SPRING_TEIID_DATA_MONGODB_MYMONGODB';
 	const mongoTempl: mongoDBDS.MongoDBDataSource = new mongoDBDS.MongoDBDataSource(dsName);
-	const mongoDSType: string = mongoTempl.type;
-	const entryName: string = 'NEWKEY';
-	const entryValue: string = 'NEWVALUE';
+	const entryName: string = 'newkey';
+	const entryValue: string = 'newvalue';
 
 	let vdbFile: string;
 	let workspacePath: string;
 	let templateFolder: string;
 
-	let dvConfig: IDVConfig;
-	let dsConfig: IDataSourceConfig;
+	let dvConfig: DataVirtConfig;
+	let dsConfig: DataSourceConfig;
 
 	function cleanupVDB(): void {
 		if (vdbFile && fs.existsSync(vdbFile)) {
 			fs.unlinkSync(vdbFile);
 		}
-	}
-
-	function prepareDataSource(dvConfig: IDVConfig, dataSourceName: string, dataSourceType: string): IDataSourceConfig {
-		let datasourceConfig = {
-			name: dataSourceName,
-			type: dataSourceType,
-			entries: new Map()
-		};
-		dvConfig.spec.env.forEach( (element: IEnv) => {
-			const key: string = element.name.slice(prefix.length+1);
-			datasourceConfig.entries.set(key, element.value);
-		});
-		return datasourceConfig;
 	}
 
 	async function initializeGlobals(createTestDataSourceEntry: boolean) {
@@ -81,35 +68,34 @@ describe('Commands Tests', () => {
 		const createdDS = await createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, vdbFile);
 		should.equal(true, createdDS, 'Execution of the Create DataSource command returned false');
 
-		const dvConfig2: IDVConfig = utils.loadModelFromFile(vdbFile);
+		const dvConfig2: DataVirtConfig = utils.loadModelFromFile(vdbFile);
 		dvConfig2.should.deep.equal(dvConfig);
-		dvConfig2.spec.env.length.should.deep.equal(mongoTempl.entries.size);
+		dvConfig2.spec.datasources[0].properties.length.should.deep.equal(mongoTempl.properties.length);
 
 		dvConfig = utils.loadModelFromFile(vdbFile);
-		dsConfig = prepareDataSource(dvConfig, dsName, mongoDSType);
+		dsConfig = utils.getDataSourceByName(dvConfig, dsName);
 
 		if (createTestDataSourceEntry === true) {
-			const oldLen: number = dvConfig.spec.env.length;
-
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, entryName, entryValue);
+			const oldLen: number = dvConfig.spec.datasources[0].properties.length;
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.DATASOURCE_ENTRY_TYPE_VALUE, entryName, entryValue);
 			should.equal(true, created, 'Execution of the Create DataSource Entry command returned false');
 
-			dvConfig.spec.env.length.should.equal(oldLen+1);
-			should.exist(dvConfig.spec.env.find( (element) => {
-				return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, entryName) && element.value === entryValue;
+			dvConfig.spec.datasources[0].properties.length.should.equal(oldLen+1);
+			should.exist(dvConfig.spec.datasources[0].properties.find( (element: Property) => {
+				return element.name === entryName && element.value === entryValue;
 			}));
 			dvConfig = utils.loadModelFromFile(vdbFile);
-			dsConfig = prepareDataSource(dvConfig, dsName, mongoDSType);
+			dsConfig = utils.getDataSourceByName(dvConfig, dsName);
 		}
 	}
 
-	async function createDataSourceEntryWithValidParameters(dvConfig: IDVConfig, dsConfig: IDataSourceConfig, vdbFile: string, entryName: string, entryValue: string) {
-		const oldLen: number = dvConfig.spec.env.length;
+	async function createDataSourceEntryWithValidParameters(dvConfig: DataVirtConfig, dsConfig: DataSourceConfig, vdbFile: string, entryName: string, entryValue: string) {
+		const oldLen: number = dvConfig.spec.datasources[0].properties.length;
 		const success = await editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, dsConfig, vdbFile, entryName, entryValue);
 		should.equal(true, success, 'Execution of the Edit DataSource command returned false');
-		dvConfig.spec.env.length.should.equal(oldLen);
-		should.exist(dvConfig.spec.env.find( (element) => {
-			return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, entryName) && element.value === entryValue;
+		dvConfig.spec.datasources[0].properties.length.should.equal(oldLen);
+		should.exist(dvConfig.spec.datasources[0].properties.find( (element: Property) => {
+			return element.name === entryName && element.value === entryValue;
 		}));
 	}
 
@@ -128,38 +114,38 @@ describe('Commands Tests', () => {
 		});
 
 		it('should create a datasource entry inside a datasource when handing over valid parameters', async () => {
-			const oldLen: number = dvConfig.spec.env.length;
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, entryName, entryValue);
+			const oldLen: number = dvConfig.spec.datasources[0].properties.length;
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.DATASOURCE_ENTRY_TYPE_VALUE, entryName, entryValue);
 			should.equal(true, created, 'Execution of the Create DataSource Entry command returned false');
 
-			dvConfig.spec.env.length.should.equal(oldLen+1);
-			should.exist(dvConfig.spec.env.find( (element) => {
-				return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, entryName) && element.value === entryValue;
+			dvConfig.spec.datasources[0].properties.length.should.equal(oldLen+1);
+			should.exist(dvConfig.spec.datasources[0].properties.find( (element: Property) => {
+				return element.name === entryName && element.value === entryValue;
 			}));
 		});
 
 		it('should not create a datasource entry inside a datasource when handing over invalid model', async () => {
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(undefined, dsConfig, vdbFile, entryName, entryValue);
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(undefined, dsConfig, vdbFile, constants.DATASOURCE_ENTRY_TYPE_VALUE, entryName, entryValue);
 			should.equal(false, created, 'Execution of the Create DataSource Entry command returned true, but should not.');
 		});
 
 		it('should not create a datasource entry inside a datasource when handing over invalid datasource config', async () => {
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, undefined, vdbFile, entryName, entryValue);
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, undefined, vdbFile, constants.DATASOURCE_ENTRY_TYPE_VALUE, entryName, entryValue);
 			should.equal(false, created, 'Execution of the Create DataSource Entry command returned true, but should not.');
 		});
 
 		it('should not create a datasource entry inside a datasource when handing over invalid file', async () => {
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, undefined, entryName, entryValue);
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, undefined, constants.DATASOURCE_ENTRY_TYPE_VALUE, entryName, entryValue);
 			should.equal(false, created, 'Execution of the Create DataSource Entry command returned true, but should not.');
 		});
 
 		it('should not create a datasource entry inside a datasource when handing over invalid entry key', async () => {
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, undefined, entryValue);
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.DATASOURCE_ENTRY_TYPE_VALUE, undefined, entryValue);
 			should.equal(false, created, 'Execution of the Create DataSource Entry command returned true, but should not.');
 		});
 
 		it('should not create a datasource entry inside a datasource when handing over invalid entry value', async () => {
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, entryName, undefined);
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.DATASOURCE_ENTRY_TYPE_VALUE, entryName, undefined);
 			should.equal(false, created, 'Execution of the Create DataSource Entry command returned true, but should not.');
 		});
 	});
@@ -223,40 +209,40 @@ describe('Commands Tests', () => {
 			cleanupVDB();
 		});
 
-		it('should return true when modifying a datasource entry with valid parameters', async () => {
-			const oldLen: number = dvConfig.spec.env.length;
+		it('should return true when deleting a datasource entry with valid parameters', async () => {
+			const oldLen: number = dvConfig.spec.datasources[0].properties.length;
 			const success = await deleteDSEntryCommand.handleDataSourceEntryDeletion(dvConfig, dsConfig, vdbFile, entryName);
-			should.equal(true, success, 'Execution of the Edit DataSource command returned false');
+			should.equal(true, success, 'Execution of the Delete DataSource command returned false');
 
-			dvConfig.spec.env.length.should.equal(oldLen-1);
-			should.not.exist(dvConfig.spec.env.find( (element) => {
-				return element.name === utils.generateFullDataSourceConfigEntryKey(dsConfig, entryName);
+			dvConfig.spec.datasources[0].properties.length.should.equal(oldLen-1);
+			should.not.exist(dvConfig.spec.datasources[0].properties.find( (element: Property) => {
+				return element.name === entryName;
 			}));
 		});
 
 		it('should return false when deleting a datasource entry with invalid model', async () => {
 			const success = await deleteDSEntryCommand.handleDataSourceEntryDeletion(undefined, dsConfig, vdbFile, entryName);
-			should.equal(false, success, 'Execution of the Edit DataSource command returned true, but it should not');
+			should.equal(false, success, 'Execution of the Delete DataSource command returned true, but it should not');
 		});
 
 		it('should return false when deleting a datasource entry with invalid datasource config', async () => {
 			const success = await deleteDSEntryCommand.handleDataSourceEntryDeletion(dvConfig, undefined, vdbFile, entryName);
-			should.equal(false, success, 'Execution of the Edit DataSource command returned true, but it should not');
+			should.equal(false, success, 'Execution of the Delete DataSource command returned true, but it should not');
 		});
 
 		it('should return false when deleting a datasource entry with invalid file', async () => {
 			const success = await deleteDSEntryCommand.handleDataSourceEntryDeletion(dvConfig, dsConfig, undefined, entryName);
-			should.equal(false, success, 'Execution of the Edit DataSource command returned true, but it should not');
+			should.equal(false, success, 'Execution of the Delete DataSource command returned true, but it should not');
 		});
 
 		it('should return false when deleting a datasource entry with invalid key', async () => {
 			const success = await deleteDSEntryCommand.handleDataSourceEntryDeletion(dvConfig, dsConfig, vdbFile, undefined);
-			should.equal(false, success, 'Execution of the Edit DataSource command returned true, but it should not');
+			should.equal(false, success, 'Execution of the Delete DataSource command returned true, but it should not');
 		});
 
 		it('should return false when deleting a datasource entry with not existing key', async () => {
 			const success = await deleteDSEntryCommand.handleDataSourceEntryDeletion(dvConfig, dsConfig, vdbFile, 'NOT_EXISTING');
-			should.equal(false, success, 'Execution of the Edit DataSource command returned true, but it should not');
+			should.equal(false, success, 'Execution of the Delete DataSource command returned true, but it should not');
 		});
 	});
 });

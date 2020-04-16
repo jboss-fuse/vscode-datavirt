@@ -5,18 +5,24 @@ metadata:
 spec:
   replicas: 1
   env:
-    - name: SPRING_TEIID_DATA_MONGODB_MYPERSONALMONGODB_REMOTE_SERVER_LIST
-      value: ""
-    - name: SPRING_TEIID_DATA_MONGODB_MYPERSONALMONGODB_USER
-      value: Paolo
-    - name: SPRING_TEIID_DATA_MONGODB_MYPERSONALMONGODB_PASSWORD
-      value: ""
-    - name: SPRING_TEIID_DATA_MONGODB_MYPERSONALMONGODB_DATABASE
-      value: ""
-    - name: SPRING_TEIID_DATA_MONGODB_MYPERSONALMONGODB_AUTH_DATABASE
-      value: ""
-    - name: SPRING_TEIID_DATA_MONGODB_MYPERSONALMONGODB_SSL
-      value: ""
+    - name: myvar
+      value: test
+  datasources:
+    - name: mariadb
+      type: mysql
+      properties:
+        - name: user
+          value: Paolo
+        - name: password
+          valueFrom:
+            secretKeyRef:
+              name: sample-ds
+              key: passwd
+        - name: email
+          valueFrom:
+            configMapKeyRef:
+              name: sample-ds
+              key: mail
   build:
     source:
       ddl: >
