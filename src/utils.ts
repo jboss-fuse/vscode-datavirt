@@ -60,7 +60,7 @@ export function validateFileNotExisting(name: string): string {
 	return undefined;
 }
 
-export function generateDataSourceEntryValue(key: string, value: string, ref: ValueFrom): string {
+export function generateDataSourceEntryValueForLabel(value: string, ref: ValueFrom): string {
 	if (ref) {
 		if (isSecretRef(ref.valueFrom)) {
 			const secretRef: SecretRef = ref.valueFrom;
@@ -74,15 +74,21 @@ export function generateDataSourceEntryValue(key: string, value: string, ref: Va
 }
 
 export function getDataSourceEntryByName(name: string, datasource: DataSourceConfig): Property | undefined {
-	return datasource.properties.find( (value: Property) => {
-		return value.name === name;
-	});
+	if (datasource && datasource.properties) {
+		return datasource.properties.find( (value: Property) => {
+			return value.name === name;
+		});
+	}
+	return undefined;
 }
 
 export function getDataSourceByName(dvConfig: DataVirtConfig, name: string): DataSourceConfig | undefined {
-	return dvConfig.spec.datasources.find( (value: DataSourceConfig) => {
-		return value.name === name;
-	});
+	if (dvConfig && dvConfig.spec && dvConfig.spec.datasources) {
+		return dvConfig.spec.datasources.find( (value: DataSourceConfig) => {
+			return value.name === name;
+		});
+	}
+	return undefined;
 }
 
 export function isSecretRef(ref: SecretRef | ConfigMapRef): ref is SecretRef {
@@ -94,7 +100,7 @@ export function isConfigMapRef(ref: SecretRef | ConfigMapRef): ref is ConfigMapR
 }
 
 export function checkForValue(value: any, valueName: string, missing: string): string {
-	let text: string = missing;
+	let text: string = missing ? missing : '';
 	if (!value) {
 		if (text) {
 			text += ', ';

@@ -22,7 +22,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as constants from '../constants';
 import * as utils from '../utils';
-import { DataVirtConfig } from '../model/DataVirtModel';
+import { DataVirtConfig, ConfigMapRef, KeyRef, SecretRef, DataSourceConfig, ValueFrom } from '../model/DataVirtModel';
 
 chai.use(sinonChai);
 const should = chai.should();
@@ -107,6 +107,136 @@ describe('Utils', () => {
 			should.exist(yamlDoc2);
 			yamlDoc.should.deep.equal(yamlDoc2);
 			fs.unlinkSync(fpTest);
+		});
+	});
+
+	context('Type Guards', () => {
+		it('should return true if trying to check for isSecretRef with a SecretRef parameter', () => {
+			should.equal(true, utils.isSecretRef(new SecretRef(new KeyRef('name', 'key'))));
+		});
+
+		it('should return false if trying to check for isSecretRef with a ConfigMapRef parameter', () => {
+			should.not.equal(true, utils.isSecretRef(new ConfigMapRef(new KeyRef('name', 'key'))));
+		});
+
+		it('should return false if trying to check for isSecretRef with an undefined parameter', () => {
+			should.not.equal(true, utils.isSecretRef(undefined));
+		});
+
+		it('should return true if trying to check for isConfigMapRef with a ConfigMapRef parameter', () => {
+			should.equal(true, utils.isConfigMapRef(new ConfigMapRef(new KeyRef('name', 'key'))));
+		});
+
+		it('should return false if trying to check for isConfigMapRef with a SecretRef parameter', () => {
+			should.not.equal(true, utils.isConfigMapRef(new SecretRef(new KeyRef('name', 'key'))));
+		});
+
+		it('should return false if trying to check for isConfigMapRef with an undefined parameter', () => {
+			should.not.equal(true, utils.isConfigMapRef(undefined));
+		});
+	});
+
+	context('checkForValue', () => {
+		it('should not return a missing property name if value is not undefined or empty', () => {
+			const newText: string = utils.checkForValue(new KeyRef('name', 'key'), 'MyValue', '');
+			newText.should.equal('');
+		});
+
+		it('should return the missing property name MyValue if value is undefined', () => {
+			const newText: string = utils.checkForValue(undefined, 'MyValue', '');
+			newText.should.equal('MyValue');
+		});
+
+		it('should return the missing property in addition to existing ones if value is undefined', () => {
+			const newText: string = utils.checkForValue(undefined, 'MyValue', 'MyOtherValue');
+			newText.should.equal('MyOtherValue, MyValue');
+		});
+	});
+
+	context('DataSource/-Entry Utils', () => {
+
+		let yamlDoc: DataVirtConfig;
+
+		beforeEach( () => {
+			const name: string = 'test';
+			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
+			yamlDoc = utils.loadModelFromFile(fpOrig);
+			should.exist(yamlDoc);
+		});
+
+		it('should return a datasource when the given name can be found', () => {
+			should.exist(utils.getDataSourceByName(yamlDoc, 'mariadb'));
+		});
+
+		it('should return undefined when no datasource with the given name can be found', () => {
+			should.not.exist(utils.getDataSourceByName(yamlDoc, 'not-existing-datasource'));
+		});
+
+		it('should return undefined when trying to get the datasource with an undefined name', () => {
+			should.not.exist(utils.getDataSourceByName(yamlDoc, undefined));
+		});
+
+		it('should return undefined when model has no datasources', () => {
+			yamlDoc.spec.datasources = undefined;
+			should.not.exist(utils.getDataSourceByName(yamlDoc, 'mariadb'));
+		});
+
+		it('should return undefined when model has no spec', () => {
+			yamlDoc.spec = undefined;
+			should.not.exist(utils.getDataSourceByName(yamlDoc, 'mariadb'));
+		});
+
+		it('should return undefined when model is undefined', () => {
+			yamlDoc = undefined;
+			should.not.exist(utils.getDataSourceByName(yamlDoc, 'mariadb'));
+		});
+
+		it('should return a datasource entry when the given name can be found', () => {
+			const dataSourceConfig: DataSourceConfig = utils.getDataSourceByName(yamlDoc, 'mariadb');
+			should.exist(dataSourceConfig);
+			should.exist(utils.getDataSourceEntryByName('email', dataSourceConfig));
+			should.exist(utils.getDataSourceEntryByName('user', dataSourceConfig));
+		});
+
+		it('should return undefined when no datasource entry with the given name can be found', () => {
+			const dataSourceConfig: DataSourceConfig = utils.getDataSourceByName(yamlDoc, 'mariadb');
+			should.exist(dataSourceConfig);
+			should.not.exist(utils.getDataSourceEntryByName('not-existing', dataSourceConfig));
+		});
+
+		it('should return undefined when trying to get the datasource entry with an undefined name', () => {
+			const dataSourceConfig: DataSourceConfig = utils.getDataSourceByName(yamlDoc, 'mariadb');
+			should.exist(dataSourceConfig);
+			should.not.exist(utils.getDataSourceEntryByName('not-existing', undefined));
+		});
+
+		it('should return undefined when datasource has no properties', () => {
+			const dataSourceConfig: DataSourceConfig = utils.getDataSourceByName(yamlDoc, 'mariadb');
+			should.exist(dataSourceConfig);
+			dataSourceConfig.properties = undefined;
+			should.not.exist(utils.getDataSourceEntryByName('not-existing', dataSourceConfig));
+		});
+
+		it('should return undefined when datasource is undefined', () => {
+			should.not.exist(utils.getDataSourceEntryByName('not-existing', undefined));
+		});
+	});
+
+	context('DataSource Entry Label Creation', () => {
+		it('should return the name of a non-reference as label with valid parameters', () => {
+			should.equal('myValue', utils.generateDataSourceEntryValueForLabel('myValue', undefined));
+		});
+
+		it('should return undefined for a non-reference with undefined value parameter', () => {
+			should.equal(undefined, utils.generateDataSourceEntryValueForLabel(undefined, undefined));
+		});
+
+		it('should return the key @ name for a secrets reference as label with valid parameters', () => {
+			should.equal('key @ name', utils.generateDataSourceEntryValueForLabel(undefined, new ValueFrom(new SecretRef(new KeyRef('name', 'key')))));
+		});
+
+		it('should return the key @ name for a configmap reference as label with valid parameters', () => {
+			should.equal('key @ name', utils.generateDataSourceEntryValueForLabel(undefined, new ValueFrom(new ConfigMapRef(new KeyRef('name', 'key')))));
 		});
 	});
 });

@@ -26,7 +26,7 @@ import * as constants from '../constants';
 import * as createVDBCommand from '../commands/CreateVDBCommand';
 import * as createDSCommand from '../commands/CreateDataSourceCommand';
 import * as createDSEntryCommand from '../commands/CreateDataSourceEntryCommand';
-import { DataVirtConfig, DataSourceConfig, Property } from '../model/DataVirtModel';
+import { DataVirtConfig, DataSourceConfig, Property, SecretRef } from '../model/DataVirtModel';
 import * as deleteDSEntryCommand from '../commands/DeleteDataSourceEntryCommand';
 import * as editDSEntryCommand from '../commands/EditDataSourceEntryCommand';
 import * as extension from '../extension';
@@ -89,7 +89,7 @@ describe('Commands Tests', () => {
 		}
 	}
 
-	async function createDataSourceEntryWithValidParameters(dvConfig: DataVirtConfig, dsConfig: DataSourceConfig, vdbFile: string, entryName: string, entryValue: string) {
+	async function editDataSourceEntryWithValidParameters(dvConfig: DataVirtConfig, dsConfig: DataSourceConfig, vdbFile: string, entryName: string, entryValue: string) {
 		const oldLen: number = dvConfig.spec.datasources[0].properties.length;
 		const success = await editDSEntryCommand.handleDataSourceEntryEdit(dvConfig, dsConfig, vdbFile, entryName, entryValue);
 		should.equal(true, success, 'Execution of the Edit DataSource command returned false');
@@ -121,6 +121,28 @@ describe('Commands Tests', () => {
 			dvConfig.spec.datasources[0].properties.length.should.equal(oldLen+1);
 			should.exist(dvConfig.spec.datasources[0].properties.find( (element: Property) => {
 				return element.name === entryName && element.value === entryValue;
+			}));
+		});
+
+		it('should create a secret reference datasource entry inside a datasource when handing over valid parameters', async () => {
+			const oldLen: number = dvConfig.spec.datasources[0].properties.length;
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.DATASOURCE_ENTRY_TYPE_SECRET, entryName, entryValue, 'refName', 'refKey');
+			should.equal(true, created, 'Execution of the Create DataSource Entry command returned false');
+
+			dvConfig.spec.datasources[0].properties.length.should.equal(oldLen+1);
+			should.exist(dvConfig.spec.datasources[0].properties.find( (element: Property) => {
+				return element.name === entryName && utils.isSecretRef(element.valueFrom.valueFrom) && element.valueFrom.valueFrom.secretKeyRef.key === 'refKey' && element.valueFrom.valueFrom.secretKeyRef.name === 'refName';
+			}));
+		});
+
+		it('should create a configmap reference datasource entry inside a datasource when handing over valid parameters', async () => {
+			const oldLen: number = dvConfig.spec.datasources[0].properties.length;
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.DATASOURCE_ENTRY_TYPE_CONFIGMAP, entryName, entryValue, 'refName', 'refKey');
+			should.equal(true, created, 'Execution of the Create DataSource Entry command returned false');
+
+			dvConfig.spec.datasources[0].properties.length.should.equal(oldLen+1);
+			should.exist(dvConfig.spec.datasources[0].properties.find( (element: Property) => {
+				return element.name === entryName && utils.isConfigMapRef(element.valueFrom.valueFrom) && element.valueFrom.valueFrom.configMapKeyRef.key === 'refKey' && element.valueFrom.valueFrom.configMapKeyRef.name === 'refName';
 			}));
 		});
 
@@ -161,11 +183,11 @@ describe('Commands Tests', () => {
 		});
 
 		it('should return true when modifying a datasource entry with valid parameters', async () => {
-			await createDataSourceEntryWithValidParameters(dvConfig, dsConfig, vdbFile, entryName, 'XYZVALUE');
+			await editDataSourceEntryWithValidParameters(dvConfig, dsConfig, vdbFile, entryName, 'XYZVALUE');
 		});
 
 		it('should return true when changing a datasource entry value to an empty string', async () => {
-			await createDataSourceEntryWithValidParameters(dvConfig, dsConfig, vdbFile, entryName, '');
+			await editDataSourceEntryWithValidParameters(dvConfig, dsConfig, vdbFile, entryName, '');
 		});
 
 		it('should return false when changing a datasource entry with an invalid model', async () => {

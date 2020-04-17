@@ -25,7 +25,7 @@ export class DataSourceEntryTreeNode extends DVTreeItem {
 	value: string | ValueFrom;
 
 	constructor(key: string, value: string, ref: ValueFrom) {
-		super('dv.datasourceentry', `${key}: ${utils.generateDataSourceEntryValue(key, value, ref) ? utils.generateDataSourceEntryValue(key, value, ref) : '<empty>'}`, vscode.TreeItemCollapsibleState.None);
+		super('dv.datasourceentry', `${key}: ${utils.generateDataSourceEntryValueForLabel(value, ref) ? utils.generateDataSourceEntryValueForLabel(value, ref) : '<empty>'}`, vscode.TreeItemCollapsibleState.None);
 		this.key = key;
 		this.value = value;
 	}
