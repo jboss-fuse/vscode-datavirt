@@ -75,6 +75,7 @@ export function editReferenceEntryType(dsEntryTreeNode: DataSourceEntryTreeNode,
 					} else if (utils.isConfigMapRef(ref.valueFrom)) {
 						newRefValue = new ConfigMapRef(new KeyRef(newRefName, newRefKey));
 					} else {
+						extension.log(`Error creating a datasource entry ${newRefKey} @ ${newRefName} in ${dsConfig.name}. The entry is neither a secret nor a config map. Please check and correct the sources in ${dsEntryTreeNode.getProject().file}.`);
 						return;
 					}
 					newRef = new ValueFrom(newRefValue);
