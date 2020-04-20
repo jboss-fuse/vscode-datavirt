@@ -22,7 +22,15 @@ import { DataSourcesTreeNode } from '../model/tree/DataSourcesTreeNode';
 import { DataVirtConfig, DataSourceConfig } from '../model/DataVirtModel';
 
 export async function createDataSourceCommand(dsTreeNode: DataSourcesTreeNode) {
-	const dsName: string = await vscode.window.showInputBox( {validateInput: utils.validateName, placeHolder: 'Enter the name of the new datasource'});
+	const dsName: string = await vscode.window.showInputBox( { validateInput: (name: string) => {
+		let msg: string = utils.validateName(name);
+		if (!msg) {
+			if (utils.getDataSourceByName(dsTreeNode.getProject().dvConfig, name)) {
+				msg = `There is already a datasource with the name ${name}.`;
+			}
+		}
+		return msg;
+	}, placeHolder: 'Enter the name of the new datasource'});
 	if (!dsName) {
 		return;
 	}
