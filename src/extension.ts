@@ -109,7 +109,7 @@ export function log(text) {
 		dataVirtExtensionOutputChannel = vscode.window.createOutputChannel('DataVirt Extension');
 	}
 	dataVirtExtensionOutputChannel.show();
-	dataVirtExtensionOutputChannel.append(text.toString());
+	dataVirtExtensionOutputChannel.append(`${text.toString()}\n`);
 }
 
 /* Used for testing purpose only*/
