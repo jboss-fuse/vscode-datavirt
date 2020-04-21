@@ -60,7 +60,7 @@ export function validateFileNotExisting(name: string): string {
 	return undefined;
 }
 
-export function generateDataSourceEntryValueForLabel(value: string, ref: ValueFrom): string {
+export function generateReferenceValueForLabel(value: string, ref: ValueFrom): string {
 	if (ref) {
 		if (isSecretRef(ref.valueFrom)) {
 			const secretRef: SecretRef = ref.valueFrom;

@@ -19,23 +19,23 @@ import * as vscode from 'vscode';
 import { DVTreeItem } from './DVTreeItem';
 import { ValueFrom } from '../DataVirtModel';
 
-export class DataSourceEntryTreeNode extends DVTreeItem {
+export class EnvironmentVariableTreeNode extends DVTreeItem {
 
 	key: string;
 	value: string | ValueFrom;
 
 	constructor(key: string, value: string, ref: ValueFrom) {
-		super('dv.datasourceentry', `${key}: ${utils.generateReferenceValueForLabel(value, ref) ? utils.generateReferenceValueForLabel(value, ref) : '<empty>'}`, vscode.TreeItemCollapsibleState.None);
+		super('dv.environmentvariable', `${key}: ${utils.generateReferenceValueForLabel(value, ref) ? utils.generateReferenceValueForLabel(value, ref) : '<empty>'}`, vscode.TreeItemCollapsibleState.None);
 		this.key = key;
 		this.value = value;
 	}
 
 	getIconName(): string {
-		return `dv_datasource_entry.gif`;
+		return `dv_environment_variable.gif`;
 	}
 
 	getToolTip(): string {
-		return `Data Source Entry: ${this.label}`;
+		return `Environment Variable: ${this.label}`;
 	}
 
 	getKey(): string {
