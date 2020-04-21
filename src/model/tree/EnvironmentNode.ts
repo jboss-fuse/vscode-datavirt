@@ -14,44 +14,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as utils from '../../utils';
 import * as vscode from 'vscode';
+import { Property } from '../DataVirtModel';
 import { DVTreeItem } from './DVTreeItem';
-import { ValueFrom } from '../DataVirtModel';
+import { EnvironmentVariableTreeNode } from './EnvironmentVariableTreeNode';
 
-export class DataSourceEntryTreeNode extends DVTreeItem {
+export class EnvironmentTreeNode extends DVTreeItem {
 
-	key: string;
-	value: string | ValueFrom;
+	environment: Property[];
 
-	constructor(key: string, value: string, ref: ValueFrom) {
-		super('dv.datasourceentry', `${key}: ${utils.generateReferenceValueForLabel(value, ref) ? utils.generateReferenceValueForLabel(value, ref) : '<empty>'}`, vscode.TreeItemCollapsibleState.None);
-		this.key = key;
-		this.value = value;
+	constructor(label: string, environment: Property[]) {
+		super('dv.environment', label, vscode.TreeItemCollapsibleState.Collapsed);
+		this.environment = environment;
 	}
 
 	getIconName(): string {
-		return `dv_datasource_entry.gif`;
+		return 'dv_environment.svg';
 	}
 
 	getToolTip(): string {
-		return `Data Source Entry: ${this.label}`;
+		return `Environment Variables`;
 	}
 
-	getKey(): string {
-		return this.key;
-	}
-
-	setKey(key: string): void {
-		this.key = key;
-		this.label = key;
-	}
-
-	getValue(): string | ValueFrom {
-		return this.value;
-	}
-
-	setValue(value: string): void {
-		this.value = value;
+	initialize(): void {
+		if (this.environment) {
+			this.environment.forEach( (element: Property) => {
+				const newItem: EnvironmentVariableTreeNode = new EnvironmentVariableTreeNode(element.name, element.value, element.valueFrom);
+				newItem.setProject(this.getProject());
+				newItem.parent = this;
+				if (this.children.indexOf(newItem) < 0) {
+					this.children.push(newItem);
+				}
+			});
+		}
 	}
 }

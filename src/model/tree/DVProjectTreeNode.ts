@@ -19,9 +19,11 @@ import { DataVirtConfig } from '../DataVirtModel';
 import { DataSourcesTreeNode } from './DataSourcesTreeNode';
 import { DVTreeItem } from './DVTreeItem';
 import { SchemaTreeNode } from './SchemaTreeNode';
+import { EnvironmentTreeNode } from './EnvironmentNode';
 
 export class DVProjectTreeNode extends DVTreeItem {
 	dataSourcesNode: DataSourcesTreeNode;
+	environmentNode: EnvironmentTreeNode;
 	schemaNode: SchemaTreeNode;
 	dvConfig: DataVirtConfig;
 	file: string;
@@ -49,6 +51,10 @@ export class DVProjectTreeNode extends DVTreeItem {
 		return this.schemaNode;
 	}
 
+	getEnvironmentNode(): EnvironmentTreeNode {
+		return this.environmentNode;
+	}
+
 	getFile(): string {
 		return this.file;
 	}
@@ -61,6 +67,12 @@ export class DVProjectTreeNode extends DVTreeItem {
 		this.dataSourcesNode.parent = this;
 		this.dataSourcesNode.initialize();
 		this.children.push(this.dataSourcesNode);
+
+		this.environmentNode = new EnvironmentTreeNode('Environment', this.dvConfig.spec.env);
+		this.environmentNode.setProject(this.getProject());
+		this.environmentNode.parent = this;
+		this.environmentNode.initialize();
+		this.children.push(this.environmentNode);
 
 		this.schemaNode = new SchemaTreeNode('Schema', this.getProject().dvConfig.spec.build.source.ddl);
 		this.schemaNode.setProject(this.getProject());

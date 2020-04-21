@@ -224,19 +224,19 @@ describe('Utils', () => {
 
 	context('DataSource Entry Label Creation', () => {
 		it('should return the name of a non-reference as label with valid parameters', () => {
-			should.equal('myValue', utils.generateDataSourceEntryValueForLabel('myValue', undefined));
+			should.equal('myValue', utils.generateReferenceValueForLabel('myValue', undefined));
 		});
 
 		it('should return undefined for a non-reference with undefined value parameter', () => {
-			should.equal(undefined, utils.generateDataSourceEntryValueForLabel(undefined, undefined));
+			should.equal(undefined, utils.generateReferenceValueForLabel(undefined, undefined));
 		});
 
 		it('should return the key @ name for a secrets reference as label with valid parameters', () => {
-			should.equal('key @ name', utils.generateDataSourceEntryValueForLabel(undefined, new ValueFrom(new SecretRef(new KeyRef('name', 'key')))));
+			should.equal('key @ name', utils.generateReferenceValueForLabel(undefined, new ValueFrom(new SecretRef(new KeyRef('name', 'key')))));
 		});
 
 		it('should return the key @ name for a configmap reference as label with valid parameters', () => {
-			should.equal('key @ name', utils.generateDataSourceEntryValueForLabel(undefined, new ValueFrom(new ConfigMapRef(new KeyRef('name', 'key')))));
+			should.equal('key @ name', utils.generateReferenceValueForLabel(undefined, new ValueFrom(new ConfigMapRef(new KeyRef('name', 'key')))));
 		});
 	});
 });
