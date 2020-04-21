@@ -17,33 +17,33 @@
 import * as extension from '../extension';
 import * as utils from '../utils';
 import * as vscode from 'vscode';
-import { DataSourceEntryTreeNode } from '../model/tree/DataSourceEntryTreeNode';
-import { DataVirtConfig, DataSourceConfig, Property, ValueFrom, SecretRef, ConfigMapRef, KeyRef } from '../model/DataVirtModel';
+import { DataVirtConfig, Property, ValueFrom, SecretRef, ConfigMapRef, KeyRef } from '../model/DataVirtModel';
+import { EnvironmentVariableTreeNode } from '../model/tree/EnvironmentVariableTreeNode';
 
-export function editDataSourceEntryCommand(dsEntryTreeNode: DataSourceEntryTreeNode) {
-	const dsConfig: DataSourceConfig = dsEntryTreeNode.getParent().dataSourceConfig;
-	const entry: Property = utils.getDataSourceEntryByName(dsEntryTreeNode.getKey(), dsConfig);
+export function editEnvironmentVariableCommand(envVarTreeNode: EnvironmentVariableTreeNode) {
+	const environment: Property[] = envVarTreeNode.getParent().environment;
+	const entry: Property = utils.getEnvironmentVariableByName(envVarTreeNode.getKey(), environment);
 	if (entry.valueFrom) {
-		editReferenceEntryType(dsEntryTreeNode, dsConfig, entry);
+		editReferenceEntryType(envVarTreeNode, environment, entry);
 	} else {
-		editValueEntryType(dsEntryTreeNode, dsConfig, entry);
+		editValueEntryType(envVarTreeNode, environment, entry);
 	}
 }
 
-export function editValueEntryType(dsEntryTreeNode: DataSourceEntryTreeNode, dsConfig: DataSourceConfig, entry: Property) {
+export function editValueEntryType(envVarTreeNode: EnvironmentVariableTreeNode, environment: Property[], entry: Property) {
 	vscode.window.showInputBox( { prompt: 'Enter a new value', placeHolder: `${entry.value ? entry : '<empty>'}`, value: entry.value })
 		.then( ( newValue: string) => {
 			if (!newValue) {
 				return;
 			}
-			handleDataSourceEntryEdit(dsEntryTreeNode.getProject().dvConfig, dsConfig, dsEntryTreeNode.getProject().getFile(), dsEntryTreeNode.getKey(), newValue)
+			handleEnvironmentVariableEdit(envVarTreeNode.getProject().dvConfig, environment, envVarTreeNode.getProject().getFile(), envVarTreeNode.getKey(), newValue)
 				.then( (success: boolean) => {
-					showFeedback(success, dsEntryTreeNode.getKey(), dsConfig.name);
+					showFeedback(success, envVarTreeNode.getKey());
 				});
 		});
 }
 
-export function editReferenceEntryType(dsEntryTreeNode: DataSourceEntryTreeNode, dsConfig: DataSourceConfig, entry: Property) {
+export function editReferenceEntryType(envVarTreeNode: EnvironmentVariableTreeNode, environment: Property[], entry: Property) {
 	const ref: ValueFrom = entry.valueFrom;
 	let oldName: string;
 	let oldKey: string;
@@ -75,31 +75,31 @@ export function editReferenceEntryType(dsEntryTreeNode: DataSourceEntryTreeNode,
 					} else if (utils.isConfigMapRef(ref.valueFrom)) {
 						newRefValue = new ConfigMapRef(new KeyRef(newRefName, newRefKey));
 					} else {
-						extension.log(`Error modifying a datasource entry ${newRefKey} @ ${newRefName} in ${dsConfig.name}. The entry is neither a secret nor a config map. Please check and correct the sources in ${dsEntryTreeNode.getProject().file}.`);
+						extension.log(`Error modifying an environment variable ${newRefKey} @ ${newRefName}. The entry is neither a secret nor a config map. Please check and correct the sources in ${envVarTreeNode.getProject().file}.`);
 						return;
 					}
 					newRef = new ValueFrom(newRefValue);
-					handleDataSourceEntryEdit(dsEntryTreeNode.getProject().dvConfig, dsConfig, dsEntryTreeNode.getProject().getFile(), dsEntryTreeNode.getKey(), undefined, newRef)
+					handleEnvironmentVariableEdit(envVarTreeNode.getProject().dvConfig, environment, envVarTreeNode.getProject().getFile(), envVarTreeNode.getKey(), undefined, newRef)
 						.then( (success: boolean) => {
-							showFeedback(success, dsEntryTreeNode.getKey(), dsConfig.name);
+							showFeedback(success, envVarTreeNode.getKey());
 						});
 				});
 		});
 }
 
-function showFeedback(success: boolean, key: string, dsName: string) {
+function showFeedback(success: boolean, key: string) {
 	if (success) {
-		vscode.window.showInformationMessage(`DataSource entry ${key} has been modified...`);
+		vscode.window.showInformationMessage(`Environment variable ${key} has been modified...`);
 	} else {
-		vscode.window.showErrorMessage(`An error occured when trying to modify the datasource entry ${key} in ${dsName}...`);
+		vscode.window.showErrorMessage(`An error occured when trying to modify the environment variable ${key}...`);
 	}
 }
 
-export function handleDataSourceEntryEdit(dvConfig: DataVirtConfig, dsConfig: DataSourceConfig, file: string, key: string, newValue: string, valueFrom?: ValueFrom): Promise<boolean> {
+export function handleEnvironmentVariableEdit(dvConfig: DataVirtConfig, environment: Property[], file: string, key: string, newValue: string, valueFrom?: ValueFrom): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
-		if (dvConfig && dsConfig && file && key) {
+		if (dvConfig && environment && file && key) {
 			try {
-				const entry: Property = utils.getDataSourceEntryByName(key, dsConfig);
+				const entry: Property = utils.getEnvironmentVariableByName(key, environment);
 				if (entry) {
 					if (valueFrom) {
 						// its a valueFrom reference
@@ -107,15 +107,11 @@ export function handleDataSourceEntryEdit(dvConfig: DataVirtConfig, dsConfig: Da
 					} else if (newValue !== undefined) {
 						// its a plain string value
 						entry.value = newValue ? newValue : '';
-					} else {
-						extension.log(`handleDataSourceEntryEdit: Unable to modify the datasource entry ${key} in ${dsConfig ? dsConfig.name : '<Unknown>'} because the key does not exist...`);
-						resolve(false);
-						return false;
 					}
 					utils.saveModelToFile(dvConfig, file);
 					resolve(true);
 				} else {
-					extension.log(`handleDataSourceEntryEdit: Unable to modify the datasource entry ${key} in ${dsConfig ? dsConfig.name : '<Unknown>'} because the key does not exist...`);
+					extension.log(`handleEnvironmentVariableEdit: Unable to modify the environment variable ${key} because the key does not exist...`);
 					resolve(false);
 				}
 			} catch (error) {
@@ -123,7 +119,7 @@ export function handleDataSourceEntryEdit(dvConfig: DataVirtConfig, dsConfig: Da
 				resolve(false);
 			}
 		} else {
-			extension.log(`handleDataSourceEntryEdit: Unable to modify the datasource entry ${key} in ${dsConfig ? dsConfig.name : '<Unknown>'}...`);
+			extension.log(`handleEnvironmentVariableEdit: Unable to modify the environment variable ${key}...`);
 			resolve(false);
 		}
 	});

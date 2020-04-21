@@ -18,12 +18,12 @@ import * as constants from '../constants';
 import * as extension from '../extension';
 import * as utils from '../utils';
 import * as vscode from 'vscode';
-import { DataSourceTreeNode } from '../model/tree/DataSourceTreeNode';
-import { DataVirtConfig, DataSourceConfig, ValueFrom, ConfigMapRef, SecretRef, Property, KeyRef } from '../model/DataVirtModel';
+import { DataVirtConfig, ValueFrom, ConfigMapRef, SecretRef, Property, KeyRef } from '../model/DataVirtModel';
+import { EnvironmentTreeNode } from '../model/tree/EnvironmentNode';
 
-export async function createDataSourceEntryCommand(dsNode: DataSourceTreeNode) {
-	if (dsNode) {
-		let entryName: string = await vscode.window.showInputBox( { placeHolder: 'Enter the name of the new entry' });
+export async function createEnvironmentVariableCommand(envNode: EnvironmentTreeNode) {
+	if (envNode) {
+		let entryName: string = await vscode.window.showInputBox( { placeHolder: 'Enter the name of the new variable' });
 		if (!entryName) {
 			return;
 		}
@@ -47,47 +47,47 @@ export async function createDataSourceEntryCommand(dsNode: DataSourceTreeNode) {
 			return;
 		}
 
-		let entryValue:string = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new entry' });
+		let entryValue:string = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new variable' });
 		if (!entryValue) {
 			return;
 		}
 
-		const yaml: DataVirtConfig = dsNode.getProject().dvConfig;
-		const file: string = dsNode.getProject().file;
-		let success: boolean = await handleDataSourceEntryCreation(yaml, dsNode.dataSourceConfig, file, entryType, entryName, entryValue, refName, refKey);
+		const yaml: DataVirtConfig = envNode.getProject().dvConfig;
+		const file: string = envNode.getProject().file;
+		let success: boolean = await handleEnvironmentVariableCreation(yaml, envNode.environment, file, entryType, entryName, entryValue, refName, refKey);
 		if (success) {
-			vscode.window.showInformationMessage(`New datasource entry ${entryName} has been created successfully...`);
+			vscode.window.showInformationMessage(`New environment variable ${entryName} has been created successfully...`);
 		} else {
-			vscode.window.showErrorMessage(`An error occured when trying to create a new datasource entry ${entryName} in datasource ${dsNode.label}...`);
+			vscode.window.showErrorMessage(`An error occured when trying to create a new environment variable ${entryName}...`);
 		}
 	}
 }
 
-export function handleDataSourceEntryCreation(dvConfig: DataVirtConfig, dsConfig: DataSourceConfig, file: string, entryType: string, entryName: string, entryValue: string, refName?: string, refKey?: string): Promise<boolean> {
+export function handleEnvironmentVariableCreation(dvConfig: DataVirtConfig, enviroment: Property[], file: string, entryType: string, entryName: string, entryValue: string, refName?: string, refKey?: string): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
-		if (dvConfig && entryType && dsConfig && file && entryName && entryValue) {
+		if (dvConfig && entryType && enviroment && file && entryName) {
 			try {
-				const entry: Property = utils.getDataSourceEntryByName(entryName, dsConfig);
+				const entry: Property = utils.getEnvironmentVariableByName(entryName, enviroment);
 				if (!entry) {
-					setDataSourceEntryValue(dsConfig.properties, entryType, entryName, entryValue, refName, refKey);
+					setEnvironmentVariableValue(enviroment, entryType, entryName, entryValue, refName, refKey);
 					utils.createOrUpdateLocalReferenceFile(refName, refKey, entryValue, entryType);
+					utils.saveModelToFile(dvConfig, file);
+					resolve(true);
 				} else {
 					resolve(false);
 				}
-				utils.saveModelToFile(dvConfig, file);
-				resolve(true);
 			} catch (error) {
 				extension.log(error);
 				resolve(false);
 			}
 		} else {
-			extension.log(`handleDataSourceEntryCreation: Unable to create the datasource entry ${entryName ? entryName : '<Unknown>'} in datasource ${dsConfig ? dsConfig.name : '<Unknown>'}...`);
+			extension.log(`handleEnvironmentVariableCreation: Unable to create the environment variable ${entryName ? entryName : '<Unknown>'}...`);
 			resolve(false);
 		}
 	});
 }
 
-function setDataSourceEntryValue(entries: Property[], entryType: string, entryName: string, entryValue: string, refName?: string, refKey?: string): void {
+function setEnvironmentVariableValue(entries: Property[], entryType: string, entryName: string, entryValue: string, refName?: string, refKey?: string): void {
 	let entry: Property;
 	if (entryType === constants.REFERENCE_TYPE_SECRET) {
 		const secretRef = new SecretRef(new KeyRef(refName, refKey));
@@ -102,3 +102,4 @@ function setDataSourceEntryValue(entries: Property[], entryType: string, entryNa
 	}
 	entries.push(entry);
 }
+
