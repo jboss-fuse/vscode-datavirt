@@ -23,7 +23,12 @@ import { EnvironmentTreeNode } from '../model/tree/EnvironmentNode';
 
 export async function createEnvironmentVariableCommand(envNode: EnvironmentTreeNode) {
 	if (envNode) {
-		let entryName: string = await vscode.window.showInputBox( { placeHolder: 'Enter the name of the new variable' });
+		let entryName: string = await vscode.window.showInputBox( { validateInput: (value: string) => {
+			if(utils.getEnvironmentVariableByName(value, envNode.environment)) {
+				return `There is already an environment variable with the name ${value}.`;
+			}
+			return undefined;
+		}, placeHolder: 'Enter the name of the new variable' });
 		if (!entryName) {
 			return;
 		}
@@ -102,4 +107,3 @@ function setEnvironmentVariableValue(entries: Property[], entryType: string, ent
 	}
 	entries.push(entry);
 }
-
