@@ -67,7 +67,17 @@
 			},
 			{
 				"title": "New",
-				"command": "datavirt.create.envvar",
+				"command": "datavirt.create.envvar.value",
+				"category": "dv"
+			},
+			{
+				"title": "New from Secret",
+				"command": "datavirt.create.envvar.secret",
+				"category": "dv"
+			},
+			{
+				"title": "New from ConfigMap",
+				"command": "datavirt.create.envvar.configmap",
 				"category": "dv"
 			},
 			{
@@ -117,7 +127,15 @@
 					"when": "false"
 				},
 				{
-					"command": "datavirt.create.envvar",
+					"command": "datavirt.create.envvar.value",
+					"when": "false"
+				},
+				{
+					"command": "datavirt.create.envvar.secret",
+					"when": "false"
+				},
+				{
+					"command": "datavirt.create.envvar.configmap",
 					"when": "false"
 				},
 				{
@@ -172,7 +190,17 @@
 				},
 				{
 					"group": "dv",
-					"command": "datavirt.create.envvar",
+					"command": "datavirt.create.envvar.value",
+					"when": "viewItem == dv.environment"
+				},
+				{
+					"group": "dv",
+					"command": "datavirt.create.envvar.secret",
+					"when": "viewItem == dv.environment"
+				},
+				{
+					"group": "dv",
+					"command": "datavirt.create.envvar.configmap",
 					"when": "viewItem == dv.environment"
 				},
 				{
