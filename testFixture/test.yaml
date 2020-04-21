@@ -5,8 +5,8 @@ metadata:
 spec:
   replicas: 1
   env:
-    - name: myvar
-      value: test
+    - name: newkey
+      value: newvalue
   datasources:
     - name: mariadb
       type: mysql

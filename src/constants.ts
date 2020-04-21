@@ -49,11 +49,11 @@ export const RELATIONAL_DB_TYPES: string[] = [
 	'vertica',
 ];
 
-export const DATASOURCE_ENTRY_TYPE_SECRET: string = 'Secret';
-export const DATASOURCE_ENTRY_TYPE_CONFIGMAP: string = 'ConfigMap';
-export const DATASOURCE_ENTRY_TYPE_VALUE: string = 'Value';
-export const DATASOURCE_VALUE_TYPES: string[] = [
-	DATASOURCE_ENTRY_TYPE_VALUE,
-	DATASOURCE_ENTRY_TYPE_SECRET,
-	DATASOURCE_ENTRY_TYPE_CONFIGMAP
+export const REFERENCE_TYPE_SECRET: string = 'Secret';
+export const REFERENCE_TYPE_CONFIGMAP: string = 'ConfigMap';
+export const REFERENCE_TYPE_VALUE: string = 'Value';
+export const REFERENCE_VALUE_TYPES: string[] = [
+	REFERENCE_TYPE_VALUE,
+	REFERENCE_TYPE_SECRET,
+	REFERENCE_TYPE_CONFIGMAP
 ];

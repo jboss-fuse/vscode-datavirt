@@ -26,6 +26,9 @@ export function loadModelFromFile(file: string): DataVirtConfig | undefined {
 	try {
 		const f = fs.readFileSync(file, 'utf8');
 		const yamlDoc:DataVirtConfig = YAML.parse(f);
+		// we need to initialize datasources and env arrays if not yet present to prevent issues
+		if (!yamlDoc.spec.datasources) yamlDoc.spec.datasources = new Array<DataSourceConfig>();
+		if (!yamlDoc.spec.env) yamlDoc.spec.env = new Array<Property>();
 		return yamlDoc;
 	} catch (err) {
 		log(err);
@@ -91,6 +94,15 @@ export function getDataSourceByName(dvConfig: DataVirtConfig, name: string): Dat
 	return undefined;
 }
 
+export function getEnvironmentVariableByName(name: string, enviroment: Property[]): Property | undefined {
+	if (enviroment) {
+		return enviroment.find( (value: Property) => {
+			return value.name === name;
+		});
+	}
+	return undefined;
+}
+
 export function isSecretRef(ref: SecretRef | ConfigMapRef): ref is SecretRef {
 	return ref && (ref as SecretRef).secretKeyRef !== undefined;
 }
@@ -109,3 +121,10 @@ export function checkForValue(value: any, valueName: string, missing: string): s
 	}
 	return text;
 }
+
+export function createOrUpdateLocalReferenceFile(refName: string, refKey: string, entryValue: string, entryType: string) {
+	// TODO: create or update the entry reference in a local yaml file for configMap OR secret format
+	// TODO: implement me!
+	log(`call to unimplemented function createOrUpdateLocalReferenceFile(${refName}, ${refKey}, ${entryValue}, ${entryType})...`);
+}
+

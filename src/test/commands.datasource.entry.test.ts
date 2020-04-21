@@ -77,7 +77,7 @@ describe('Commands Tests', () => {
 
 		if (createTestDataSourceEntry === true) {
 			const oldLen: number = dvConfig.spec.datasources[0].properties.length;
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.DATASOURCE_ENTRY_TYPE_VALUE, entryName, entryValue);
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.REFERENCE_TYPE_VALUE, entryName, entryValue);
 			should.equal(true, created, 'Execution of the Create DataSource Entry command returned false');
 
 			dvConfig.spec.datasources[0].properties.length.should.equal(oldLen+1);
@@ -115,7 +115,7 @@ describe('Commands Tests', () => {
 
 		it('should create a datasource entry inside a datasource when handing over valid parameters', async () => {
 			const oldLen: number = dvConfig.spec.datasources[0].properties.length;
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.DATASOURCE_ENTRY_TYPE_VALUE, entryName, entryValue);
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.REFERENCE_TYPE_VALUE, entryName, entryValue);
 			should.equal(true, created, 'Execution of the Create DataSource Entry command returned false');
 
 			dvConfig.spec.datasources[0].properties.length.should.equal(oldLen+1);
@@ -126,7 +126,7 @@ describe('Commands Tests', () => {
 
 		it('should create a secret reference datasource entry inside a datasource when handing over valid parameters', async () => {
 			const oldLen: number = dvConfig.spec.datasources[0].properties.length;
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.DATASOURCE_ENTRY_TYPE_SECRET, entryName, entryValue, 'refName', 'refKey');
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.REFERENCE_TYPE_SECRET, entryName, entryValue, 'refName', 'refKey');
 			should.equal(true, created, 'Execution of the Create DataSource Entry command returned false');
 
 			dvConfig.spec.datasources[0].properties.length.should.equal(oldLen+1);
@@ -137,7 +137,7 @@ describe('Commands Tests', () => {
 
 		it('should create a configmap reference datasource entry inside a datasource when handing over valid parameters', async () => {
 			const oldLen: number = dvConfig.spec.datasources[0].properties.length;
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.DATASOURCE_ENTRY_TYPE_CONFIGMAP, entryName, entryValue, 'refName', 'refKey');
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.REFERENCE_TYPE_CONFIGMAP, entryName, entryValue, 'refName', 'refKey');
 			should.equal(true, created, 'Execution of the Create DataSource Entry command returned false');
 
 			dvConfig.spec.datasources[0].properties.length.should.equal(oldLen+1);
@@ -147,27 +147,27 @@ describe('Commands Tests', () => {
 		});
 
 		it('should not create a datasource entry inside a datasource when handing over invalid model', async () => {
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(undefined, dsConfig, vdbFile, constants.DATASOURCE_ENTRY_TYPE_VALUE, entryName, entryValue);
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(undefined, dsConfig, vdbFile, constants.REFERENCE_TYPE_VALUE, entryName, entryValue);
 			should.equal(false, created, 'Execution of the Create DataSource Entry command returned true, but should not.');
 		});
 
 		it('should not create a datasource entry inside a datasource when handing over invalid datasource config', async () => {
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, undefined, vdbFile, constants.DATASOURCE_ENTRY_TYPE_VALUE, entryName, entryValue);
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, undefined, vdbFile, constants.REFERENCE_TYPE_VALUE, entryName, entryValue);
 			should.equal(false, created, 'Execution of the Create DataSource Entry command returned true, but should not.');
 		});
 
 		it('should not create a datasource entry inside a datasource when handing over invalid file', async () => {
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, undefined, constants.DATASOURCE_ENTRY_TYPE_VALUE, entryName, entryValue);
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, undefined, constants.REFERENCE_TYPE_VALUE, entryName, entryValue);
 			should.equal(false, created, 'Execution of the Create DataSource Entry command returned true, but should not.');
 		});
 
 		it('should not create a datasource entry inside a datasource when handing over invalid entry key', async () => {
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.DATASOURCE_ENTRY_TYPE_VALUE, undefined, entryValue);
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.REFERENCE_TYPE_VALUE, undefined, entryValue);
 			should.equal(false, created, 'Execution of the Create DataSource Entry command returned true, but should not.');
 		});
 
 		it('should not create a datasource entry inside a datasource when handing over invalid entry value', async () => {
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.DATASOURCE_ENTRY_TYPE_VALUE, entryName, undefined);
+			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.REFERENCE_TYPE_VALUE, entryName, undefined);
 			should.equal(false, created, 'Execution of the Create DataSource Entry command returned true, but should not.');
 		});
 	});
