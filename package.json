@@ -36,12 +36,12 @@
 	"contributes": {
 		"commands": [
 			{
-				"title": "Create a Virtual Database Definition (VDB)",
+				"title": "New Virtual Database Definition (VDB)",
 				"command": "datavirt.create.vdb",
 				"category": "dv"
 			},
 			{
-				"title": "Create a Datasource",
+				"title": "New Datasource",
 				"command": "datavirt.create.datasource",
 				"category": "dv"
 			},
@@ -51,47 +51,47 @@
 				"category": "dv"
 			},
 			{
-				"title": "Create an Entry",
+				"title": "New Property",
 				"command": "datavirt.create.datasourceentry",
 				"category": "dv"
 			},
 			{
-				"title": "Modify Entry",
+				"title": "Edit Property",
 				"command": "datavirt.edit.datasourceentry",
 				"category": "dv"
 			},
 			{
-				"title": "Delete Entry",
+				"title": "Delete Property",
 				"command": "datavirt.delete.datasourceentry",
 				"category": "dv"
 			},
 			{
-				"title": "New",
+				"title": "New Variable",
 				"command": "datavirt.create.envvar.value",
 				"category": "dv"
 			},
 			{
-				"title": "New from Secret",
+				"title": "New Variable from Secret",
 				"command": "datavirt.create.envvar.secret",
 				"category": "dv"
 			},
 			{
-				"title": "New from ConfigMap",
+				"title": "New Variable from ConfigMap",
 				"command": "datavirt.create.envvar.configmap",
 				"category": "dv"
 			},
 			{
-				"title": "Modify",
+				"title": "Edit Variable",
 				"command": "datavirt.edit.envvar",
 				"category": "dv"
 			},
 			{
-				"title": "Delete",
+				"title": "Delete Variable",
 				"command": "datavirt.delete.envvar",
 				"category": "dv"
 			},
 			{
-				"title": "Edit",
+				"title": "Edit Schema",
 				"command": "datavirt.edit.schema",
 				"category": "dv"
 			}
@@ -159,62 +159,62 @@
 			],
 			"view/item/context": [
 				{
-					"group": "dv",
+					"group": "dv@1",
 					"command": "datavirt.create.vdb",
 					"when": "viewItem == undefined"
 				},
 				{
-					"group": "dv",
+					"group": "dv@1",
 					"command": "datavirt.create.datasource",
 					"when": "viewItem == dv.datasources"
 				},
 				{
-					"group": "dv",
+					"group": "dv@2",
 					"command": "datavirt.delete.datasource",
 					"when": "viewItem == dv.datasource"
 				},
 				{
-					"group": "dv",
+					"group": "dv@1",
 					"command": "datavirt.create.datasourceentry",
 					"when": "viewItem == dv.datasource"
 				},
 				{
-					"group": "dv",
+					"group": "dv@1",
 					"command": "datavirt.edit.datasourceentry",
 					"when": "viewItem == dv.datasourceentry"
 				},
 				{
-					"group": "dv",
+					"group": "dv@2",
 					"command": "datavirt.delete.datasourceentry",
 					"when": "viewItem == dv.datasourceentry"
 				},
 				{
-					"group": "dv",
+					"group": "dv@1",
 					"command": "datavirt.create.envvar.value",
 					"when": "viewItem == dv.environment"
 				},
 				{
-					"group": "dv",
+					"group": "dv@3",
 					"command": "datavirt.create.envvar.secret",
 					"when": "viewItem == dv.environment"
 				},
 				{
-					"group": "dv",
+					"group": "dv@2",
 					"command": "datavirt.create.envvar.configmap",
 					"when": "viewItem == dv.environment"
 				},
 				{
-					"group": "dv",
+					"group": "dv@1",
 					"command": "datavirt.edit.envvar",
 					"when": "viewItem == dv.environmentvariable"
 				},
 				{
-					"group": "dv",
+					"group": "dv@2",
 					"command": "datavirt.delete.envvar",
 					"when": "viewItem == dv.environmentvariable"
 				},
 				{
-					"group": "dv",
+					"group": "dv@1",
 					"command": "datavirt.edit.schema",
 					"when": "viewItem == dv.schema"
 				}

@@ -23,7 +23,7 @@ import { DataVirtConfig, DataSourceConfig, ValueFrom, ConfigMapRef, SecretRef, P
 
 export async function createDataSourceEntryCommand(dsNode: DataSourceTreeNode) {
 	if (dsNode) {
-		let entryName: string = await vscode.window.showInputBox( { placeHolder: 'Enter the name of the new entry' });
+		let entryName: string = await vscode.window.showInputBox( { placeHolder: 'Enter the name of the new property' });
 		if (!entryName) {
 			return;
 		}
@@ -47,7 +47,7 @@ export async function createDataSourceEntryCommand(dsNode: DataSourceTreeNode) {
 			return;
 		}
 
-		let entryValue:string = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new entry' });
+		let entryValue:string = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new property' });
 		if (!entryValue) {
 			return;
 		}
@@ -56,9 +56,9 @@ export async function createDataSourceEntryCommand(dsNode: DataSourceTreeNode) {
 		const file: string = dsNode.getProject().file;
 		let success: boolean = await handleDataSourceEntryCreation(yaml, dsNode.dataSourceConfig, file, entryType, entryName, entryValue, refName, refKey);
 		if (success) {
-			vscode.window.showInformationMessage(`New datasource entry ${entryName} has been created successfully...`);
+			vscode.window.showInformationMessage(`New datasource property ${entryName} has been created successfully...`);
 		} else {
-			vscode.window.showErrorMessage(`An error occured when trying to create a new datasource entry ${entryName} in datasource ${dsNode.label}...`);
+			vscode.window.showErrorMessage(`An error occured when trying to create a new datasource property ${entryName} in datasource ${dsNode.label}...`);
 		}
 	}
 }
@@ -81,7 +81,7 @@ export function handleDataSourceEntryCreation(dvConfig: DataVirtConfig, dsConfig
 				resolve(false);
 			}
 		} else {
-			extension.log(`handleDataSourceEntryCreation: Unable to create the datasource entry ${entryName ? entryName : '<Unknown>'} in datasource ${dsConfig ? dsConfig.name : '<Unknown>'}...`);
+			extension.log(`handleDataSourceEntryCreation: Unable to create the datasource property ${entryName ? entryName : '<Unknown>'} in datasource ${dsConfig ? dsConfig.name : '<Unknown>'}...`);
 			resolve(false);
 		}
 	});

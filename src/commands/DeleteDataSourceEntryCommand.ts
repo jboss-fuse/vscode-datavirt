@@ -29,9 +29,9 @@ export function deleteDataSourceEntryCommand(ds: DataSourceEntryTreeNode) {
 	handleDataSourceEntryDeletion(dvConfig, dsConfig, file, key)
 		.then( (success: boolean) => {
 			if (success) {
-				vscode.window.showInformationMessage(`DataSource entry ${key} has been deleted from ${dsConfig.name}...`);
+				vscode.window.showInformationMessage(`DataSource property ${key} has been deleted from ${dsConfig.name}...`);
 			} else {
-				vscode.window.showErrorMessage(`An error occured when trying to delete the datasource entry ${key} from ${dsConfig ? dsConfig.name : '<Unknown>'}...`);
+				vscode.window.showErrorMessage(`An error occured when trying to delete the datasource property ${key} from ${dsConfig ? dsConfig.name : '<Unknown>'}...`);
 			}
 		});
 }
@@ -61,7 +61,7 @@ export function handleDataSourceEntryDeletion(dvConfig: DataVirtConfig, dsConfig
 				resolve(false);
 			}
 		} else {
-			extension.log(`handleDataSourceEntryDeletion: Unable to delete the datasource entry ${key} from ${dsConfig ? dsConfig.name : '<Unknown>'}...`);
+			extension.log(`handleDataSourceEntryDeletion: Unable to delete the datasource property ${key} from ${dsConfig ? dsConfig.name : '<Unknown>'}...`);
 			resolve(false);
 		}
 	});

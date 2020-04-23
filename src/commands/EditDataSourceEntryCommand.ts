@@ -75,7 +75,7 @@ export function editReferenceEntryType(dsEntryTreeNode: DataSourceEntryTreeNode,
 					} else if (utils.isConfigMapRef(ref.valueFrom)) {
 						newRefValue = new ConfigMapRef(new KeyRef(newRefName, newRefKey));
 					} else {
-						extension.log(`Error modifying a datasource entry ${newRefKey} @ ${newRefName} in ${dsConfig.name}. The entry is neither a secret nor a config map. Please check and correct the sources in ${dsEntryTreeNode.getProject().file}.`);
+						extension.log(`Error modifying a datasource property ${newRefKey} @ ${newRefName} in ${dsConfig.name}. The property is neither a secret nor a config map. Please check and correct the sources in ${dsEntryTreeNode.getProject().file}.`);
 						return;
 					}
 					newRef = new ValueFrom(newRefValue);
@@ -89,9 +89,9 @@ export function editReferenceEntryType(dsEntryTreeNode: DataSourceEntryTreeNode,
 
 function showFeedback(success: boolean, key: string, dsName: string) {
 	if (success) {
-		vscode.window.showInformationMessage(`DataSource entry ${key} has been modified...`);
+		vscode.window.showInformationMessage(`DataSource property ${key} has been modified...`);
 	} else {
-		vscode.window.showErrorMessage(`An error occured when trying to modify the datasource entry ${key} in ${dsName}...`);
+		vscode.window.showErrorMessage(`An error occured when trying to modify the datasource property ${key} in ${dsName}...`);
 	}
 }
 
@@ -108,14 +108,14 @@ export function handleDataSourceEntryEdit(dvConfig: DataVirtConfig, dsConfig: Da
 						// its a plain string value
 						entry.value = newValue ? newValue : '';
 					} else {
-						extension.log(`handleDataSourceEntryEdit: Unable to modify the datasource entry ${key} in ${dsConfig ? dsConfig.name : '<Unknown>'} because the key does not exist...`);
+						extension.log(`handleDataSourceEntryEdit: Unable to modify the datasource property ${key} in ${dsConfig ? dsConfig.name : '<Unknown>'} because the key does not exist...`);
 						resolve(false);
 						return false;
 					}
 					utils.saveModelToFile(dvConfig, file);
 					resolve(true);
 				} else {
-					extension.log(`handleDataSourceEntryEdit: Unable to modify the datasource entry ${key} in ${dsConfig ? dsConfig.name : '<Unknown>'} because the key does not exist...`);
+					extension.log(`handleDataSourceEntryEdit: Unable to modify the datasource property ${key} in ${dsConfig ? dsConfig.name : '<Unknown>'} because the key does not exist...`);
 					resolve(false);
 				}
 			} catch (error) {
@@ -123,7 +123,7 @@ export function handleDataSourceEntryEdit(dvConfig: DataVirtConfig, dsConfig: Da
 				resolve(false);
 			}
 		} else {
-			extension.log(`handleDataSourceEntryEdit: Unable to modify the datasource entry ${key} in ${dsConfig ? dsConfig.name : '<Unknown>'}...`);
+			extension.log(`handleDataSourceEntryEdit: Unable to modify the datasource property ${key} in ${dsConfig ? dsConfig.name : '<Unknown>'}...`);
 			resolve(false);
 		}
 	});
