@@ -21,29 +21,10 @@ import * as vscode from 'vscode';
 import { DataSourceTreeNode } from '../model/tree/DataSourceTreeNode';
 import { DataVirtConfig, DataSourceConfig, ValueFrom, ConfigMapRef, SecretRef, Property, KeyRef } from '../model/DataVirtModel';
 
-export async function createDataSourceEntryCommand(dsNode: DataSourceTreeNode) {
+export async function createDataSourceEntryCommandForValue(dsNode: DataSourceTreeNode) {
 	if (dsNode) {
-		let entryName: string = await vscode.window.showInputBox( { placeHolder: 'Enter the name of the new property' });
+		let entryName: string = await queryPropertyName(dsNode);
 		if (!entryName) {
-			return;
-		}
-
-		let entryType: string = await vscode.window.showQuickPick( constants.REFERENCE_VALUE_TYPES, { canPickMany: false, placeHolder: 'What value type do you want to create?' });
-		if (!entryType) {
-			return;
-		}
-
-		let refName: string;
-		let refKey: string;
-		if (entryType === constants.REFERENCE_TYPE_CONFIGMAP || entryType === constants.REFERENCE_TYPE_SECRET) {
-			refName = await vscode.window.showInputBox( { placeHolder: 'Enter the name of the reference' });
-			refKey = await vscode.window.showInputBox( { placeHolder: 'Enter the key for the reference' });
-		} else {
-			refName = '';
-			refKey = '';
-		}
-		// explicit check for undefined because in this case the user canceled the reference name or key input box
-		if (refName === undefined || refKey === undefined) {
 			return;
 		}
 
@@ -54,7 +35,46 @@ export async function createDataSourceEntryCommand(dsNode: DataSourceTreeNode) {
 
 		const yaml: DataVirtConfig = dsNode.getProject().dvConfig;
 		const file: string = dsNode.getProject().file;
-		let success: boolean = await handleDataSourceEntryCreation(yaml, dsNode.dataSourceConfig, file, entryType, entryName, entryValue, refName, refKey);
+		let success: boolean = await handleDataSourceEntryCreation(yaml, dsNode.dataSourceConfig, file, constants.REFERENCE_TYPE_VALUE, entryName, entryValue, undefined, undefined);
+		if (success) {
+			vscode.window.showInformationMessage(`New datasource property ${entryName} has been created successfully...`);
+		} else {
+			vscode.window.showErrorMessage(`An error occured when trying to create a new datasource property ${entryName} in datasource ${dsNode.label}...`);
+		}
+	}
+}
+
+export async function createDataSourceEntryCommandForSecret(dsNode: DataSourceTreeNode) {
+	await createDataSourceEntryCommandForReference(dsNode, constants.REFERENCE_TYPE_SECRET);
+}
+
+export async function createDataSourceEntryCommandForConfigMap(dsNode: DataSourceTreeNode) {
+	await createDataSourceEntryCommandForReference(dsNode, constants.REFERENCE_TYPE_CONFIGMAP);
+}
+
+async function createDataSourceEntryCommandForReference(dsNode: DataSourceTreeNode, type: string) {
+	if (dsNode) {
+		let entryName: string = await queryPropertyName(dsNode);
+		if (!entryName) {
+			return;
+		}
+
+		let refName: string = await vscode.window.showInputBox( { placeHolder: 'Enter the name of the reference' });
+		let refKey: string = await vscode.window.showInputBox( { placeHolder: 'Enter the key for the reference' });
+
+		// explicit check for undefined because in this case the user canceled the reference name or key input box
+		if (refName === undefined || refKey === undefined) {
+			return;
+		}
+
+		let entryValue:string = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new variable' });
+		if (!entryValue) {
+			return;
+		}
+
+		const yaml: DataVirtConfig = dsNode.getProject().dvConfig;
+		const file: string = dsNode.getProject().file;
+		let success: boolean = await handleDataSourceEntryCreation(yaml, dsNode.dataSourceConfig, file, type, entryName, entryValue, refName, refKey);
 		if (success) {
 			vscode.window.showInformationMessage(`New datasource property ${entryName} has been created successfully...`);
 		} else {
@@ -101,4 +121,13 @@ function setDataSourceEntryValue(entries: Property[], entryType: string, entryNa
 		entry = new Property(entryName, entryValue, undefined);
 	}
 	entries.push(entry);
+}
+
+async function queryPropertyName(dsNode: DataSourceTreeNode): Promise<string | undefined> {
+	return await vscode.window.showInputBox( { validateInput: (value: string) => {
+		if(utils.getDataSourceEntryByName(value, dsNode.dataSourceConfig)) {
+			return `There is already a property with the name ${value}.`;
+		}
+		return undefined;
+	}, placeHolder: 'Enter the name of the new property' });
 }
