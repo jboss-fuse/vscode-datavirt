@@ -67,7 +67,7 @@ async function createDataSourceEntryCommandForReference(dsNode: DataSourceTreeNo
 			return;
 		}
 
-		let entryValue:string = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new variable' });
+		let entryValue:string = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new property' });
 		if (!entryValue) {
 			return;
 		}
