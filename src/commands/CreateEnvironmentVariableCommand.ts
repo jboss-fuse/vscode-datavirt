@@ -21,7 +21,7 @@ import * as vscode from 'vscode';
 import { DataVirtConfig, ValueFrom, ConfigMapRef, SecretRef, Property, KeyRef } from '../model/DataVirtModel';
 import { EnvironmentTreeNode } from '../model/tree/EnvironmentNode';
 
-export async function createEnvironmentVariableCommanForValue(envNode: EnvironmentTreeNode) {
+export async function createEnvironmentVariableCommandForValue(envNode: EnvironmentTreeNode) {
 	if (envNode) {
 		let entryName: string = await queryVariableName(envNode);
 		if (!entryName) {
@@ -44,15 +44,15 @@ export async function createEnvironmentVariableCommanForValue(envNode: Environme
 	}
 }
 
-export async function createEnvironmentVariableCommanForSecret(envNode: EnvironmentTreeNode) {
-	await createEnvironmentVariableCommanForReference(envNode, constants.REFERENCE_TYPE_SECRET);
+export async function createEnvironmentVariableCommandForSecret(envNode: EnvironmentTreeNode) {
+	await createEnvironmentVariableCommandForReference(envNode, constants.REFERENCE_TYPE_SECRET);
 }
 
-export async function createEnvironmentVariableCommanForConfigMap(envNode: EnvironmentTreeNode) {
-	await createEnvironmentVariableCommanForReference(envNode, constants.REFERENCE_TYPE_CONFIGMAP);
+export async function createEnvironmentVariableCommandForConfigMap(envNode: EnvironmentTreeNode) {
+	await createEnvironmentVariableCommandForReference(envNode, constants.REFERENCE_TYPE_CONFIGMAP);
 }
 
-async function createEnvironmentVariableCommanForReference(envNode: EnvironmentTreeNode, type: string) {
+async function createEnvironmentVariableCommandForReference(envNode: EnvironmentTreeNode, type: string) {
 	if (envNode) {
 		let entryName: string = await queryVariableName(envNode);
 		if (!entryName) {
