@@ -122,6 +122,13 @@ export function checkForValue(value: any, valueName: string, missing: string): s
 	return text;
 }
 
+export function createTempFile(vdbName: string, sql: string): string {
+	const tmp = require('tmp');
+	const tmpobj = tmp.fileSync( {postfix: `${vdbName}.ddl`});
+	fs.writeFileSync(tmpobj.name, sql);
+	return tmpobj.name;
+}
+
 export function createOrUpdateLocalReferenceFile(refName: string, refKey: string, entryValue: string, entryType: string) {
 	// TODO: create or update the entry reference in a local yaml file for configMap OR secret format
 	// TODO: implement me!

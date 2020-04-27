@@ -15,27 +15,17 @@
  * limitations under the License.
  */
 import * as extension from '../extension';
-import * as fs from 'fs';
-import * as path from 'path';
 import * as utils from '../utils';
 import * as vscode from 'vscode';
 import { SchemaTreeNode } from '../model/tree/SchemaTreeNode';
 
 export function editSchemaCommand(ddlNode: SchemaTreeNode) {
 	const sql: string = ddlNode.getDDL();
-	const tempFile = extension.createTempFile(ddlNode.getProject().label, sql);
+	const tempFile = utils.createTempFile(ddlNode.getProject().label, sql);
 	vscode.workspace.openTextDocument(tempFile)
 		.then((textDocument: vscode.TextDocument) => {
 			vscode.window.showTextDocument(textDocument, 1, true)
 				.then( (editor: vscode.TextEditor) => {
-					if (extension.fileToNode.has(tempFile)) {
-						for ( const [key, value] of extension.fileToNode) {
-							if (value === ddlNode) {
-								fs.unlinkSync(key);
-								fs.rmdirSync(path.dirname(key));
-							}
-						}
-					}
 					extension.fileToNode.set(tempFile, ddlNode);
 					extension.fileToEditor.set(tempFile, editor);
 				});
