@@ -125,6 +125,4 @@ export function checkForValue(value: any, valueName: string, missing: string): s
 export function createOrUpdateLocalReferenceFile(refName: string, refKey: string, entryValue: string, entryType: string) {
 	// TODO: create or update the entry reference in a local yaml file for configMap OR secret format
 	// TODO: implement me!
-	log(`call to unimplemented function createOrUpdateLocalReferenceFile(${refName}, ${refKey}, ${entryValue}, ${entryType})...`);
 }
-
