@@ -29,7 +29,7 @@ export async function createEnvironmentVariableCommandForValue(envNode: Environm
 		}
 
 		let entryValue:string = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new variable' });
-		if (!entryValue) {
+		if (entryValue === undefined) {
 			return;
 		}
 
@@ -128,6 +128,8 @@ async function queryVariableName(envNode: EnvironmentTreeNode): Promise<string |
 	return await vscode.window.showInputBox( { validateInput: (value: string) => {
 		if(utils.getEnvironmentVariableByName(value, envNode.environment)) {
 			return `There is already an environment variable with the name ${value}.`;
+		} else if (!value) {
+			return 'The name of the variable is mandatory.';
 		}
 		return undefined;
 	}, placeHolder: 'Enter the name of the new variable' });
