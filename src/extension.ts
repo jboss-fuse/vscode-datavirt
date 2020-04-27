@@ -80,7 +80,7 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	vscode.window.onDidChangeVisibleTextEditors(handleVisibleEditorChanges);
+	vscode.workspace.onDidCloseTextDocument(handleClosedTextDocument);
 
 	vscode.workspace.onWillSaveTextDocument( (event) => {
 		event.waitUntil(handleSaveDDL(event));
@@ -142,20 +142,13 @@ function creatDataVirtView(): void {
 	});
 }
 
-function handleVisibleEditorChanges(event) {
-	let k: string;
-	for( const [key, value] of fileToEditor) {
-		if (event.indexOf(value) === -1) {
-			const p = path.dirname(key);
-			if (fileToNode.has(key)) {
-				fs.unlinkSync(key);
-				fs.rmdirSync(p);
-			}
-			k = key;
-		}
+function handleClosedTextDocument(event) {
+	const fileName: string = event.fileName;
+	if (fileToEditor.has(fileName)) {
+		fs.unlinkSync(fileName);
+		fileToEditor.delete(fileName);
+		fileToNode.delete(fileName);
 	}
-	fileToEditor.delete(k);
-	fileToNode.delete(k);
 }
 
 function startFileSystemWatcher(): void {
@@ -169,13 +162,6 @@ function startFileSystemWatcher(): void {
 	fileSystemWatcher.onDidChange( () => {
 		dataVirtProvider.refresh();
 	});
-}
-
-export function createTempFile(vdbName: string, sql: string): string {
-	const p = fs.mkdtempSync(`${vscode.workspace.rootPath}${path.sep}.tmp_`, 'utf-8');
-	const tempFile: string = path.join(p, `${vdbName}${constants.DDL_FILE_EXT}`);
-	fs.writeFileSync(tempFile, sql);
-	return tempFile;
 }
 
 export function fillDataTypes(): void {
