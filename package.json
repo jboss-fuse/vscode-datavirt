@@ -36,7 +36,7 @@
 	"contributes": {
 		"commands": [
 			{
-				"title": "New Virtual Database Definition (VDB)",
+				"title": "New Virtual Database",
 				"command": "datavirt.create.vdb",
 				"category": "dv"
 			},
