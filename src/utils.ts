@@ -17,10 +17,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import * as constants from './constants';
 import { DataSourceConfig, DataVirtConfig, ValueFrom, SecretRef, ConfigMapRef, Property } from './model/DataVirtModel';
 import { log } from './extension';
 
 const YAML = require('yaml');
+const TMP = require('tmp');
 
 export function loadModelFromFile(file: string): DataVirtConfig | undefined {
 	try {
@@ -123,10 +125,10 @@ export function checkForValue(value: any, valueName: string, missing: string): s
 }
 
 export function createTempFile(vdbName: string, sql: string): string {
-	const tmp = require('tmp');
-	const tmpobj = tmp.fileSync( {postfix: `${vdbName}.ddl`});
-	fs.writeFileSync(tmpobj.name, sql);
-	return tmpobj.name;
+	const tmpDir = TMP.dirSync();
+	const tempFile: string = path.join(tmpDir.name, `${vdbName}${constants.DDL_FILE_EXT}`);
+	fs.writeFileSync(tempFile, sql);
+	return tempFile;
 }
 
 export function createOrUpdateLocalReferenceFile(refName: string, refKey: string, entryValue: string, entryType: string) {
