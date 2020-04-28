@@ -31,7 +31,7 @@ export class SchemaTreeNode extends DVTreeItem {
 	}
 
 	getToolTip(): string {
-		return `Schema: ${this.label}`;
+		return `DDL: ${this.label}`;
 	}
 
 	getDDL(): string {
