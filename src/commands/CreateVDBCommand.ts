@@ -33,7 +33,7 @@ export function createVDBCommand() {
 			return res;
 		}, placeHolder: 'Enter the name of the new VDB config' })
 			.then( (vdbName: string) => {
-				if (!vdbName) {
+				if (vdbName === undefined) {
 					return;
 				}
 				handleVDBCreation(vscode.workspace.workspaceFolders[0].uri.fsPath, vdbName)

@@ -29,7 +29,7 @@ export async function createDataSourceEntryCommandForValue(dsNode: DataSourceTre
 		}
 
 		let entryValue:string = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new property' });
-		if (!entryValue) {
+		if (entryValue === undefined) {
 			return;
 		}
 
@@ -55,20 +55,22 @@ export async function createDataSourceEntryCommandForConfigMap(dsNode: DataSourc
 async function createDataSourceEntryCommandForReference(dsNode: DataSourceTreeNode, type: string) {
 	if (dsNode) {
 		let entryName: string = await queryPropertyName(dsNode);
-		if (!entryName) {
+		if (entryName === undefined) {
 			return;
 		}
 
-		let refName: string = await vscode.window.showInputBox( { placeHolder: 'Enter the name of the reference' });
-		let refKey: string = await vscode.window.showInputBox( { placeHolder: 'Enter the key for the reference' });
+		let refName: string = await vscode.window.showInputBox( { validateInput: utils.ensureValueIsNotEmpty, placeHolder: 'Enter the name of the reference' });
+		if (refName === undefined) {
+			return;
+		}
 
-		// explicit check for undefined because in this case the user canceled the reference name or key input box
-		if (refName === undefined || refKey === undefined) {
+		let refKey: string = await vscode.window.showInputBox( { validateInput: utils.ensureValueIsNotEmpty, placeHolder: 'Enter the key for the reference' });
+		if (refKey === undefined) {
 			return;
 		}
 
 		let entryValue:string = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new property' });
-		if (!entryValue) {
+		if (entryValue === undefined) {
 			return;
 		}
 
@@ -85,7 +87,7 @@ async function createDataSourceEntryCommandForReference(dsNode: DataSourceTreeNo
 
 export function handleDataSourceEntryCreation(dvConfig: DataVirtConfig, dsConfig: DataSourceConfig, file: string, entryType: string, entryName: string, entryValue: string, refName?: string, refKey?: string): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
-		if (dvConfig && entryType && dsConfig && file && entryName && entryValue) {
+		if (dvConfig && entryType && dsConfig && file && entryName && entryValue !== undefined) {
 			try {
 				const entry: Property = utils.getDataSourceEntryByName(entryName, dsConfig);
 				if (!entry) {
@@ -128,6 +130,6 @@ async function queryPropertyName(dsNode: DataSourceTreeNode): Promise<string | u
 		if(utils.getDataSourceEntryByName(value, dsNode.dataSourceConfig)) {
 			return `There is already a property with the name ${value}.`;
 		}
-		return undefined;
+		return utils.ensureValueIsNotEmpty(value);
 	}, placeHolder: 'Enter the name of the new property' });
 }
