@@ -101,7 +101,7 @@
 				"category": "dv"
 			},
 			{
-				"title": "Edit Schema",
+				"title": "Edit DDL",
 				"command": "datavirt.edit.schema",
 				"category": "dv"
 			}

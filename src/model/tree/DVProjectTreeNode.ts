@@ -74,7 +74,7 @@ export class DVProjectTreeNode extends DVTreeItem {
 		this.environmentNode.initialize();
 		this.children.push(this.environmentNode);
 
-		this.schemaNode = new SchemaTreeNode('Schema', this.getProject().dvConfig.spec.build.source.ddl);
+		this.schemaNode = new SchemaTreeNode('DDL', this.getProject().dvConfig.spec.build.source.ddl);
 		this.schemaNode.setProject(this.getProject());
 		this.schemaNode.parent = this;
 		this.children.push(this.schemaNode);
