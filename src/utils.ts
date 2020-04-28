@@ -57,6 +57,13 @@ export function validateName(name: string): string {
 	}
 }
 
+export function ensureValueIsNotEmpty(value: string): string | undefined {
+	if (!value) {
+		return 'Please specify a value.';
+	}
+	return undefined;
+}
+
 export function validateFileNotExisting(name: string): string {
 	const fp: string = path.join(vscode.workspace.rootPath, `${name}.yaml`);
 	if (fs.existsSync(fp)) {

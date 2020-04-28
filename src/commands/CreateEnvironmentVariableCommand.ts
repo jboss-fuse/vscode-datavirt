@@ -24,7 +24,7 @@ import { EnvironmentTreeNode } from '../model/tree/EnvironmentNode';
 export async function createEnvironmentVariableCommandForValue(envNode: EnvironmentTreeNode) {
 	if (envNode) {
 		let entryName: string = await queryVariableName(envNode);
-		if (!entryName) {
+		if (entryName === undefined) {
 			return;
 		}
 
@@ -55,20 +55,22 @@ export async function createEnvironmentVariableCommandForConfigMap(envNode: Envi
 async function createEnvironmentVariableCommandForReference(envNode: EnvironmentTreeNode, type: string) {
 	if (envNode) {
 		let entryName: string = await queryVariableName(envNode);
-		if (!entryName) {
+		if (entryName === undefined) {
 			return;
 		}
 
-		let refName: string = await vscode.window.showInputBox( { placeHolder: 'Enter the name of the reference' });
-		let refKey: string = await vscode.window.showInputBox( { placeHolder: 'Enter the key for the reference' });
+		let refName: string = await vscode.window.showInputBox( { validateInput: utils.ensureValueIsNotEmpty, placeHolder: 'Enter the name of the reference' });
+		if (refName === undefined) {
+			return;
+		}
 
-		// explicit check for undefined because in this case the user canceled the reference name or key input box
-		if (refName === undefined || refKey === undefined) {
+		let refKey: string = await vscode.window.showInputBox( { validateInput: utils.ensureValueIsNotEmpty, placeHolder: 'Enter the key for the reference' });
+		if (refKey === undefined) {
 			return;
 		}
 
 		let entryValue:string = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new variable' });
-		if (!entryValue) {
+		if (entryValue === undefined) {
 			return;
 		}
 
@@ -128,9 +130,7 @@ async function queryVariableName(envNode: EnvironmentTreeNode): Promise<string |
 	return await vscode.window.showInputBox( { validateInput: (value: string) => {
 		if(utils.getEnvironmentVariableByName(value, envNode.environment)) {
 			return `There is already an environment variable with the name ${value}.`;
-		} else if (!value) {
-			return 'The name of the variable is mandatory.';
 		}
-		return undefined;
+		return utils.ensureValueIsNotEmpty(value);
 	}, placeHolder: 'Enter the name of the new variable' });
 }

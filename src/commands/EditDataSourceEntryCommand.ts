@@ -33,7 +33,7 @@ export function editDataSourceEntryCommand(dsEntryTreeNode: DataSourceEntryTreeN
 export function editValueEntryType(dsEntryTreeNode: DataSourceEntryTreeNode, dsConfig: DataSourceConfig, entry: Property) {
 	vscode.window.showInputBox( { prompt: 'Enter a new value', placeHolder: `${entry.value ? entry : '<empty>'}`, value: entry.value })
 		.then( ( newValue: string) => {
-			if (!newValue) {
+			if (newValue === undefined) {
 				return;
 			}
 			handleDataSourceEntryEdit(dsEntryTreeNode.getProject().dvConfig, dsConfig, dsEntryTreeNode.getProject().getFile(), dsEntryTreeNode.getKey(), newValue)
@@ -58,14 +58,14 @@ export function editReferenceEntryType(dsEntryTreeNode: DataSourceEntryTreeNode,
 	} else {
 		return;
 	}
-	vscode.window.showInputBox( {prompt: 'Enter the new reference name', value: oldName})
+	vscode.window.showInputBox( { validateInput: utils.ensureValueIsNotEmpty, prompt: 'Enter the new reference name', value: oldName })
 		.then( (newRefName: string) => {
-			if (!newRefName) {
+			if (newRefName === undefined) {
 				return;
 			}
-			vscode.window.showInputBox( {prompt: 'Enter the new reference key', value: oldKey})
+			vscode.window.showInputBox( { validateInput: utils.ensureValueIsNotEmpty, prompt: 'Enter the new reference key', value: oldKey })
 				.then( (newRefKey: string) => {
-					if (!newRefKey) {
+					if (newRefKey === undefined) {
 						return;
 					}
 					let newRef: ValueFrom;

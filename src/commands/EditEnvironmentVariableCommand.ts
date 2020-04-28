@@ -33,7 +33,7 @@ export function editEnvironmentVariableCommand(envVarTreeNode: EnvironmentVariab
 export function editValueEntryType(envVarTreeNode: EnvironmentVariableTreeNode, environment: Property[], entry: Property) {
 	vscode.window.showInputBox( { prompt: 'Enter a new value', placeHolder: `${entry.value ? entry : '<empty>'}`, value: entry.value })
 		.then( ( newValue: string) => {
-			if (!newValue) {
+			if (newValue === undefined) {
 				return;
 			}
 			handleEnvironmentVariableEdit(envVarTreeNode.getProject().dvConfig, environment, envVarTreeNode.getProject().getFile(), envVarTreeNode.getKey(), newValue)
@@ -58,14 +58,14 @@ export function editReferenceEntryType(envVarTreeNode: EnvironmentVariableTreeNo
 	} else {
 		return;
 	}
-	vscode.window.showInputBox( {prompt: 'Enter the new reference name', value: oldName})
+	vscode.window.showInputBox( {prompt: 'Enter the new reference name', validateInput: utils.ensureValueIsNotEmpty, value: oldName })
 		.then( (newRefName: string) => {
-			if (!newRefName) {
+			if (newRefName === undefined) {
 				return;
 			}
-			vscode.window.showInputBox( {prompt: 'Enter the new reference key', value: oldKey})
+			vscode.window.showInputBox( {prompt: 'Enter the new reference key', validateInput: utils.ensureValueIsNotEmpty, value: oldKey})
 				.then( (newRefKey: string) => {
-					if (!newRefKey) {
+					if (newRefKey === undefined) {
 						return;
 					}
 					let newRef: ValueFrom;
