@@ -51,11 +51,19 @@ export function replaceDDLNamePlaceholder(ddl: string, placeholder: string, repl
 	return undefined;
 }
 
-export function validateName(name: string): string {
+export function validateName(name: string): string | undefined {
 	if (name && /^[a-z0-9]{4,253}$/.test(name)) {
 		return undefined;
 	} else {
 		return 'The entered name does not comply with the naming conventions. ([a-z0-9] and length of 4-253 characters)';
+	}
+}
+
+export function ensureValidEnvironmentVariableName(name: string): string | undefined {
+	if (name && /^[A-Z]{1}[A-Z0-9_]{3,252}$/.test(name)) {
+		return undefined;
+	} else {
+		return 'The entered name does not comply with the naming conventions. ([A-Z][A-Z0-9_] and length of 4-253 characters)';
 	}
 }
 

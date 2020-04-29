@@ -129,6 +129,6 @@ async function queryVariableName(envNode: EnvironmentTreeNode): Promise<string |
 		if(utils.getEnvironmentVariableByName(value, envNode.environment)) {
 			return `There is already an environment variable with the name ${value}.`;
 		}
-		return utils.ensureValueIsNotEmpty(value);
+		return utils.ensureValidEnvironmentVariableName(value);
 	}, placeHolder: 'Enter the name of the new variable' });
 }

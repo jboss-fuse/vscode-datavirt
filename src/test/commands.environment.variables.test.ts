@@ -36,7 +36,7 @@ const should = chai.should();
 
 describe('Commands Tests', () => {
 	const name = 'newvdb';
-	const entryName: string = 'newkey';
+	const entryName: string = 'NEWKEY';
 	const entryValue: string = 'newvalue';
 
 	let vdbFile: string;
