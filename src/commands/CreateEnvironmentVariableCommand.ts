@@ -18,7 +18,7 @@ import * as constants from '../constants';
 import * as extension from '../extension';
 import * as utils from '../utils';
 import * as vscode from 'vscode';
-import { DataVirtConfig, ValueFrom, ConfigMapRef, SecretRef, Property, KeyRef } from '../model/DataVirtModel';
+import { DataVirtConfig, ConfigMapRef, SecretRef, Property, KeyRef } from '../model/DataVirtModel';
 import { EnvironmentTreeNode } from '../model/tree/EnvironmentNode';
 
 export async function createEnvironmentVariableCommandForValue(envNode: EnvironmentTreeNode) {
@@ -114,12 +114,10 @@ function setEnvironmentVariableValue(entries: Property[], entryType: string, ent
 	let entry: Property;
 	if (entryType === constants.REFERENCE_TYPE_SECRET) {
 		const secretRef = new SecretRef(new KeyRef(refName, refKey));
-		const value = new ValueFrom(secretRef);
-		entry = new Property(entryName, undefined, value);
+		entry = new Property(entryName, undefined, secretRef);
 	} else if (entryType === constants.REFERENCE_TYPE_CONFIGMAP) {
 		const configMapRef = new ConfigMapRef(new KeyRef(refName, refKey));
-		const value = new ValueFrom(configMapRef);
-		entry = new Property(entryName, undefined, value);
+		entry = new Property(entryName, undefined, configMapRef);
 	} else {
 		entry = new Property(entryName, entryValue, undefined);
 	}

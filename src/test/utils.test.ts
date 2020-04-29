@@ -22,7 +22,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as constants from '../constants';
 import * as utils from '../utils';
-import { DataVirtConfig, ConfigMapRef, KeyRef, SecretRef, DataSourceConfig, ValueFrom } from '../model/DataVirtModel';
+import { DataVirtConfig, ConfigMapRef, KeyRef, SecretRef, DataSourceConfig } from '../model/DataVirtModel';
 
 chai.use(sinonChai);
 const should = chai.should();
@@ -232,11 +232,11 @@ describe('Utils', () => {
 		});
 
 		it('should return the key @ name for a secrets reference as label with valid parameters', () => {
-			should.equal('key @ name', utils.generateReferenceValueForLabel(undefined, new ValueFrom(new SecretRef(new KeyRef('name', 'key')))));
+			should.equal('key @ name', utils.generateReferenceValueForLabel(undefined, new SecretRef(new KeyRef('name', 'key'))));
 		});
 
 		it('should return the key @ name for a configmap reference as label with valid parameters', () => {
-			should.equal('key @ name', utils.generateReferenceValueForLabel(undefined, new ValueFrom(new ConfigMapRef(new KeyRef('name', 'key')))));
+			should.equal('key @ name', utils.generateReferenceValueForLabel(undefined, new ConfigMapRef(new KeyRef('name', 'key'))));
 		});
 	});
 });

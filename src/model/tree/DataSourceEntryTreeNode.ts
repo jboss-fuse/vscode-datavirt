@@ -17,14 +17,14 @@
 import * as utils from '../../utils';
 import * as vscode from 'vscode';
 import { DVTreeItem } from './DVTreeItem';
-import { ValueFrom } from '../DataVirtModel';
+import { ConfigMapRef, SecretRef } from '../DataVirtModel';
 
 export class DataSourceEntryTreeNode extends DVTreeItem {
 
 	key: string;
-	value: string | ValueFrom;
+	value: string | ConfigMapRef | SecretRef;
 
-	constructor(key: string, value: string, ref: ValueFrom) {
+	constructor(key: string, value: string, ref: ConfigMapRef | SecretRef) {
 		super('dv.datasourceentry', `${key}: ${utils.generateReferenceValueForLabel(value, ref) ? utils.generateReferenceValueForLabel(value, ref) : '<empty>'}`, vscode.TreeItemCollapsibleState.None);
 		this.key = key;
 		this.value = value;
@@ -47,7 +47,7 @@ export class DataSourceEntryTreeNode extends DVTreeItem {
 		this.label = key;
 	}
 
-	getValue(): string | ValueFrom {
+	getValue(): string | ConfigMapRef | SecretRef {
 		return this.value;
 	}
 

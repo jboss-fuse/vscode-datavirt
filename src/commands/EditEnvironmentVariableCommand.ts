@@ -17,7 +17,7 @@
 import * as extension from '../extension';
 import * as utils from '../utils';
 import * as vscode from 'vscode';
-import { DataVirtConfig, Property, ValueFrom, SecretRef, ConfigMapRef, KeyRef } from '../model/DataVirtModel';
+import { DataVirtConfig, Property, SecretRef, ConfigMapRef, KeyRef } from '../model/DataVirtModel';
 import { EnvironmentVariableTreeNode } from '../model/tree/EnvironmentVariableTreeNode';
 
 export function editEnvironmentVariableCommand(envVarTreeNode: EnvironmentVariableTreeNode) {
@@ -44,15 +44,15 @@ export function editValueEntryType(envVarTreeNode: EnvironmentVariableTreeNode, 
 }
 
 export function editReferenceEntryType(envVarTreeNode: EnvironmentVariableTreeNode, environment: Property[], entry: Property) {
-	const ref: ValueFrom = entry.valueFrom;
+	const ref: ConfigMapRef | SecretRef = entry.valueFrom;
 	let oldName: string;
 	let oldKey: string;
-	if (utils.isSecretRef(ref.valueFrom)) {
-		const secRef : SecretRef = ref.valueFrom;
+	if (utils.isSecretRef(ref)) {
+		const secRef : SecretRef = ref;
 		oldName = secRef.secretKeyRef.name;
 		oldKey = secRef.secretKeyRef.key;
-	} else if (utils.isConfigMapRef(ref.valueFrom)) {
-		const mapRef : ConfigMapRef = ref.valueFrom;
+	} else if (utils.isConfigMapRef(ref)) {
+		const mapRef : ConfigMapRef = ref;
 		oldName = mapRef.configMapKeyRef.name;
 		oldKey = mapRef.configMapKeyRef.key;
 	} else {
@@ -68,18 +68,16 @@ export function editReferenceEntryType(envVarTreeNode: EnvironmentVariableTreeNo
 					if (newRefKey === undefined) {
 						return;
 					}
-					let newRef: ValueFrom;
 					let newRefValue: ConfigMapRef | SecretRef;
-					if (utils.isSecretRef(ref.valueFrom)) {
+					if (utils.isSecretRef(ref)) {
 						newRefValue = new SecretRef(new KeyRef(newRefName, newRefKey));
-					} else if (utils.isConfigMapRef(ref.valueFrom)) {
+					} else if (utils.isConfigMapRef(ref)) {
 						newRefValue = new ConfigMapRef(new KeyRef(newRefName, newRefKey));
 					} else {
 						extension.log(`Error modifying an environment variable ${newRefKey} @ ${newRefName}. The entry is neither a secret nor a config map. Please check and correct the sources in ${envVarTreeNode.getProject().file}.`);
 						return;
 					}
-					newRef = new ValueFrom(newRefValue);
-					handleEnvironmentVariableEdit(envVarTreeNode.getProject().dvConfig, environment, envVarTreeNode.getProject().getFile(), envVarTreeNode.getKey(), undefined, newRef)
+					handleEnvironmentVariableEdit(envVarTreeNode.getProject().dvConfig, environment, envVarTreeNode.getProject().getFile(), envVarTreeNode.getKey(), undefined, newRefValue)
 						.then( (success: boolean) => {
 							showFeedback(success, envVarTreeNode.getKey());
 						});
@@ -95,7 +93,7 @@ function showFeedback(success: boolean, key: string) {
 	}
 }
 
-export function handleEnvironmentVariableEdit(dvConfig: DataVirtConfig, environment: Property[], file: string, key: string, newValue: string, valueFrom?: ValueFrom): Promise<boolean> {
+export function handleEnvironmentVariableEdit(dvConfig: DataVirtConfig, environment: Property[], file: string, key: string, newValue: string, valueFrom?: ConfigMapRef | SecretRef): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
 		if (dvConfig && environment && file && key) {
 			try {
