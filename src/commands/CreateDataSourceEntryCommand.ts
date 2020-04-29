@@ -19,7 +19,7 @@ import * as extension from '../extension';
 import * as utils from '../utils';
 import * as vscode from 'vscode';
 import { DataSourceTreeNode } from '../model/tree/DataSourceTreeNode';
-import { DataVirtConfig, DataSourceConfig, ValueFrom, ConfigMapRef, SecretRef, Property, KeyRef } from '../model/DataVirtModel';
+import { DataVirtConfig, DataSourceConfig, ConfigMapRef, SecretRef, Property, KeyRef } from '../model/DataVirtModel';
 
 export async function createDataSourceEntryCommandForValue(dsNode: DataSourceTreeNode) {
 	if (dsNode) {
@@ -35,7 +35,7 @@ export async function createDataSourceEntryCommandForValue(dsNode: DataSourceTre
 
 		const yaml: DataVirtConfig = dsNode.getProject().dvConfig;
 		const file: string = dsNode.getProject().file;
-		let success: boolean = await handleDataSourceEntryCreation(yaml, dsNode.dataSourceConfig, file, constants.REFERENCE_TYPE_VALUE, entryName, entryValue, undefined, undefined);
+		let success: boolean = await handleDataSourceEntryCreation(yaml, dsNode.dataSourceConfig, file, constants.REFERENCE_TYPE_VALUE, entryName, entryValue);
 		if (success) {
 			vscode.window.showInformationMessage(`New datasource property ${entryName} has been created successfully...`);
 		} else {
@@ -113,12 +113,10 @@ function setDataSourceEntryValue(entries: Property[], entryType: string, entryNa
 	let entry: Property;
 	if (entryType === constants.REFERENCE_TYPE_SECRET) {
 		const secretRef = new SecretRef(new KeyRef(refName, refKey));
-		const value = new ValueFrom(secretRef);
-		entry = new Property(entryName, undefined, value);
+		entry = new Property(entryName, undefined, secretRef);
 	} else if (entryType === constants.REFERENCE_TYPE_CONFIGMAP) {
 		const configMapRef = new ConfigMapRef(new KeyRef(refName, refKey));
-		const value = new ValueFrom(configMapRef);
-		entry = new Property(entryName, undefined, value);
+		entry = new Property(entryName, undefined, configMapRef);
 	} else {
 		entry = new Property(entryName, entryValue, undefined);
 	}

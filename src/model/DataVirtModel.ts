@@ -43,14 +43,6 @@ export class DataSourceConfig {
 	}
 }
 
-export class ValueFrom {
-	valueFrom: SecretRef | ConfigMapRef;
-
-	constructor(ref: SecretRef | ConfigMapRef) {
-		this.valueFrom = ref;
-	}
-}
-
 export class SecretRef {
 	secretKeyRef: KeyRef;
 
@@ -80,9 +72,9 @@ export class KeyRef {
 export class Property {
 	name: string;
 	value?: string;
-	valueFrom?: ValueFrom;
+	valueFrom?: SecretRef | ConfigMapRef;
 
-	constructor(name: string, value?: string, valueFrom?: ValueFrom) {
+	constructor(name: string, value?: string, valueFrom?: SecretRef | ConfigMapRef) {
 		this.name = name;
 		if (value) this.value = value;
 		if (valueFrom) this.valueFrom = valueFrom;

@@ -18,7 +18,7 @@ import * as extension from '../extension';
 import * as utils from '../utils';
 import * as vscode from 'vscode';
 import { DataSourceEntryTreeNode } from '../model/tree/DataSourceEntryTreeNode';
-import { DataVirtConfig, DataSourceConfig, Property, ValueFrom, SecretRef, ConfigMapRef, KeyRef } from '../model/DataVirtModel';
+import { DataVirtConfig, DataSourceConfig, Property, SecretRef, ConfigMapRef, KeyRef } from '../model/DataVirtModel';
 
 export function editDataSourceEntryCommand(dsEntryTreeNode: DataSourceEntryTreeNode) {
 	const dsConfig: DataSourceConfig = dsEntryTreeNode.getParent().dataSourceConfig;
@@ -44,15 +44,15 @@ export function editValueEntryType(dsEntryTreeNode: DataSourceEntryTreeNode, dsC
 }
 
 export function editReferenceEntryType(dsEntryTreeNode: DataSourceEntryTreeNode, dsConfig: DataSourceConfig, entry: Property) {
-	const ref: ValueFrom = entry.valueFrom;
+	const ref: ConfigMapRef | SecretRef = entry.valueFrom;
 	let oldName: string;
 	let oldKey: string;
-	if (utils.isSecretRef(ref.valueFrom)) {
-		const secRef : SecretRef = ref.valueFrom;
+	if (utils.isSecretRef(ref)) {
+		const secRef : SecretRef = ref;
 		oldName = secRef.secretKeyRef.name;
 		oldKey = secRef.secretKeyRef.key;
-	} else if (utils.isConfigMapRef(ref.valueFrom)) {
-		const mapRef : ConfigMapRef = ref.valueFrom;
+	} else if (utils.isConfigMapRef(ref)) {
+		const mapRef : ConfigMapRef = ref;
 		oldName = mapRef.configMapKeyRef.name;
 		oldKey = mapRef.configMapKeyRef.key;
 	} else {
@@ -68,18 +68,16 @@ export function editReferenceEntryType(dsEntryTreeNode: DataSourceEntryTreeNode,
 					if (newRefKey === undefined) {
 						return;
 					}
-					let newRef: ValueFrom;
 					let newRefValue: ConfigMapRef | SecretRef;
-					if (utils.isSecretRef(ref.valueFrom)) {
+					if (utils.isSecretRef(ref)) {
 						newRefValue = new SecretRef(new KeyRef(newRefName, newRefKey));
-					} else if (utils.isConfigMapRef(ref.valueFrom)) {
+					} else if (utils.isConfigMapRef(ref)) {
 						newRefValue = new ConfigMapRef(new KeyRef(newRefName, newRefKey));
 					} else {
 						extension.log(`Error modifying a datasource property ${newRefKey} @ ${newRefName} in ${dsConfig.name}. The property is neither a secret nor a config map. Please check and correct the sources in ${dsEntryTreeNode.getProject().file}.`);
 						return;
 					}
-					newRef = new ValueFrom(newRefValue);
-					handleDataSourceEntryEdit(dsEntryTreeNode.getProject().dvConfig, dsConfig, dsEntryTreeNode.getProject().getFile(), dsEntryTreeNode.getKey(), undefined, newRef)
+					handleDataSourceEntryEdit(dsEntryTreeNode.getProject().dvConfig, dsConfig, dsEntryTreeNode.getProject().getFile(), dsEntryTreeNode.getKey(), undefined, newRefValue)
 						.then( (success: boolean) => {
 							showFeedback(success, dsEntryTreeNode.getKey(), dsConfig.name);
 						});
@@ -95,7 +93,7 @@ function showFeedback(success: boolean, key: string, dsName: string) {
 	}
 }
 
-export function handleDataSourceEntryEdit(dvConfig: DataVirtConfig, dsConfig: DataSourceConfig, file: string, key: string, newValue: string, valueFrom?: ValueFrom): Promise<boolean> {
+export function handleDataSourceEntryEdit(dvConfig: DataVirtConfig, dsConfig: DataSourceConfig, file: string, key: string, newValue: string, valueFrom?: ConfigMapRef | SecretRef): Promise<boolean> {
 	return new Promise<boolean>( (resolve) => {
 		if (dvConfig && dsConfig && file && key) {
 			try {

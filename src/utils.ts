@@ -18,7 +18,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as constants from './constants';
-import { DataSourceConfig, DataVirtConfig, ValueFrom, SecretRef, ConfigMapRef, Property } from './model/DataVirtModel';
+import { DataSourceConfig, DataVirtConfig, SecretRef, ConfigMapRef, Property } from './model/DataVirtModel';
 import { log } from './extension';
 
 const YAML = require('yaml');
@@ -72,13 +72,13 @@ export function validateFileNotExisting(name: string): string {
 	return undefined;
 }
 
-export function generateReferenceValueForLabel(value: string, ref: ValueFrom): string {
+export function generateReferenceValueForLabel(value: string, ref: ConfigMapRef | SecretRef): string {
 	if (ref) {
-		if (isSecretRef(ref.valueFrom)) {
-			const secretRef: SecretRef = ref.valueFrom;
+		if (isSecretRef(ref)) {
+			const secretRef: SecretRef = ref;
 			return `${secretRef.secretKeyRef.key} @ ${secretRef.secretKeyRef.name}`;
-		} else if (isConfigMapRef(ref.valueFrom)) {
-			const configMapRef: ConfigMapRef = ref.valueFrom;
+		} else if (isConfigMapRef(ref)) {
+			const configMapRef: ConfigMapRef = ref;
 			return `${configMapRef.configMapKeyRef.key} @ ${configMapRef.configMapKeyRef.name}`;
 		}
 	}

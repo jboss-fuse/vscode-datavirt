@@ -131,7 +131,7 @@ describe('Commands Tests', () => {
 
 			dvConfig.spec.datasources[0].properties.length.should.equal(oldLen+1);
 			should.exist(dvConfig.spec.datasources[0].properties.find( (element: Property) => {
-				return element.name === entryName && utils.isSecretRef(element.valueFrom.valueFrom) && element.valueFrom.valueFrom.secretKeyRef.key === 'refKey' && element.valueFrom.valueFrom.secretKeyRef.name === 'refName';
+				return element.name === entryName && utils.isSecretRef(element.valueFrom) && element.valueFrom.secretKeyRef.key === 'refKey' && element.valueFrom.secretKeyRef.name === 'refName';
 			}));
 		});
 
@@ -142,7 +142,7 @@ describe('Commands Tests', () => {
 
 			dvConfig.spec.datasources[0].properties.length.should.equal(oldLen+1);
 			should.exist(dvConfig.spec.datasources[0].properties.find( (element: Property) => {
-				return element.name === entryName && utils.isConfigMapRef(element.valueFrom.valueFrom) && element.valueFrom.valueFrom.configMapKeyRef.key === 'refKey' && element.valueFrom.valueFrom.configMapKeyRef.name === 'refName';
+				return element.name === entryName && utils.isConfigMapRef(element.valueFrom) && element.valueFrom.configMapKeyRef.key === 'refKey' && element.valueFrom.configMapKeyRef.name === 'refName';
 			}));
 		});
 
