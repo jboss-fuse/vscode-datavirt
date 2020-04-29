@@ -19,7 +19,7 @@ import * as extension from '../extension';
 import * as utils from '../utils';
 import * as vscode from 'vscode';
 import { DataSourcesTreeNode } from '../model/tree/DataSourcesTreeNode';
-import { DataVirtConfig, DataSourceConfig } from '../model/DataVirtModel';
+import { DataVirtConfig, DataSourceConfig, Property } from '../model/DataVirtModel';
 
 export async function createDataSourceCommand(dsTreeNode: DataSourcesTreeNode) {
 	const dsName: string = await vscode.window.showInputBox( { validateInput: (name: string) => {
@@ -68,6 +68,12 @@ export function handleDataSourceCreation(dsName: string, dsType: string, dvConfi
 					dsConfig.type = dsRelDBType;
 				}
 				dsConfig.name = dsName;
+				// preset empty property values
+				dsConfig.properties.forEach((element: Property) => {
+					if (!element.value) {
+						element.value = constants.EMPTY_VALUE;
+					}
+				});
 				if (!dvConfig.spec.datasources) {
 					dvConfig.spec.datasources = new Array<DataSourceConfig>();
 				}

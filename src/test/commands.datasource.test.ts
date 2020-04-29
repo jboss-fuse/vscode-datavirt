@@ -21,9 +21,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
+import * as constants from '../constants';
 import * as createVDBCommand from '../commands/CreateVDBCommand';
 import * as createDSCommand from '../commands/CreateDataSourceCommand';
-import { DataVirtConfig } from '../model/DataVirtModel';
+import { DataVirtConfig, DataSourceConfig, Property } from '../model/DataVirtModel';
 import * as deleteDSCommand from '../commands/DeleteDataSourceCommand';
 import * as extension from '../extension';
 import * as mongoDBDS from '../model/datasources/MongoDBDataSource';
@@ -65,6 +66,11 @@ describe('Commands Tests', () => {
 		dvConfig2.should.deep.equal(dvConfig);
 		dvConfig2.spec.datasources[0].properties.length.should.deep.equal(mongoTemplate.properties.length);
 		dvConfig = utils.loadModelFromFile(vdbFile);
+		dvConfig.spec.datasources.forEach( (element: DataSourceConfig) => {
+			element.properties.forEach( (prop: Property) => {
+				should.equal(prop.value, constants.EMPTY_VALUE, `DataSource ${element.name} / Property ${prop.name} does not have the <empty> string value set.`);
+			});
+		});
 	}
 
 	before(() => {
