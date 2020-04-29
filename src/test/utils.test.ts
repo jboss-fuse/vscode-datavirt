@@ -56,6 +56,36 @@ describe('Utils', () => {
 		});
 	});
 
+	context('Validate the length and content of an environment variable name', () => {
+		it('should return a validation error message when handing over an undefined parameter', () => {
+			should.exist(utils.ensureValidEnvironmentVariableName(undefined));
+		});
+
+		it('should return a validation error message when handing over a name with less than 4 characters', () => {
+			should.exist(utils.ensureValidEnvironmentVariableName('ABC'));
+		});
+
+		it('should return a validation error message when handing over a name with more than 253 characters', () => {
+			should.exist(utils.ensureValidEnvironmentVariableName('A12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234'));
+		});
+
+		it('should return a validation error message when handing over a name starting with underscore', () => {
+			should.exist(utils.ensureValidEnvironmentVariableName('_ABCD'));
+		});
+
+		it('should return a validation error message when handing over a name starting with a digit', () => {
+			should.exist(utils.ensureValidEnvironmentVariableName('0_ABCD'));
+		});
+
+		it('should return a validation error message when handing over a name starting with lowercase letter', () => {
+			should.exist(utils.ensureValidEnvironmentVariableName('a_BCD'));
+		});
+
+		it('should return undefined (no error) when handing over a name length between 4 and 253 characters', () => {
+			should.not.exist(utils.ensureValidEnvironmentVariableName('TEST'));
+		});
+	});
+
 	context('Replace the name of a template', () => {
 
 		it('should replace the name inside VDB DDL template with the given name', () => {
