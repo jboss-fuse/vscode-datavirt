@@ -57,8 +57,8 @@ describe('Commands Tests', () => {
 		dvConfig = utils.loadModelFromFile(vdbFile);
 	}
 
-	async function createDataSource() {
-		const createdDS = await createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, vdbFile);
+	async function createDataSource(dataSourceName?: string) {
+		const createdDS = await createDSCommand.handleDataSourceCreation(dataSourceName ? dataSourceName : dsName, dsType, dvConfig, vdbFile);
 		should.equal(true, createdDS, 'Execution of the Create DataSource command returned false');
 
 		const dvConfig2: DataVirtConfig = utils.loadModelFromFile(vdbFile);
@@ -157,6 +157,31 @@ describe('Commands Tests', () => {
 
 			dvConfig = utils.loadModelFromFile(vdbFile);
 			dvConfig.spec.datasources.length.should.deep.equal(1);
+		});
+
+		it('should not always delete the last datasource (regression test FUSETOOLS2-415)', async () => {
+			await createDataSource('test1');
+			await createDataSource('test2');
+			await createDataSource('test3');
+
+			dvConfig = utils.loadModelFromFile(vdbFile);
+			should.equal(dvConfig.spec.datasources.length, 4);
+
+			should.exist(utils.getDataSourceByName(dvConfig, 'test1'), 'Cannot find expected datasource test1');
+			should.exist(utils.getDataSourceByName(dvConfig, 'test2'), 'Cannot find expected datasource test2');
+			should.exist(utils.getDataSourceByName(dvConfig, 'test3'), 'Cannot find expected datasource test3');
+			should.exist(utils.getDataSourceByName(dvConfig, dsName), `Cannot find expected datasource ${dsName}`);
+
+			const deletedDS = await deleteDSCommand.handleDataSourceDeletion('test1', dvConfig, vdbFile);
+			should.equal(true, deletedDS, 'Execution of the Delete DataSource command returned false');
+
+			dvConfig = utils.loadModelFromFile(vdbFile);
+			should.equal(dvConfig.spec.datasources.length, 3);
+
+			should.not.exist(utils.getDataSourceByName(dvConfig, 'test1'), 'Can still find the deleted datasource in the list!');
+			should.exist(utils.getDataSourceByName(dvConfig, 'test2'), 'Cannot find expected datasource test2');
+			should.exist(utils.getDataSourceByName(dvConfig, 'test3'), 'Cannot find expected datasource test3');
+			should.exist(utils.getDataSourceByName(dvConfig, dsName), `Cannot find expected datasource ${dsName}`);
 		});
 	});
 });

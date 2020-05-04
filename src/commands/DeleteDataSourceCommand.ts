@@ -22,12 +22,12 @@ import { DataVirtConfig, DataSourceConfig } from '../model/DataVirtModel';
 
 export function deleteDataSourceCommand(dsNode: DataSourceTreeNode): void {
 	if (dsNode) {
-		handleDataSourceDeletion(dsNode.label, dsNode.getProject().dvConfig, dsNode.getProject().file)
+		handleDataSourceDeletion(dsNode.dataSourceConfig.name, dsNode.getProject().dvConfig, dsNode.getProject().file)
 			.then( (success: boolean) => {
 				if (success) {
-					vscode.window.showInformationMessage(`DataSource ${dsNode.label} has been deleted...`);
+					vscode.window.showInformationMessage(`DataSource ${dsNode.dataSourceConfig.name} has been deleted...`);
 				} else {
-					vscode.window.showErrorMessage(`An error occured when trying to delete the datasource ${dsNode.label}...`);
+					vscode.window.showErrorMessage(`An error occured when trying to delete the datasource ${dsNode.dataSourceConfig.name}...`);
 				}
 		});
 	}
@@ -40,9 +40,14 @@ export function handleDataSourceDeletion(dsName: string, dvConfig: DataVirtConfi
 				const index: number = dvConfig.spec.datasources.findIndex( (value: DataSourceConfig) => {
 					return value.name === dsName;
 				});
-				dvConfig.spec.datasources.splice(index, 1);
-				utils.saveModelToFile(dvConfig, file);
-				resolve(true);
+				if (index !== -1) {
+					dvConfig.spec.datasources.splice(index, 1);
+					utils.saveModelToFile(dvConfig, file);
+					resolve(true);
+				} else {
+					extension.log(`Unable to delete datasource ${dsName}. Cannot find a datasource with that name.`);
+					resolve(false);
+				}
 			} catch (error) {
 				extension.log(error);
 				resolve(false);
