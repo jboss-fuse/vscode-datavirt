@@ -93,11 +93,11 @@ export function handleDataSourceEntryCreation(dvConfig: DataVirtConfig, dsConfig
 				if (!entry) {
 					setDataSourceEntryValue(dsConfig.properties, entryType, entryName, entryValue, refName, refKey);
 					utils.createOrUpdateLocalReferenceFile(refName, refKey, entryValue, entryType);
+					utils.saveModelToFile(dvConfig, file);
+					resolve(true);
 				} else {
 					resolve(false);
 				}
-				utils.saveModelToFile(dvConfig, file);
-				resolve(true);
 			} catch (error) {
 				extension.log(error);
 				resolve(false);

@@ -20,7 +20,7 @@ export const VDB_KIND: string = 'VirtualDatabase';
 export const DDL_FILE_EXT: string = '.ddl';
 export const TEMPLATE_NAME: string = '$!TEMPLATE!$';
 export const DDL_NAME_PLACEHOLDER: string = '$!VDB_NAME_PLACEHOLDER!$';
-export const EMPTY_VALUE: string = '<empty>';
+export const EMPTY_VALUE: string = '';
 export const RELATIONAL_DB_KEY: string = 'RelationalDB';
 export const RELATIONAL_DB_TYPES: string[] = [
 	'amazon-athena',
