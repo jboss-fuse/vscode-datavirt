@@ -76,8 +76,8 @@ export class Property {
 
 	constructor(name: string, value?: string, valueFrom?: SecretRef | ConfigMapRef) {
 		this.name = name;
-		if (value) this.value = value;
-		if (valueFrom) this.valueFrom = valueFrom;
+		if (value !== undefined) this.value = value;
+		if (valueFrom !== undefined) this.valueFrom = valueFrom;
 	}
 }
 
