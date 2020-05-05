@@ -111,7 +111,7 @@ describe('Commands Tests', () => {
 			}
 		});
 
-		it('should not generate a VDB file when passing undefined as file', async () => {
+		it('should not delete a VDB file when passing undefined as file', async () => {
 			try {
 				await createVDBCommand.handleVDBCreation(name, undefined);
 				fail('delete command did not throw exception when passing undefined instead of the file');

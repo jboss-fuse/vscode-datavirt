@@ -21,7 +21,6 @@ import * as path from 'path';
 import * as utils from '../utils';
 import * as vscode from 'vscode';
 import { DataVirtConfig } from '../model/DataVirtModel';
-import { SchemaTreeNode } from '../model/tree/SchemaTreeNode';
 
 export function createVDBCommand() {
 	if (extension.workspaceReady) {
@@ -39,7 +38,7 @@ export function createVDBCommand() {
 				handleVDBCreation(vscode.workspace.workspaceFolders[0].uri.fsPath, vdbName)
 					.then( (success: boolean) => {
 						if (success) {
-							openDDLEditor(vdbName);
+							utils.openDDLEditor(vdbName);
 							vscode.window.showInformationMessage(`Virtual database ${vdbName} has been created successfully...`);
 						} else {
 							vscode.window.showErrorMessage(`An error occured when trying to create a new virtual database with the name ${vdbName}...`);
@@ -75,11 +74,4 @@ export function handleVDBCreation(filepath: string, fileName: string, templateFo
 			reject(new Error('handleVDBCreation: Unable to create the virtual database because no name was given...'));
 		}
 	});
-}
-
-function openDDLEditor(vdbName: string) {
-	const node: SchemaTreeNode = extension.dataVirtProvider.getSchemaTreeNodeOfProject(vdbName);
-	if (node) {
-		vscode.commands.executeCommand('datavirt.edit.schema', node);
-	}
 }

@@ -130,7 +130,7 @@
 					"when": "false"
 				},
 				{
-					"command": "datavirt.delete.datasource",
+					"command": "datavirt.delete.vdb",
 					"when": "false"
 				},
 				{
