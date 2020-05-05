@@ -57,7 +57,7 @@ describe('Commands Tests', () => {
 
 	context('Create VDB', () => {
 
-		it('should generate a valid VDB file when handing over valid parameters', async () => {
+		it('should generate a valid VDB file when passing valid parameters', async () => {
 			const success = await createVDBCommand.handleVDBCreation(workspacePath, name, templateFolder);
 			should.equal(true, success, 'Execution of the createVDBCommand returned false');
 			fs.existsSync(vdbFile).should.equal(true);
@@ -67,19 +67,19 @@ describe('Commands Tests', () => {
 			dvConfig.spec.build.source.ddl.should.contain(name);
 		});
 
-		it('should not generate a VDB file when handing over invalid file name', async () => {
+		it('should not generate a VDB file when passing invalid file name', async () => {
 			try {
 				await createVDBCommand.handleVDBCreation(workspacePath, undefined, templateFolder);
-				fail('create command did not throw exception when handing over invalid name');
+				fail('create command did not throw exception when passing invalid name');
 			} catch (error) {
 				should.exist(error);
 			}
 		});
 
-		it('should not generate a VDB file when handing over invalid folder name', async () => {
+		it('should not generate a VDB file when passing invalid folder name', async () => {
 			try {
 				await createVDBCommand.handleVDBCreation(undefined, name, templateFolder);
-				fail('create command did not throw exception when handing over invalid workspace path');
+				fail('create command did not throw exception when passing invalid workspace path');
 			} catch (error) {
 				should.exist(error);
 			}
@@ -94,7 +94,7 @@ describe('Commands Tests', () => {
 			fs.existsSync(vdbFile).should.equal(true);
 		});
 
-		it('should delete a VDB file when handing over valid parameters', async () => {
+		it('should delete a VDB file when passing valid parameters', async () => {
 			const success = await deleteVDBCommand.handleVDBDeletion(name, vdbFile);
 			should.equal(true, success, `Execution of the deleteVDBCommand returned false for VDB ${name} with file ${vdbFile}`);
 			fs.existsSync(vdbFile).should.equal(false);
@@ -102,19 +102,19 @@ describe('Commands Tests', () => {
 			should.not.exist(dvConfig);
 		});
 
-		it('should not delete a VDB file when handing over invalid file name', async () => {
+		it('should not delete a VDB file when passing invalid file name', async () => {
 			try {
 				await deleteVDBCommand.handleVDBDeletion(name, `${vdbFile}.not.existing.yaml`);
-				fail('delete command did not throw exception when handing over invalid file');
+				fail('delete command did not throw exception when passing invalid file');
 			} catch (error) {
 				should.exist(error);
 			}
 		});
 
-		it('should not generate a VDB file when handing over undefined as file', async () => {
+		it('should not generate a VDB file when passing undefined as file', async () => {
 			try {
 				await createVDBCommand.handleVDBCreation(name, undefined);
-				fail('delete command did not throw exception when handing over undefined instead of the file');
+				fail('delete command did not throw exception when passing undefined instead of the file');
 			} catch (error) {
 				should.exist(error);
 			}
