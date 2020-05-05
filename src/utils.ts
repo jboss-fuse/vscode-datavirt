@@ -140,16 +140,6 @@ export function createTempFile(vdbName: string, sql: string): string {
 	return tempFile;
 }
 
-export function closeOpenEditorsIfRequired(filePathAndName: string): void {
-	if (filePathAndName && vscode.window.visibleTextEditors) {
-		vscode.window.visibleTextEditors.forEach( (editor: vscode.TextEditor) => {
-			if (editor.document.fileName === filePathAndName) {
-				vscode.commands.executeCommand('workbench.action.closeActiveEditor', editor);
-			}
-		});
-	}
-}
-
 export function openDDLEditor(vdbName: string) {
 	const node: SchemaTreeNode = extension.dataVirtProvider.getSchemaTreeNodeOfProject(vdbName);
 	if (node) {
