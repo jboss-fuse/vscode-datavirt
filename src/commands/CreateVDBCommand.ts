@@ -31,7 +31,7 @@ export function createVDBCommand() {
 				res = utils.validateFileNotExisting(name);
 			}
 			return res;
-		}, placeHolder: 'Enter the name of the new VDB config' })
+		}, placeHolder: 'Enter the name of the new virtual database' })
 			.then( (vdbName: string) => {
 				if (vdbName === undefined) {
 					return;
@@ -40,9 +40,9 @@ export function createVDBCommand() {
 					.then( (success: boolean) => {
 						if (success) {
 							openDDLEditor(vdbName);
-							vscode.window.showInformationMessage(`New VDB ${vdbName} has been created successfully...`);
+							vscode.window.showInformationMessage(`Virtual database ${vdbName} has been created successfully...`);
 						} else {
-							vscode.window.showErrorMessage(`An error occured when trying to create a new VDB with name ${vdbName}...`);
+							vscode.window.showErrorMessage(`An error occured when trying to create a new virtual database with the name ${vdbName}...`);
 						}
 					})
 					.catch( (error) => {
@@ -50,7 +50,7 @@ export function createVDBCommand() {
 					});
 			});
 	} else {
-		vscode.window.showErrorMessage(`DataVirt Tooling only works when a workspace folder is opened.` +
+		vscode.window.showErrorMessage(`Data Virtualization Tooling only works when a workspace folder is opened.` +
 			` Please add a folder to the workspace with 'File->Add Folder to Workspace' or use the Command Palette (Ctrl+Shift+P) and type 'Add Folder'.` +
 			` Once there is at least one folder in the workspace, please try again.`);
 	}
@@ -72,7 +72,7 @@ export function handleVDBCreation(filepath: string, fileName: string, templateFo
 				reject(error);
 			}
 		} else {
-			reject(new Error('handleVDBCreation: Unable to create the VDB because no name was given...'));
+			reject(new Error('handleVDBCreation: Unable to create the virtual database because no name was given...'));
 		}
 	});
 }

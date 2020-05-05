@@ -24,9 +24,9 @@ export function deleteVDBCommand(dvProjectNode: DVProjectTreeNode): void {
 		handleVDBDeletion(dvProjectNode.label, dvProjectNode.file)
 			.then( (success: boolean) => {
 				if (success) {
-					vscode.window.showInformationMessage(`VDB ${dvProjectNode.label} has been deleted...`);
+					vscode.window.showInformationMessage(`Virtual database ${dvProjectNode.label} has been deleted...`);
 				} else {
-					vscode.window.showErrorMessage(`An error occured when trying to delete the VDB ${dvProjectNode.label}...`);
+					vscode.window.showErrorMessage(`An error occured when trying to delete the virtual database ${dvProjectNode.label}...`);
 				}
 		});
 	}
@@ -43,7 +43,7 @@ export function handleVDBDeletion(vdbName: string, file: string): Promise<boolea
 				resolve(false);
 			}
 		} else {
-			extension.log(`handleVDBDeletion: Unable to delete the VDB ${vdbName}...`);
+			extension.log(`handleVDBDeletion: Unable to delete the virtual database ${vdbName}...`);
 			resolve(false);
 		}
 	});
