@@ -25,6 +25,7 @@ import * as vscode from 'vscode';
 import * as createVDBCommand from '../commands/CreateVDBCommand';
 import * as extension from '../extension';
 import * as utils from '../utils';
+import * as deleteVDBCommand from '../commands/DeleteVDBCommand';
 
 chai.use(sinonChai);
 const should = chai.should();
@@ -44,17 +45,17 @@ describe('Commands Tests', () => {
 		templateFolder = path.join(workspacePath, '../resources/');
 	});
 
+	beforeEach( () => {
+		vdbFile = path.join(workspacePath, `${name}.yaml`);
+	});
+
+	afterEach( () => {
+		if (vdbFile && fs.existsSync(vdbFile)) {
+			fs.unlinkSync(vdbFile);
+		}
+	});
+
 	context('Create VDB', () => {
-
-		beforeEach( () => {
-			vdbFile = path.join(workspacePath, `${name}.yaml`);
-		});
-
-		afterEach( () => {
-			if (vdbFile && fs.existsSync(vdbFile)) {
-				fs.unlinkSync(vdbFile);
-			}
-		});
 
 		it('should generate a valid VDB file when handing over valid parameters', async () => {
 			const success = await createVDBCommand.handleVDBCreation(workspacePath, name, templateFolder);
@@ -69,7 +70,7 @@ describe('Commands Tests', () => {
 		it('should not generate a VDB file when handing over invalid file name', async () => {
 			try {
 				await createVDBCommand.handleVDBCreation(workspacePath, undefined, templateFolder);
-				fail('create command did not throw exception when handing invalid name');
+				fail('create command did not throw exception when handing over invalid name');
 			} catch (error) {
 				should.exist(error);
 			}
@@ -78,7 +79,42 @@ describe('Commands Tests', () => {
 		it('should not generate a VDB file when handing over invalid folder name', async () => {
 			try {
 				await createVDBCommand.handleVDBCreation(undefined, name, templateFolder);
-				fail('create command did not throw exception when handing invalid workspace path');
+				fail('create command did not throw exception when handing over invalid workspace path');
+			} catch (error) {
+				should.exist(error);
+			}
+		});
+	});
+
+	context('Delete VDB', () => {
+
+		beforeEach( async () => {
+			const success = await createVDBCommand.handleVDBCreation(workspacePath, name, templateFolder);
+			should.equal(true, success, 'Execution of the createVDBCommand returned false');
+			fs.existsSync(vdbFile).should.equal(true);
+		});
+
+		it('should delete a VDB file when handing over valid parameters', async () => {
+			const success = await deleteVDBCommand.handleVDBDeletion(name, vdbFile);
+			should.equal(true, success, `Execution of the deleteVDBCommand returned false for VDB ${name} with file ${vdbFile}`);
+			fs.existsSync(vdbFile).should.equal(false);
+			const dvConfig = utils.loadModelFromFile(vdbFile);
+			should.not.exist(dvConfig);
+		});
+
+		it('should not delete a VDB file when handing over invalid file name', async () => {
+			try {
+				await deleteVDBCommand.handleVDBDeletion(name, `${vdbFile}.not.existing.yaml`);
+				fail('delete command did not throw exception when handing over invalid file');
+			} catch (error) {
+				should.exist(error);
+			}
+		});
+
+		it('should not generate a VDB file when handing over undefined as file', async () => {
+			try {
+				await createVDBCommand.handleVDBCreation(name, undefined);
+				fail('delete command did not throw exception when handing over undefined instead of the file');
 			} catch (error) {
 				should.exist(error);
 			}

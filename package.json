@@ -41,6 +41,11 @@
 				"category": "dv"
 			},
 			{
+				"title": "Delete Virtual Database",
+				"command": "datavirt.delete.vdb",
+				"category": "dv"
+			},
+			{
 				"title": "New Datasource",
 				"command": "datavirt.create.datasource",
 				"category": "dv"
@@ -125,6 +130,10 @@
 					"when": "false"
 				},
 				{
+					"command": "datavirt.delete.datasource",
+					"when": "false"
+				},
+				{
 					"command": "datavirt.create.datasourceentry.value",
 					"when": "false"
 				},
@@ -180,6 +189,11 @@
 					"group": "dv@1",
 					"command": "datavirt.create.vdb",
 					"when": "viewItem == undefined"
+				},
+				{
+					"group": "dv@1",
+					"command": "datavirt.delete.vdb",
+					"when": "viewItem == dv.project"
 				},
 				{
 					"group": "dv@1",

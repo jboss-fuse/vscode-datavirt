@@ -30,6 +30,7 @@ import { DataSourceConfig } from './model/DataVirtModel';
 import { deleteDataSourceCommand } from './commands/DeleteDataSourceCommand';
 import { deleteDataSourceEntryCommand } from './commands/DeleteDataSourceEntryCommand';
 import { deleteEnvironmentVariableCommand } from './commands/DeleteEnvironmentVariableCommand';
+import { deleteVDBCommand } from './commands/DeleteVDBCommand';
 import { deployVDBCommand } from './commands/DeployVDBCommand';
 import { editDataSourceEntryCommand } from './commands/EditDataSourceEntryCommand';
 import { editEnvironmentVariableCommand } from './commands/EditEnvironmentVariableCommand';
@@ -90,6 +91,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// register the commands
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.vdb', createVDBCommand));
+	context.subscriptions.push(vscode.commands.registerCommand('datavirt.delete.vdb', deleteVDBCommand));
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.datasource', createDataSourceCommand));
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.delete.datasource', deleteDataSourceCommand));
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.datasourceentry.value', createDataSourceEntryCommandForValue));
