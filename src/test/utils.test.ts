@@ -95,6 +95,18 @@ describe('Utils', () => {
 	});
 
 	context('Load/Save of a VDB file', () => {
+
+		let dummyNonVDBFile: string;
+
+		before( () => {
+			dummyNonVDBFile = path.resolve(__dirname, '../../testFixture', `dummy.yaml`);
+			fs.writeFileSync(dummyNonVDBFile, 'test');
+		});
+
+		after( () => {
+			fs.unlinkSync(dummyNonVDBFile);
+		});
+
 		it('should match the vdb model contents between a save and reload to/from a vdb file', () => {
 			const name: string = 'test';
 			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
@@ -110,11 +122,8 @@ describe('Utils', () => {
 		});
 
 		it('should return undefined for yaml files which are not kind VirtualDatabase', () => {
-			const fpTest: string = path.resolve(__dirname, '../../testFixture', `dummy.yaml`);
-			fs.writeFileSync(fpTest, 'test');
-			const yamlDoc:DataVirtConfig = utils.loadModelFromFile(fpTest);
+			const yamlDoc:DataVirtConfig = utils.loadModelFromFile(dummyNonVDBFile);
 			should.not.exist(yamlDoc);
-			fs.unlinkSync(fpTest);
 		});
 	});
 
