@@ -16,35 +16,33 @@
  */
 import * as extension from '../extension';
 import * as fs from 'fs';
+import * as util from 'util';
+import * as utils from '../utils';
 import * as vscode from 'vscode';
 import { DVProjectTreeNode } from '../model/tree/DVProjectTreeNode';
 
-export function deleteVDBCommand(dvProjectNode: DVProjectTreeNode): void {
-	if (dvProjectNode) {
-		handleVDBDeletion(dvProjectNode.label, dvProjectNode.file)
-			.then( (success: boolean) => {
-				if (success) {
-					vscode.window.showInformationMessage(`Virtual database ${dvProjectNode.label} has been deleted...`);
-				} else {
-					vscode.window.showErrorMessage(`An error occured when trying to delete the virtual database ${dvProjectNode.label}...`);
-				}
-		});
+const unlinkFile = util.promisify(fs.unlink);
+
+export async function deleteVDBCommand(dvProjectNode: DVProjectTreeNode): Promise<void> {
+	const success: boolean = await handleVDBDeletion(dvProjectNode.label, dvProjectNode.file);
+	if (success) {
+		utils.closeOpenEditorsIfRequired(dvProjectNode.file);
+		vscode.window.showInformationMessage(`Virtual database ${dvProjectNode.label} has been deleted...`);
+	} else {
+		vscode.window.showErrorMessage(`An error occured when trying to delete the virtual database ${dvProjectNode.label}...`);
 	}
 }
 
-export function handleVDBDeletion(vdbName: string, file: string): Promise<boolean> {
-	return new Promise<boolean>( (resolve) => {
-		if (vdbName && file) {
-			try {
-				fs.unlinkSync(file);
-				resolve(true);
-			} catch (error) {
-				extension.log(error);
-				resolve(false);
-			}
-		} else {
-			extension.log(`handleVDBDeletion: Unable to delete the virtual database ${vdbName}...`);
-			resolve(false);
+export async function handleVDBDeletion(vdbName: string, file: string): Promise<boolean> {
+	if (vdbName && file) {
+		try {
+			await unlinkFile(file);
+			return true;
+		} catch (error) {
+			extension.log(error);
 		}
-	});
+	} else {
+		extension.log(`handleVDBDeletion: Unable to delete the virtual database [${vdbName}] with file [${file}]...`);
+	}
+	return false;
 }

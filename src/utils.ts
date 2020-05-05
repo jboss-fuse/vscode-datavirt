@@ -14,12 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as extension from './extension';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as constants from './constants';
 import { DataSourceConfig, DataVirtConfig, SecretRef, ConfigMapRef, Property } from './model/DataVirtModel';
 import { log } from './extension';
+import { SchemaTreeNode } from './model/tree/SchemaTreeNode';
 
 const YAML = require('yaml');
 const TMP = require('tmp');
@@ -146,6 +148,23 @@ export function createTempFile(vdbName: string, sql: string): string {
 	const tempFile: string = path.join(tmpDir.name, `${vdbName}${constants.DDL_FILE_EXT}`);
 	fs.writeFileSync(tempFile, sql);
 	return tempFile;
+}
+
+export function closeOpenEditorsIfRequired(filePathAndName: string): void {
+	if (filePathAndName && vscode.window.visibleTextEditors) {
+		vscode.window.visibleTextEditors.forEach( (editor: vscode.TextEditor) => {
+			if (editor.document.fileName === filePathAndName) {
+				vscode.commands.executeCommand('workbench.action.closeActiveEditor', editor);
+			}
+		});
+	}
+}
+
+export function openDDLEditor(vdbName: string) {
+	const node: SchemaTreeNode = extension.dataVirtProvider.getSchemaTreeNodeOfProject(vdbName);
+	if (node) {
+		vscode.commands.executeCommand('datavirt.edit.schema', node);
+	}
 }
 
 export function createOrUpdateLocalReferenceFile(refName: string, refKey: string, entryValue: string, entryType: string) {
