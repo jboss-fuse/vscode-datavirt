@@ -28,10 +28,12 @@ export function loadModelFromFile(file: string): DataVirtConfig | undefined {
 	try {
 		const f = fs.readFileSync(file, 'utf8');
 		const yamlDoc:DataVirtConfig = YAML.parse(f);
-		// we need to initialize datasources and env arrays if not yet present to prevent issues
-		if (!yamlDoc.spec.datasources) yamlDoc.spec.datasources = new Array<DataSourceConfig>();
-		if (!yamlDoc.spec.env) yamlDoc.spec.env = new Array<Property>();
-		return yamlDoc;
+		if (yamlDoc && yamlDoc.kind && yamlDoc.kind === constants.VDB_KIND) {
+			// we need to initialize datasources and env arrays if not yet present to prevent issues
+			if (!yamlDoc.spec.datasources) yamlDoc.spec.datasources = new Array<DataSourceConfig>();
+			if (!yamlDoc.spec.env) yamlDoc.spec.env = new Array<Property>();
+			return yamlDoc;
+		}
 	} catch (err) {
 		log(err);
 	}
