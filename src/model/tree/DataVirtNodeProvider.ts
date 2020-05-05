@@ -137,16 +137,14 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 	processDataVirtYAML(fullPath: string, name: string, yaml : DataVirtConfig): void {
 		if (yaml) {
 			try {
-				if (yaml.kind === constants.VDB_KIND) {
-					// found a DV config file -> put to tree
-					let title = name;
-					if (yaml.metadata.name) {
-						title = yaml.metadata.name;
-					}
-					const newItem = new DVProjectTreeNode(title, fullPath, yaml);
-					if (!this.doesNodeExist(this.treeNodes, newItem)) {
-						this.addChild(this.treeNodes, newItem, true);
-					}
+				// found a DV config file -> put to tree
+				let title = name;
+				if (yaml.metadata.name) {
+					title = yaml.metadata.name;
+				}
+				const newItem = new DVProjectTreeNode(title, fullPath, yaml);
+				if (!this.doesNodeExist(this.treeNodes, newItem)) {
+					this.addChild(this.treeNodes, newItem, true);
 				}
 			} catch( error ) {
 				console.log(error);

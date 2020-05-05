@@ -108,6 +108,14 @@ describe('Utils', () => {
 			yamlDoc.should.deep.equal(yamlDoc2);
 			fs.unlinkSync(fpTest);
 		});
+
+		it('should return undefined for yaml files which are not kind VirtualDatabase', () => {
+			const fpTest: string = path.resolve(__dirname, '../../testFixture', `dummy.yaml`);
+			fs.writeFileSync(fpTest, 'test');
+			const yamlDoc:DataVirtConfig = utils.loadModelFromFile(fpTest);
+			should.not.exist(yamlDoc);
+			fs.unlinkSync(fpTest);
+		});
 	});
 
 	context('Type Guards', () => {
