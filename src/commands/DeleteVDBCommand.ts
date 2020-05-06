@@ -30,7 +30,7 @@ export async function deleteVDBCommand(dvProjectNode: DVProjectTreeNode): Promis
 export async function handleVDBDeletion(vdbName: string, file: string): Promise<boolean> {
 	if (vdbName && file) {
 		try {
-			await vscode.workspace.fs.delete(vscode.Uri.parse(file));
+			await vscode.workspace.fs.delete(vscode.Uri.file(file));
 			return true;
 		} catch (error) {
 			extension.log(error);
