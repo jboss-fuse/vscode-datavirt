@@ -32,11 +32,12 @@ export function activate(context: ExtensionContext) {
 	};
 
 	let clientOptions: LanguageClientOptions = {
-		documentSelector: ['ddl'],
+		documentSelector: ['ddl', 'sql'],
 		synchronize: {
 			configurationSection: ['ddl'],
 			fileEvents: [
-				workspace.createFileSystemWatcher('**/*.ddl')
+				workspace.createFileSystemWatcher('**/*.ddl'),
+				workspace.createFileSystemWatcher('**/*.sql')
 			]
 		}
 	};
