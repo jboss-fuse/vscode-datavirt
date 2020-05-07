@@ -21,18 +21,22 @@ import { Uri } from 'vscode';
 
 const waitUntil = require('async-wait-until');
 
-describe('Should do completion for ddl file', () => {
+describe('Should do completion for schema file', () => {
 
 	const expectedCompletion = { label: 'Create Database view' };
 
-	it('Completes Database view for DDL', async () => {
-		await testCompletion(new vscode.Position(0, 0), expectedCompletion);
+	it('Completes Database view for .ddl file', async () => {
+		await testCompletion('.ddl', new vscode.Position(0, 0), expectedCompletion);
+	});
+
+	it('Completes Database view for .sql file', async () => {
+		await testCompletion('.sql', new vscode.Position(0, 0), expectedCompletion);
 	});
 
 });
 
-async function testCompletion(position: vscode.Position, expectedCompletion: vscode.CompletionItem) {
-	const ddlUri = Uri.parse('untitled:test.ddl');
+async function testCompletion(fileExtension: string, position: vscode.Position, expectedCompletion: vscode.CompletionItem) {
+	const ddlUri = Uri.parse(`untitled:test${fileExtension}`);
 	await vscode.workspace.openTextDocument(ddlUri);
 	await checkExpectedCompletion(ddlUri, position, expectedCompletion);
 }
