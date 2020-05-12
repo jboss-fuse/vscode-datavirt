@@ -137,22 +137,22 @@ describe('Utils', () => {
 			fs.unlinkSync(dummyNonVDBFile);
 		});
 
-		it('should match the vdb model contents between a save and reload to/from a vdb file', () => {
+		it('should match the vdb model contents between a save and reload to/from a vdb file', async () => {
 			const name: string = 'test';
 			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
 			const fpTest: string = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
-			const yamlDoc:DataVirtConfig = utils.loadModelFromFile(fpOrig);
+			const yamlDoc:DataVirtConfig = await utils.loadModelFromFile(fpOrig);
 			should.exist(yamlDoc);
-			utils.saveModelToFile(yamlDoc, fpTest);
+			await utils.saveModelToFile(yamlDoc, fpTest);
 			should.exist(utils.validateFileNotExisting(name));
-			const yamlDoc2:DataVirtConfig = utils.loadModelFromFile(fpTest);
+			const yamlDoc2:DataVirtConfig = await utils.loadModelFromFile(fpTest);
 			should.exist(yamlDoc2);
 			yamlDoc.should.deep.equal(yamlDoc2);
 			fs.unlinkSync(fpTest);
 		});
 
-		it('should return undefined for yaml files which are not kind VirtualDatabase', () => {
-			const yamlDoc:DataVirtConfig = utils.loadModelFromFile(dummyNonVDBFile);
+		it('should return undefined for yaml files which are not kind VirtualDatabase', async() => {
+			const yamlDoc:DataVirtConfig = await utils.loadModelFromFile(dummyNonVDBFile);
 			should.not.exist(yamlDoc);
 		});
 	});
@@ -204,10 +204,10 @@ describe('Utils', () => {
 
 		let yamlDoc: DataVirtConfig;
 
-		beforeEach( () => {
+		beforeEach( async() => {
 			const name: string = 'test';
 			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
-			yamlDoc = utils.loadModelFromFile(fpOrig);
+			yamlDoc = await utils.loadModelFromFile(fpOrig);
 			should.exist(yamlDoc);
 		});
 

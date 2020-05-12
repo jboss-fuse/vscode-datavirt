@@ -87,14 +87,14 @@ async function createEnvironmentVariableCommandForReference(envNode: Environment
 
 
 export function handleEnvironmentVariableCreation(dvConfig: DataVirtConfig, enviroment: Property[], file: string, entryType: string, entryName: string, entryValue: string, refName?: string, refKey?: string): Promise<boolean> {
-	return new Promise<boolean>( (resolve) => {
+	return new Promise<boolean>( async (resolve) => {
 		if (dvConfig && entryType && enviroment && file && entryName) {
 			try {
 				const entry: Property = utils.getEnvironmentVariableByName(entryName, enviroment);
 				if (!entry) {
 					setEnvironmentVariableValue(enviroment, entryType, entryName, entryValue, refName, refKey);
 					utils.createOrUpdateLocalReferenceFile(refName, refKey, entryValue, entryType);
-					utils.saveModelToFile(dvConfig, file);
+					await utils.saveModelToFile(dvConfig, file);
 					resolve(true);
 				} else {
 					resolve(false);

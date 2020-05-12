@@ -86,14 +86,14 @@ async function createDataSourceEntryCommandForReference(dsNode: DataSourceTreeNo
 }
 
 export function handleDataSourceEntryCreation(dvConfig: DataVirtConfig, dsConfig: DataSourceConfig, file: string, entryType: string, entryName: string, entryValue: string, refName?: string, refKey?: string): Promise<boolean> {
-	return new Promise<boolean>( (resolve) => {
+	return new Promise<boolean>( async (resolve) => {
 		if (dvConfig && entryType && dsConfig && file && entryName && entryValue !== undefined) {
 			try {
 				const entry: Property = utils.getDataSourceEntryByName(entryName, dsConfig);
 				if (!entry) {
 					setDataSourceEntryValue(dsConfig.properties, entryType, entryName, entryValue, refName, refKey);
 					utils.createOrUpdateLocalReferenceFile(refName, refKey, entryValue, entryType);
-					utils.saveModelToFile(dvConfig, file);
+					await utils.saveModelToFile(dvConfig, file);
 					resolve(true);
 				} else {
 					resolve(false);

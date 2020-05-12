@@ -94,7 +94,7 @@ function showFeedback(success: boolean, key: string) {
 }
 
 export function handleEnvironmentVariableEdit(dvConfig: DataVirtConfig, environment: Property[], file: string, key: string, newValue: string, valueFrom?: ConfigMapRef | SecretRef): Promise<boolean> {
-	return new Promise<boolean>( (resolve) => {
+	return new Promise<boolean>( async (resolve) => {
 		if (dvConfig && environment && file && key) {
 			try {
 				const entry: Property = utils.getEnvironmentVariableByName(key, environment);
@@ -106,7 +106,7 @@ export function handleEnvironmentVariableEdit(dvConfig: DataVirtConfig, environm
 						// its a plain string value
 						entry.value = newValue ? newValue : '';
 					}
-					utils.saveModelToFile(dvConfig, file);
+					await utils.saveModelToFile(dvConfig, file);
 					resolve(true);
 				} else {
 					extension.log(`handleEnvironmentVariableEdit: Unable to modify the environment variable ${key} because the key does not exist...`);

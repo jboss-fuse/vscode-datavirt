@@ -35,7 +35,7 @@ chai.use(sinonChai);
 const should = chai.should();
 
 describe('Commands Tests', () => {
-	const name = 'newvdb';
+	const name = 'newvdbenv';
 	const entryName: string = 'NEWKEY';
 	const entryValue: string = 'newvalue';
 
@@ -57,7 +57,7 @@ describe('Commands Tests', () => {
 
 		vdbFile = path.join(workspacePath, `${name}.yaml`);
 		fs.existsSync(vdbFile).should.equal(true);
-		dvConfig = utils.loadModelFromFile(vdbFile);
+		dvConfig = await utils.loadModelFromFile(vdbFile);
 
 		if (createEnvVar) {
 			await createEnvironmentVariableWithValidParameters(dvConfig, vdbFile, constants.REFERENCE_TYPE_VALUE, entryName, entryValue, undefined, undefined);
@@ -93,10 +93,18 @@ describe('Commands Tests', () => {
 		templateFolder = path.join(workspacePath, '../resources/');
 	});
 
+	after(() => {
+		cleanupVDB();
+	});
+
 	context('Create Environment Variable', () => {
 
 		beforeEach( async () => {
 			await initializeGlobals(false);
+		});
+
+		afterEach( () => {
+			cleanupVDB();
 		});
 
 		it('should create an environment variable when handing over valid parameters', async () => {

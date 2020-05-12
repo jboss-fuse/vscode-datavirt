@@ -37,7 +37,7 @@ export function deleteDataSourceEntryCommand(ds: DataSourceEntryTreeNode) {
 }
 
 export function handleDataSourceEntryDeletion(dvConfig: DataVirtConfig, dsConfig: DataSourceConfig, file: string, key: string): Promise<boolean> {
-	return new Promise<boolean>( (resolve) => {
+	return new Promise<boolean>( async (resolve) => {
 		if (dvConfig && dsConfig && file && key) {
 			try {
 				let deleted: boolean = false;
@@ -53,7 +53,7 @@ export function handleDataSourceEntryDeletion(dvConfig: DataVirtConfig, dsConfig
 					}
 				});
 				if (deleted) {
-					utils.saveModelToFile(dvConfig, file);
+					await utils.saveModelToFile(dvConfig, file);
 				}
 				resolve(deleted);
 			} catch (error) {

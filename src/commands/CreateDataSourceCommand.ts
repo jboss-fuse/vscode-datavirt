@@ -60,7 +60,7 @@ export async function createDataSourceCommand(dsTreeNode: DataSourcesTreeNode) {
 }
 
 export function handleDataSourceCreation(dsName: string, dsType: string, dvConfig: DataVirtConfig, file: string, dsRelDBType?: string): Promise<boolean> {
-	return new Promise<boolean>( (resolve) => {
+	return new Promise<boolean>( async(resolve) => {
 		if (dsName && dsType && dvConfig && file) {
 			try {
 				let dsConfig: DataSourceConfig = extension.DATASOURCE_TYPES.get(dsType);
@@ -78,7 +78,7 @@ export function handleDataSourceCreation(dsName: string, dsType: string, dvConfi
 					dvConfig.spec.datasources = new Array<DataSourceConfig>();
 				}
 				dvConfig.spec.datasources.push(dsConfig);
-				utils.saveModelToFile(dvConfig, file);
+				await utils.saveModelToFile(dvConfig, file);
 				resolve(true);
 			} catch (error) {
 				extension.log(error);
