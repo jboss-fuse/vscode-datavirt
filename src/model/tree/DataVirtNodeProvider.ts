@@ -103,7 +103,7 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 				}
 			});
 
-			this._onDidChangeTreeData.fire();
+			this._onDidChangeTreeData.fire(undefined);
 			if (this.treeNodes.length === 0) {
 				extension.log(`Refreshing Data Virt view succeeded, no data available.`);
 			}
