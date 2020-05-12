@@ -16,7 +16,6 @@
  */
 import * as constants from '../../constants';
 import * as extension from '../../extension';
-import * as fs from 'fs';
 import * as path from 'path';
 import * as utils from '../../utils';
 import * as vscode from 'vscode';
@@ -97,11 +96,11 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 		return new Promise<void>( async (resolve, reject) => {
 			this.resetList();
 
-			fs.readdirSync(this.workspace).forEach( (file) => {
-				if (file.toLowerCase().endsWith('.yaml')) {
-					this.processFile(this.workspace, file);
+			for (const [name, type] of await vscode.workspace.fs.readDirectory(vscode.Uri.file(this.workspace))) {
+				if (type === vscode.FileType.File && name.toLowerCase().endsWith('.yaml')) {
+					await this.processFile(this.workspace, name);
 				}
-			});
+			}
 
 			this._onDidChangeTreeData.fire(undefined);
 			if (this.treeNodes.length === 0) {
@@ -152,9 +151,9 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 		}
 	}
 
-	processFile(folder: string, file: string) {
+	async processFile(folder: string, file: string) {
 		const fullPath: string = path.join(folder, file);
-		const yamlDoc:DataVirtConfig = utils.loadModelFromFile(fullPath);
+		const yamlDoc:DataVirtConfig = await utils.loadModelFromFile(fullPath);
 		this.processDataVirtYAML(fullPath, file, yamlDoc);
 	}
 }

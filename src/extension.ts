@@ -16,8 +16,6 @@
  */
 'use strict';
 
-import * as fs from 'fs';
-import * as path from 'path';
 import * as vscode from 'vscode';
 import { AmazonS3DataSource } from './model/datasources/AmazonS3DataSource';
 import * as constants from './constants';
@@ -147,7 +145,7 @@ function creatDataVirtView(): void {
 function handleClosedTextDocument(event) {
 	const fileName: string = event.fileName;
 	if (fileToEditor.has(fileName)) {
-		fs.unlinkSync(fileName);
+		vscode.workspace.fs.delete(vscode.Uri.file(fileName));
 		fileToEditor.delete(fileName);
 		fileToNode.delete(fileName);
 	}

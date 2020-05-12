@@ -55,17 +55,17 @@ describe('Commands Tests', () => {
 		should.equal(true, createdVDB, 'Execution of the command Create VDB returned false');
 		vdbFile = path.join(workspacePath, `${name}.yaml`);
 		fs.existsSync(vdbFile).should.equal(true);
-		dvConfig = utils.loadModelFromFile(vdbFile);
+		dvConfig = await utils.loadModelFromFile(vdbFile);
 	}
 
 	async function createDataSource(dataSourceName?: string) {
 		const createdDS = await createDSCommand.handleDataSourceCreation(dataSourceName ? dataSourceName : dsName, dsType, dvConfig, vdbFile);
 		should.equal(true, createdDS, 'Execution of the Create DataSource command returned false');
 
-		const dvConfig2: DataVirtConfig = utils.loadModelFromFile(vdbFile);
+		const dvConfig2: DataVirtConfig = await utils.loadModelFromFile(vdbFile);
 		dvConfig2.should.deep.equal(dvConfig);
 		dvConfig2.spec.datasources[0].properties.length.should.deep.equal(mongoTemplate.properties.length);
-		dvConfig = utils.loadModelFromFile(vdbFile);
+		dvConfig = await utils.loadModelFromFile(vdbFile);
 		dvConfig.spec.datasources.forEach( (element: DataSourceConfig) => {
 			element.properties.forEach( (prop: Property) => {
 				should.equal(prop.value, constants.EMPTY_VALUE, `DataSource ${element.name} / Property ${prop.name} does not have the <empty> string value set.`);
@@ -94,7 +94,7 @@ describe('Commands Tests', () => {
 		it('should generate a valid datasource definition inside a VDB when handing over valid parameters', async () => {
 			const createdDS = await createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, vdbFile);
 			should.equal(true, createdDS, 'Execution of the Create DataSource command returned false');
-			const dvConfig2: DataVirtConfig = utils.loadModelFromFile(vdbFile);
+			const dvConfig2: DataVirtConfig = await utils.loadModelFromFile(vdbFile);
 			dvConfig2.should.deep.equal(dvConfig);
 			dvConfig2.spec.datasources.length.should.deep.equal(dvConfig.spec.datasources.length);
 		});
@@ -135,7 +135,7 @@ describe('Commands Tests', () => {
 			const deletedDS = await deleteDSCommand.handleDataSourceDeletion(dsName, dvConfig, vdbFile);
 			should.equal(true, deletedDS, 'Execution of the Delete DataSource command returned false');
 			dvConfig.spec.datasources.length.should.equal(0);
-			const dvConfig2: DataVirtConfig = utils.loadModelFromFile(vdbFile);
+			const dvConfig2: DataVirtConfig = await utils.loadModelFromFile(vdbFile);
 			dvConfig2.spec.datasources.length.should.equal(0);
 		});
 
@@ -155,13 +155,13 @@ describe('Commands Tests', () => {
 			const createdDS = await createDSCommand.handleDataSourceCreation(newDSName, dsType, dvConfig, vdbFile);
 			should.equal(true, createdDS, 'Execution of the Create DataSource command returned false');
 
-			dvConfig = utils.loadModelFromFile(vdbFile);
+			dvConfig = await utils.loadModelFromFile(vdbFile);
 			dvConfig.spec.datasources.length.should.deep.equal(2);
 
 			const deletedDS = await deleteDSCommand.handleDataSourceDeletion(newDSName, dvConfig, vdbFile);
 			should.equal(true, deletedDS, 'Execution of the Delete DataSource command returned false');
 
-			dvConfig = utils.loadModelFromFile(vdbFile);
+			dvConfig = await utils.loadModelFromFile(vdbFile);
 			dvConfig.spec.datasources.length.should.deep.equal(1);
 		});
 
@@ -170,7 +170,7 @@ describe('Commands Tests', () => {
 			await createDataSource('test2');
 			await createDataSource('test3');
 
-			dvConfig = utils.loadModelFromFile(vdbFile);
+			dvConfig = await utils.loadModelFromFile(vdbFile);
 			should.equal(dvConfig.spec.datasources.length, 4);
 
 			should.exist(utils.getDataSourceByName(dvConfig, 'test1'), 'Cannot find expected datasource test1');
@@ -181,7 +181,7 @@ describe('Commands Tests', () => {
 			const deletedDS = await deleteDSCommand.handleDataSourceDeletion('test1', dvConfig, vdbFile);
 			should.equal(true, deletedDS, 'Execution of the Delete DataSource command returned false');
 
-			dvConfig = utils.loadModelFromFile(vdbFile);
+			dvConfig = await utils.loadModelFromFile(vdbFile);
 			should.equal(dvConfig.spec.datasources.length, 3);
 
 			should.not.exist(utils.getDataSourceByName(dvConfig, 'test1'), 'Can still find the deleted datasource in the list!');

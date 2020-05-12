@@ -19,30 +19,26 @@ import * as utils from '../utils';
 import * as vscode from 'vscode';
 import { SchemaTreeNode } from '../model/tree/SchemaTreeNode';
 
-export function editSchemaCommand(ddlNode: SchemaTreeNode) {
+export async function editSchemaCommand(ddlNode: SchemaTreeNode) {
 	const sql: string = ddlNode.getDDL();
-	const tempFile = utils.createTempFile(ddlNode.getProject().label, sql);
-	vscode.workspace.openTextDocument(tempFile)
-		.then((textDocument: vscode.TextDocument) => {
-			vscode.window.showTextDocument(textDocument, 1, true)
-				.then( (editor: vscode.TextEditor) => {
-					extension.fileToNode.set(tempFile, ddlNode);
-					extension.fileToEditor.set(tempFile, editor);
-				});
-		});
+	const tempFile = await utils.createTempFile(ddlNode.getProject().label, sql);
+	const textDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(tempFile);
+	const editor: vscode.TextEditor = await vscode.window.showTextDocument(textDocument, 1, true);
+	extension.fileToNode.set(tempFile, ddlNode);
+	extension.fileToEditor.set(tempFile, editor);
 }
 
 export function handleSaveDDL(event: vscode.TextDocumentWillSaveEvent): Promise<void> {
-	return new Promise<void>( (resolve, reject) => {
+	return new Promise<void>( async (resolve, reject) => {
 		const fileName: string = event.document.fileName;
 		const ddl: string = event.document.getText();
 		const sNode: SchemaTreeNode = extension.fileToNode.get(fileName);
 		if (sNode) {
 			sNode.getProject().dvConfig.spec.build.source.ddl = ddl;
-			utils.saveModelToFile(sNode.getProject().dvConfig, sNode.getProject().getFile());
+			await utils.saveModelToFile(sNode.getProject().dvConfig, sNode.getProject().getFile());
 			resolve();
-			return;
+		} else {
+			reject();
 		}
-		reject();
 	});
 }

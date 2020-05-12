@@ -16,7 +16,6 @@
  */
 import * as constants from '../constants';
 import * as extension from '../extension';
-import * as fs from 'fs';
 import * as path from 'path';
 import * as utils from '../utils';
 import * as vscode from 'vscode';
@@ -24,13 +23,7 @@ import { DataVirtConfig } from '../model/DataVirtModel';
 
 export function createVDBCommand() {
 	if (extension.workspaceReady) {
-		vscode.window.showInputBox( { validateInput: (name: string) => {
-			let res: string = utils.validateName(name);
-			if (!res) {
-				res = utils.validateFileNotExisting(name);
-			}
-			return res;
-		}, placeHolder: 'Enter the name of the new virtual database' })
+		vscode.window.showInputBox( { validateInput: utils.validateVDBName, placeHolder: 'Enter the name of the new virtual database' })
 			.then( (vdbName: string) => {
 				if (vdbName === undefined) {
 					return;
@@ -56,16 +49,16 @@ export function createVDBCommand() {
 }
 
 export function handleVDBCreation(filepath: string, fileName: string, templateFolder?: string): Promise<boolean> {
-	return new Promise<boolean>( (resolve, reject) => {
+	return new Promise<boolean>( async (resolve, reject) => {
 		if (fileName && fileName.length>0) {
 			try {
 				const templatePath = templateFolder ? path.join(templateFolder, 'vdb_template.yaml') : path.join(extension.pluginResourcesPath, 'vdb_template.yaml');
 				const targetFile: string = path.join(filepath, `${fileName}.yaml`);
-				fs.copyFileSync(templatePath, targetFile);
-				const yamlDoc:DataVirtConfig = utils.loadModelFromFile(targetFile);
+				await vscode.workspace.fs.copy(vscode.Uri.file(templatePath), vscode.Uri.file(targetFile));
+				const yamlDoc:DataVirtConfig = await utils.loadModelFromFile(targetFile);
 				yamlDoc.metadata.name = fileName;
 				yamlDoc.spec.build.source.ddl = utils.replaceDDLNamePlaceholder(yamlDoc.spec.build.source.ddl, constants.DDL_NAME_PLACEHOLDER, fileName);
-				utils.saveModelToFile(yamlDoc, targetFile);
+				await utils.saveModelToFile(yamlDoc, targetFile);
 				resolve(true);
 			} catch (error) {
 				reject(error);

@@ -36,7 +36,7 @@ export function deleteEnvironmentVariableCommand(envVarTreeNode: EnvironmentVari
 }
 
 export function handleEnvironmentVariableDeletion(dvConfig: DataVirtConfig, file: string, key: string): Promise<boolean> {
-	return new Promise<boolean>( (resolve) => {
+	return new Promise<boolean>( async (resolve) => {
 		if (dvConfig && file && key) {
 			try {
 				let deleted: boolean = false;
@@ -48,7 +48,7 @@ export function handleEnvironmentVariableDeletion(dvConfig: DataVirtConfig, file
 					deleted = true;
 				}
 				if (deleted) {
-					utils.saveModelToFile(dvConfig, file);
+					await utils.saveModelToFile(dvConfig, file);
 				}
 				resolve(deleted);
 			} catch (error) {

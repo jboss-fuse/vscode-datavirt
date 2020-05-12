@@ -61,7 +61,7 @@ describe('Commands Tests', () => {
 			const success = await createVDBCommand.handleVDBCreation(workspacePath, name, templateFolder);
 			should.equal(true, success, 'Execution of the createVDBCommand returned false');
 			fs.existsSync(vdbFile).should.equal(true);
-			const dvConfig = utils.loadModelFromFile(vdbFile);
+			const dvConfig = await utils.loadModelFromFile(vdbFile);
 			should.exist(dvConfig);
 			should.equal(dvConfig.metadata.name, name);
 			dvConfig.spec.build.source.ddl.should.contain(name);
@@ -94,11 +94,11 @@ describe('Commands Tests', () => {
 			fs.existsSync(vdbFile).should.equal(true);
 		});
 
-		it('should delete a VDB file when passing valid parameters', async () => {
+		it('should delete a VDB file 6when passing valid parameters', async () => {
 			const success = await deleteVDBCommand.handleVDBDeletion(name, vdbFile);
 			should.equal(true, success, `Execution of the deleteVDBCommand returned false for VDB ${name} with file ${vdbFile}`);
 			fs.existsSync(vdbFile).should.equal(false);
-			const dvConfig = utils.loadModelFromFile(vdbFile);
+			const dvConfig = await utils.loadModelFromFile(vdbFile);
 			should.not.exist(dvConfig);
 		});
 

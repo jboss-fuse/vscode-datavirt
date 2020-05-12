@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 import * as extension from './extension';
-import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as constants from './constants';
@@ -26,10 +25,10 @@ import { SchemaTreeNode } from './model/tree/SchemaTreeNode';
 const YAML = require('yaml');
 const TMP = require('tmp');
 
-export function loadModelFromFile(file: string): DataVirtConfig | undefined {
+export async function loadModelFromFile(file: string): Promise<DataVirtConfig | undefined> {
 	try {
-		const f = fs.readFileSync(file, 'utf8');
-		const yamlDoc:DataVirtConfig = YAML.parse(f);
+		const f = await vscode.workspace.fs.readFile(vscode.Uri.file(file));
+		const yamlDoc:DataVirtConfig = YAML.parse(f.toString());
 		if (yamlDoc && yamlDoc.kind && yamlDoc.kind === constants.VDB_KIND) {
 			// we need to initialize datasources and env arrays if not yet present to prevent issues
 			if (!yamlDoc.spec.datasources) yamlDoc.spec.datasources = new Array<DataSourceConfig>();
@@ -42,8 +41,8 @@ export function loadModelFromFile(file: string): DataVirtConfig | undefined {
 	return undefined;
 }
 
-export function saveModelToFile(dvConfig: DataVirtConfig, file: string): void {
-	fs.writeFileSync(file, YAML.stringify(dvConfig));
+export async function saveModelToFile(dvConfig: DataVirtConfig, file: string): Promise<void> {
+	await vscode.workspace.fs.writeFile(vscode.Uri.file(file), Buffer.from(YAML.stringify(dvConfig)));
 }
 
 export function replaceDDLNamePlaceholder(ddl: string, placeholder: string, replacement: string): string {
@@ -51,14 +50,6 @@ export function replaceDDLNamePlaceholder(ddl: string, placeholder: string, repl
 		return ddl.split(placeholder).join(replacement);
 	}
 	return undefined;
-}
-
-export function validateName(name: string): string | undefined {
-	if (name && /^[a-z0-9]{4,253}$/.test(name)) {
-		return undefined;
-	} else {
-		return 'The entered name does not comply with the naming conventions. ([a-z0-9] and length of 4-253 characters)';
-	}
 }
 
 export function ensureValidEnvironmentVariableName(name: string): string | undefined {
@@ -76,12 +67,30 @@ export function ensureValueIsNotEmpty(value: string): string | undefined {
 	return undefined;
 }
 
-export function validateFileNotExisting(name: string): string {
-	const fp: string = path.join(vscode.workspace.rootPath, `${name}.yaml`);
-	if (fs.existsSync(fp)) {
-		return 'There is already a file with the same name. Please choose a different name.';
+export function validateName(name: string): string | undefined {
+	if (name && /^[a-z0-9]{4,253}$/.test(name)) {
+		return undefined;
+	} else {
+		return 'The entered name does not comply with the naming conventions. ([a-z0-9] and length of 4-253 characters)';
 	}
-	return undefined;
+}
+
+export async function validateVDBName(name: string): Promise<string | undefined>  {
+	let res = validateName(name);
+	if (!res) {
+		res = await validateFileNotExisting(name);
+	}
+	return res;
+}
+
+export async function validateFileNotExisting(name: string): Promise<string | undefined> {
+	const fp: string = path.join(vscode.workspace.rootPath, `${name}.yaml`);
+	try {
+		await vscode.workspace.fs.stat(vscode.Uri.file(fp));
+	} catch (error) {
+		return undefined;
+	}
+	return 'There is already a file with the same name. Please choose a different name.';
 }
 
 export function generateReferenceValueForLabel(value: string, ref: ConfigMapRef | SecretRef): string {
@@ -143,10 +152,10 @@ export function checkForValue(value: any, valueName: string, missing: string): s
 	return text;
 }
 
-export function createTempFile(vdbName: string, sql: string): string {
+export async function createTempFile(vdbName: string, sql: string): Promise<string> {
 	const tmpDir = TMP.dirSync();
 	const tempFile: string = path.join(tmpDir.name, `${vdbName}${constants.DDL_FILE_EXT}`);
-	fs.writeFileSync(tempFile, sql);
+	await vscode.workspace.fs.writeFile(vscode.Uri.file(tempFile), Buffer.from(sql));
 	return tempFile;
 }
 

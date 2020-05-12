@@ -34,7 +34,7 @@ export function deleteDataSourceCommand(dsNode: DataSourceTreeNode): void {
 }
 
 export function handleDataSourceDeletion(dsName: string, dvConfig: DataVirtConfig, file: string): Promise<boolean> {
-	return new Promise<boolean>( (resolve) => {
+	return new Promise<boolean>( async (resolve) => {
 		if (dsName && dvConfig && file) {
 			try {
 				const index: number = dvConfig.spec.datasources.findIndex( (value: DataSourceConfig) => {
@@ -42,7 +42,7 @@ export function handleDataSourceDeletion(dsName: string, dvConfig: DataVirtConfi
 				});
 				if (index !== -1) {
 					dvConfig.spec.datasources.splice(index, 1);
-					utils.saveModelToFile(dvConfig, file);
+					await utils.saveModelToFile(dvConfig, file);
 					resolve(true);
 				} else {
 					extension.log(`Unable to delete datasource ${dsName}. Cannot find a datasource with that name.`);

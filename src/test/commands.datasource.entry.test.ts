@@ -63,16 +63,16 @@ describe('Commands Tests', () => {
 
 		vdbFile = path.join(workspacePath, `${name}.yaml`);
 		fs.existsSync(vdbFile).should.equal(true);
-		dvConfig = utils.loadModelFromFile(vdbFile);
+		dvConfig = await utils.loadModelFromFile(vdbFile);
 
 		const createdDS = await createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, vdbFile);
 		should.equal(true, createdDS, 'Execution of the Create DataSource command returned false');
 
-		const dvConfig2: DataVirtConfig = utils.loadModelFromFile(vdbFile);
+		const dvConfig2: DataVirtConfig = await utils.loadModelFromFile(vdbFile);
 		dvConfig2.should.deep.equal(dvConfig);
 		dvConfig2.spec.datasources[0].properties.length.should.deep.equal(mongoTempl.properties.length);
 
-		dvConfig = utils.loadModelFromFile(vdbFile);
+		dvConfig = await utils.loadModelFromFile(vdbFile);
 		dsConfig = utils.getDataSourceByName(dvConfig, dsName);
 
 		if (createTestDataSourceEntry === true) {
@@ -84,7 +84,7 @@ describe('Commands Tests', () => {
 			should.exist(dvConfig.spec.datasources[0].properties.find( (element: Property) => {
 				return element.name === entryName && element.value === entryValue;
 			}));
-			dvConfig = utils.loadModelFromFile(vdbFile);
+			dvConfig = await utils.loadModelFromFile(vdbFile);
 			dsConfig = utils.getDataSourceByName(dvConfig, dsName);
 		}
 	}
@@ -111,6 +111,10 @@ describe('Commands Tests', () => {
 
 		beforeEach( async () => {
 			await initializeGlobals(false);
+		});
+
+		afterEach( () => {
+			cleanupVDB();
 		});
 
 		it('should create a datasource entry inside a datasource when handing over valid parameters', async () => {

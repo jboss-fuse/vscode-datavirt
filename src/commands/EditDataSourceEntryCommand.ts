@@ -94,7 +94,7 @@ function showFeedback(success: boolean, key: string, dsName: string) {
 }
 
 export function handleDataSourceEntryEdit(dvConfig: DataVirtConfig, dsConfig: DataSourceConfig, file: string, key: string, newValue: string, valueFrom?: ConfigMapRef | SecretRef): Promise<boolean> {
-	return new Promise<boolean>( (resolve) => {
+	return new Promise<boolean>( async (resolve) => {
 		if (dvConfig && dsConfig && file && key) {
 			try {
 				const entry: Property = utils.getDataSourceEntryByName(key, dsConfig);
@@ -110,7 +110,7 @@ export function handleDataSourceEntryEdit(dvConfig: DataVirtConfig, dsConfig: Da
 						resolve(false);
 						return false;
 					}
-					utils.saveModelToFile(dvConfig, file);
+					await utils.saveModelToFile(dvConfig, file);
 					resolve(true);
 				} else {
 					extension.log(`handleDataSourceEntryEdit: Unable to modify the datasource property ${key} in ${dsConfig ? dsConfig.name : '<Unknown>'} because the key does not exist...`);
