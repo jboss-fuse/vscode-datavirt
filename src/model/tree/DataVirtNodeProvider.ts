@@ -96,7 +96,8 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 		return new Promise<void>( async (resolve, reject) => {
 			this.resetList();
 
-			for (const [name, type] of await vscode.workspace.fs.readDirectory(vscode.Uri.file(this.workspace))) {
+			const yamlFiles: [string, vscode.FileType][] = await vscode.workspace.fs.readDirectory(vscode.Uri.file(this.workspace));
+			for (const [name, type] of yamlFiles) {
 				if (type === vscode.FileType.File && name.toLowerCase().endsWith('.yaml')) {
 					await this.processFile(this.workspace, name);
 				}
@@ -110,8 +111,8 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 		});
 	}
 
-	getSchemaTreeNodeOfProject(name: string): SchemaTreeNode {
-		this.refresh();
+	async getSchemaTreeNodeOfProject(name: string): Promise<SchemaTreeNode> {
+		await this.refresh();
 		const projectNode:DVProjectTreeNode = this.treeNodes.find( (node) => node.label === name);
 		if (projectNode && projectNode.schemaNode) {
 			return projectNode.schemaNode;

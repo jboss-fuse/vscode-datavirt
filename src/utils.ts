@@ -159,8 +159,8 @@ export async function createTempFile(vdbName: string, sql: string): Promise<stri
 	return tempFile;
 }
 
-export function openDDLEditor(vdbName: string) {
-	const node: SchemaTreeNode = extension.dataVirtProvider.getSchemaTreeNodeOfProject(vdbName);
+export async function openDDLEditor(vdbName: string) {
+	const node: SchemaTreeNode = await extension.dataVirtProvider.getSchemaTreeNodeOfProject(vdbName);
 	if (node) {
 		vscode.commands.executeCommand('datavirt.edit.schema', node);
 	}
