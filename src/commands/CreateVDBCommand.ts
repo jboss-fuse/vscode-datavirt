@@ -21,26 +21,19 @@ import * as utils from '../utils';
 import * as vscode from 'vscode';
 import { DataVirtConfig } from '../model/DataVirtModel';
 
-export function createVDBCommand() {
+export async function createVDBCommand() {
 	if (extension.workspaceReady) {
-		vscode.window.showInputBox( { validateInput: utils.validateVDBName, placeHolder: 'Enter the name of the new virtual database' })
-			.then( (vdbName: string) => {
-				if (vdbName === undefined) {
-					return;
-				}
-				handleVDBCreation(vscode.workspace.workspaceFolders[0].uri.fsPath, vdbName)
-					.then( (success: boolean) => {
-						if (success) {
-							utils.openDDLEditor(vdbName);
-							vscode.window.showInformationMessage(`Virtual database ${vdbName} has been created successfully...`);
-						} else {
-							vscode.window.showErrorMessage(`An error occured when trying to create a new virtual database with the name ${vdbName}...`);
-						}
-					})
-					.catch( (error) => {
-						extension.log(error);
-					});
-			});
+		const vdbName: string = await vscode.window.showInputBox( { validateInput: utils.validateVDBName, placeHolder: 'Enter the name of the new virtual database' });
+		if (vdbName === undefined) {
+			return;
+		}
+		const success: boolean = await handleVDBCreation(vscode.workspace.workspaceFolders[0].uri.fsPath, vdbName);
+		if (success) {
+			await utils.openDDLEditor(vdbName);
+			vscode.window.showInformationMessage(`Virtual database ${vdbName} has been created successfully...`);
+		} else {
+			vscode.window.showErrorMessage(`An error occured when trying to create a new virtual database with the name ${vdbName}...`);
+		}
 	} else {
 		vscode.window.showErrorMessage(`Data Virtualization Tooling only works when a workspace folder is opened.` +
 			` Please add a folder to the workspace with 'File->Add Folder to Workspace' or use the Command Palette (Ctrl+Shift+P) and type 'Add Folder'.` +
