@@ -94,7 +94,7 @@ describe('Commands Tests', () => {
 			fs.existsSync(vdbFile).should.equal(true);
 		});
 
-		it('should delete a VDB file 6when passing valid parameters', async () => {
+		it('should delete a VDB file when passing valid parameters', async () => {
 			const success = await deleteVDBCommand.handleVDBDeletion(name, vdbFile);
 			should.equal(true, success, `Execution of the deleteVDBCommand returned false for VDB ${name} with file ${vdbFile}`);
 			fs.existsSync(vdbFile).should.equal(false);
