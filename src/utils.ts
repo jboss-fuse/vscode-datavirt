@@ -36,7 +36,7 @@ export async function loadModelFromFile(file: string): Promise<DataVirtConfig | 
 			return yamlDoc;
 		}
 	} catch (err) {
-		log(err);
+		log(`loadModelFromFile(${file}) -> ${err}`);
 	}
 	return undefined;
 }
