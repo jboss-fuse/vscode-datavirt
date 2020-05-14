@@ -22,7 +22,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as constants from '../constants';
 import * as utils from '../utils';
-import { DataVirtConfig, ConfigMapRef, KeyRef, SecretRef, DataSourceConfig, SecretConfig } from '../model/DataVirtModel';
+import { DataVirtConfig, ConfigMapRef, KeyRef, SecretRef, DataSourceConfig, SecretConfig, ConfigMapConfig } from '../model/DataVirtModel';
 
 chai.use(sinonChai);
 const should = chai.should();
@@ -337,6 +337,54 @@ describe('Utils', () => {
 		it('should return undefined for yaml files which are not kind Secret', async() => {
 			const secrets:SecretConfig = await utils.loadSecretsFromFile(dummyNonSecretFile);
 			should.not.exist(secrets);
+		});
+	});
+
+	context('Load/Save of a ConfigMap file', () => {
+
+		let dummyNonConfigMapFile: string;
+
+		before( () => {
+			dummyNonConfigMapFile = path.resolve(__dirname, '../../testFixture', `dummy-configmap.yaml`);
+			fs.writeFileSync(dummyNonConfigMapFile, 'test');
+		});
+
+		after( () => {
+			fs.unlinkSync(dummyNonConfigMapFile);
+		});
+
+		it('should match the configmap model contents between a save and reload to/from a configmap file', async() => {
+			const name: string = 'myconfigmap';
+			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
+			const fpTest: string = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
+			const yamlDoc:ConfigMapConfig = await utils.loadConfigMapFromFile(fpOrig);
+			should.exist(yamlDoc);
+			await utils.saveConfigMapToFile(yamlDoc, fpTest);
+			should.exist(utils.validateFileNotExisting(name));
+			const yamlDoc2:ConfigMapConfig = await utils.loadConfigMapFromFile(fpTest);
+			should.exist(yamlDoc2);
+			yamlDoc.should.deep.equal(yamlDoc2);
+			fs.unlinkSync(fpTest);
+		});
+
+		it('should persist new added configmap entries and be able to retain them from file', async() => {
+			const name: string = 'myconfigmap';
+			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
+			const fpTest: string = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
+			const yamlDoc:ConfigMapConfig = await utils.loadConfigMapFromFile(fpOrig);
+			should.exist(yamlDoc);
+			utils.setConfigMapValueForKey(yamlDoc, 'myConfigMapKey', 'ABC123');
+			await utils.saveConfigMapToFile(yamlDoc, fpTest);
+			const yamlDoc2:ConfigMapConfig = await utils.loadConfigMapFromFile(fpTest);
+			should.exist(yamlDoc2);
+			should.exist(utils.getConfigMapValueForKey(yamlDoc2, 'myConfigMapKey'));
+			should.equal(utils.getConfigMapValueForKey(yamlDoc2, 'myConfigMapKey'), 'ABC123');
+			fs.unlinkSync(fpTest);
+		});
+
+		it('should return undefined for yaml files which are not kind Secret', async() => {
+			const cfgMap:ConfigMapConfig = await utils.loadConfigMapFromFile(dummyNonConfigMapFile);
+			should.not.exist(cfgMap);
 		});
 	});
 });

@@ -96,3 +96,10 @@ export class SecretConfig {
 	type: string;
 	data: any;
 }
+
+export class ConfigMapConfig {
+	api_version: string;
+	kind: string;
+	metadata: MetaData;
+	data: any;
+}
