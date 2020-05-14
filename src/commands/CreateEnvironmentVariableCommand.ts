@@ -21,25 +21,27 @@ import * as vscode from 'vscode';
 import { DataVirtConfig, ConfigMapRef, SecretRef, Property, KeyRef } from '../model/DataVirtModel';
 import { EnvironmentTreeNode } from '../model/tree/EnvironmentNode';
 
+const CREATE_NEW_ENTRY: string = '...New...';
+
 export async function createEnvironmentVariableCommandForValue(envNode: EnvironmentTreeNode) {
 	if (envNode) {
-		let entryName: string = await queryVariableName(envNode);
-		if (entryName === undefined) {
+		const variableName: string = await queryVariableName(envNode);
+		if (variableName === undefined) {
 			return;
 		}
 
-		let entryValue:string = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new variable' });
-		if (entryValue === undefined) {
+		const variableValue:string = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new variable' });
+		if (variableValue === undefined) {
 			return;
 		}
 
 		const yaml: DataVirtConfig = envNode.getProject().dvConfig;
 		const file: string = envNode.getProject().file;
-		let success: boolean = await handleEnvironmentVariableCreation(yaml, envNode.environment, file, constants.REFERENCE_TYPE_VALUE, entryName, entryValue);
+		const success: boolean = await handleEnvironmentVariableCreation(yaml, envNode.environment, file, constants.REFERENCE_TYPE_VALUE, variableName, variableValue);
 		if (success) {
-			vscode.window.showInformationMessage(`New environment variable ${entryName} has been created successfully...`);
+			vscode.window.showInformationMessage(`New environment variable ${variableName} has been created successfully...`);
 		} else {
-			vscode.window.showErrorMessage(`An error occured when trying to create a new environment variable ${entryName}...`);
+			vscode.window.showErrorMessage(`An error occured when trying to create a new environment variable ${variableName}...`);
 		}
 	}
 }
@@ -54,47 +56,54 @@ export async function createEnvironmentVariableCommandForConfigMap(envNode: Envi
 
 async function createEnvironmentVariableCommandForReference(envNode: EnvironmentTreeNode, type: string) {
 	if (envNode) {
-		let entryName: string = await queryVariableName(envNode);
-		if (entryName === undefined) {
-			return;
-		}
+		const yaml: DataVirtConfig = envNode.getProject().dvConfig;
+		const file: string = envNode.getProject().file;
 
-		let refName: string = await vscode.window.showInputBox( { validateInput: utils.ensureValueIsNotEmpty, placeHolder: 'Enter the name of the reference' });
+		const refName: string = await vscode.window.showInputBox( { validateInput: utils.ensureValueIsNotEmpty, placeHolder: 'Enter the name of the reference' });
 		if (refName === undefined) {
 			return;
 		}
 
-		let refKey: string = await vscode.window.showInputBox( { validateInput: utils.ensureValueIsNotEmpty, placeHolder: 'Enter the key for the reference' });
-		if (refKey === undefined) {
-			return;
-		}
+		let variableName: string;
+		let variableValue: string;
+		if(utils.doesLocalReferenceFileExist(file, refName, type)) {
+			const predefinedVariables = utils.loadPredefinedVariables(file, refName, type);
 
-		let entryValue:string = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new variable' });
-		if (entryValue === undefined) {
-			return;
-		}
-
-		const yaml: DataVirtConfig = envNode.getProject().dvConfig;
-		const file: string = envNode.getProject().file;
-		let success: boolean = await handleEnvironmentVariableCreation(yaml, envNode.environment, file, type, entryName, entryValue, refName, refKey);
-		if (success) {
-			vscode.window.showInformationMessage(`New environment variable ${entryName} has been created successfully...`);
+			const variable: Property = await queryVariable(envNode, predefinedVariables);
+			if (variable === undefined) {
+				return;
+			} else {
+				variableName = variable.name;
+				variableValue = variable.value;
+			}
 		} else {
-			vscode.window.showErrorMessage(`An error occured when trying to create a new environment variable ${entryName}...`);
+			variableName = await queryVariableName(envNode);
+		}
+
+		variableValue = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new variable', value: variableValue ? variableValue : '' });
+		if (variableValue === undefined) {
+			return;
+		}
+
+		const success: boolean = await handleEnvironmentVariableCreation(yaml, envNode.environment, file, type, variableName, variableValue, refName);
+		if (success) {
+			vscode.window.showInformationMessage(`New environment variable ${variableName} has been created successfully...`);
+		} else {
+			vscode.window.showErrorMessage(`An error occured when trying to create a new environment variable ${variableName}...`);
 		}
 	}
 }
 
 
-export function handleEnvironmentVariableCreation(dvConfig: DataVirtConfig, enviroment: Property[], file: string, entryType: string, entryName: string, entryValue: string, refName?: string, refKey?: string): Promise<boolean> {
+export function handleEnvironmentVariableCreation(dvConfig: DataVirtConfig, enviroment: Property[], file: string, variableType: string, variableName: string, variableValue: string, refName?: string): Promise<boolean> {
 	return new Promise<boolean>( async (resolve) => {
-		if (dvConfig && entryType && enviroment && file && entryName) {
+		if (dvConfig && variableType && enviroment && file && variableName) {
 			try {
-				const entry: Property = utils.getEnvironmentVariableByName(entryName, enviroment);
+				const entry: Property = utils.getEnvironmentVariableByName(variableName, enviroment);
 				if (!entry) {
-					setEnvironmentVariableValue(enviroment, entryType, entryName, entryValue, refName, refKey);
-					utils.createOrUpdateLocalReferenceFile(refName, refKey, entryValue, entryType);
-					await utils.saveModelToFile(dvConfig, file);
+					setEnvironmentVariableValue(enviroment, variableType, variableName, variableValue, refName);
+					utils.createOrUpdateLocalReferenceFile(refName, variableName, variableValue, variableType);
+					utils.saveModelToFile(dvConfig, file);
 					resolve(true);
 				} else {
 					resolve(false);
@@ -104,24 +113,50 @@ export function handleEnvironmentVariableCreation(dvConfig: DataVirtConfig, envi
 				resolve(false);
 			}
 		} else {
-			extension.log(`handleEnvironmentVariableCreation: Unable to create the environment variable ${entryName ? entryName : '<Unknown>'}...`);
+			extension.log(`handleEnvironmentVariableCreation: Unable to create the environment variable ${variableName ? variableName : '<Unknown>'}...`);
 			resolve(false);
 		}
 	});
 }
 
-function setEnvironmentVariableValue(entries: Property[], entryType: string, entryName: string, entryValue: string, refName?: string, refKey?: string): void {
-	let entry: Property;
-	if (entryType === constants.REFERENCE_TYPE_SECRET) {
-		const secretRef = new SecretRef(new KeyRef(refName, refKey));
-		entry = new Property(entryName, undefined, secretRef);
-	} else if (entryType === constants.REFERENCE_TYPE_CONFIGMAP) {
-		const configMapRef = new ConfigMapRef(new KeyRef(refName, refKey));
-		entry = new Property(entryName, undefined, configMapRef);
+function setEnvironmentVariableValue(entries: Property[], variableType: string, variableName: string, variableValue: string, refName?: string): void {
+	let variable: Property;
+	if (variableType === constants.REFERENCE_TYPE_SECRET) {
+		const secretRef = new SecretRef(new KeyRef(refName, variableName));
+		variable = new Property(variableName, undefined, secretRef);
+	} else if (variableType === constants.REFERENCE_TYPE_CONFIGMAP) {
+		const configMapRef = new ConfigMapRef(new KeyRef(refName, variableName));
+		variable = new Property(variableName, undefined, configMapRef);
 	} else {
-		entry = new Property(entryName, entryValue, undefined);
+		variable = new Property(variableName, variableValue, undefined);
 	}
-	entries.push(entry);
+	entries.push(variable);
+}
+
+async function queryVariable(envNode: EnvironmentTreeNode, predefinedVariables: Array<Property>): Promise<Property | undefined> {
+	const names: string[] = new Array<string>();
+	names.push(CREATE_NEW_ENTRY);
+
+	predefinedVariables.forEach( (variable: Property) => {
+		names.push(variable.name);
+	});
+
+	const selectedVariableName: string = await vscode.window.showQuickPick(names, { canPickMany: false, placeHolder: `Select a variable from the list or enter a new one` });
+	if (!selectedVariableName) {
+		return undefined;
+	}
+
+	if (selectedVariableName === CREATE_NEW_ENTRY) {
+		const variableName: string = await queryVariableName(envNode);
+		if (variableName === undefined) {
+			return;
+		}
+		return new Property(variableName, '', undefined);
+	} else {
+		return predefinedVariables.find( (value: Property) => {
+			return value.name === selectedVariableName;
+		});
+	}
 }
 
 async function queryVariableName(envNode: EnvironmentTreeNode): Promise<string | undefined> {
