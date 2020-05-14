@@ -22,10 +22,12 @@ import * as path from 'path';
 import * as sinon from 'sinon';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
+import * as constants from '../constants';
 import * as utils from '../utils';
 
 chai.use(sinonChai);
 const should = chai.should();
+const waitUntil = require('async-wait-until');
 
 describe('Commands Tests', () => {
 	let showInputBoxStub: sinon.SinonStub;
@@ -72,6 +74,11 @@ describe('Commands Tests', () => {
 			should.exist(dvConfig);
 			should.equal(dvConfig.metadata.name, name);
 			dvConfig.spec.build.source.ddl.should.contain(name);
+
+			const expectedFileName: string = `${name}${constants.DDL_FILE_EXT}`;
+			await waitUntil(() => {
+				return vscode.window.activeTextEditor?.document.fileName.endsWith(expectedFileName);
+			}, 5000, `DDL editor has not opened for ${expectedFileName}`);
 			commandSpy.should.have.been.calledWith('datavirt.edit.schema');
 		});
 	});
