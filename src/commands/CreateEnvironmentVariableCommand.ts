@@ -21,7 +21,7 @@ import * as vscode from 'vscode';
 import { DataVirtConfig, ConfigMapRef, SecretRef, Property, KeyRef } from '../model/DataVirtModel';
 import { EnvironmentTreeNode } from '../model/tree/EnvironmentNode';
 
-const CREATE_NEW_ENTRY: string = '...New...';
+const CREATE_NEW_ENTRY: string = 'New...';
 
 export async function createEnvironmentVariableCommandForValue(envNode: EnvironmentTreeNode) {
 	if (envNode) {
@@ -95,13 +95,13 @@ async function createEnvironmentVariableCommandForReference(envNode: Environment
 }
 
 
-export function handleEnvironmentVariableCreation(dvConfig: DataVirtConfig, enviroment: Property[], file: string, variableType: string, variableName: string, variableValue: string, refName?: string): Promise<boolean> {
+export function handleEnvironmentVariableCreation(dvConfig: DataVirtConfig, environment: Property[], file: string, variableType: string, variableName: string, variableValue: string, refName?: string): Promise<boolean> {
 	return new Promise<boolean>( async (resolve) => {
-		if (dvConfig && variableType && enviroment && file && variableName) {
+		if (dvConfig && variableType && environment && file && variableName) {
 			try {
-				const entry: Property = utils.getEnvironmentVariableByName(variableName, enviroment);
+				const entry: Property = utils.getEnvironmentVariableByName(variableName, environment);
 				if (!entry) {
-					setEnvironmentVariableValue(enviroment, variableType, variableName, variableValue, refName);
+					setEnvironmentVariableValue(environment, variableType, variableName, variableValue, refName);
 					utils.createOrUpdateLocalReferenceFile(refName, variableName, variableValue, variableType);
 					utils.saveModelToFile(dvConfig, file);
 					resolve(true);
@@ -141,7 +141,7 @@ async function queryVariable(envNode: EnvironmentTreeNode, predefinedVariables: 
 		names.push(variable.name);
 	});
 
-	const selectedVariableName: string = await vscode.window.showQuickPick(names, { canPickMany: false, placeHolder: `Select a variable from the list or enter a new one` });
+	const selectedVariableName: string = await vscode.window.showQuickPick(names, { canPickMany: false, placeHolder: `Select a variable from the list or "New..." to create a new one` });
 	if (!selectedVariableName) {
 		return undefined;
 	}
