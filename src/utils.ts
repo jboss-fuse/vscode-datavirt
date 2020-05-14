@@ -19,7 +19,7 @@ import * as extension from './extension';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as constants from './constants';
-import { DataSourceConfig, DataVirtConfig, SecretRef, ConfigMapRef, Property, SecretConfig } from './model/DataVirtModel';
+import { DataSourceConfig, DataVirtConfig, SecretRef, ConfigMapRef, Property, SecretConfig, ConfigMapConfig } from './model/DataVirtModel';
 import { log } from './extension';
 import { SchemaTreeNode } from './model/tree/SchemaTreeNode';
 
@@ -204,4 +204,35 @@ export function getSecretValueForKey(secretConfig: SecretConfig, secretKey: stri
 		return Base64.decode(secretConfig.data[secretKey]);
 	}
 	return undefined;
+}
+
+export async function loadConfigMapFromFile(file: string): Promise<ConfigMapConfig> {
+	try {
+		const content = await vscode.workspace.fs.readFile(vscode.Uri.file(file));
+		const yamlDoc:ConfigMapConfig = YAML.parse(content.toString());
+		if (yamlDoc && yamlDoc.kind && yamlDoc.kind === constants.CONFIGMAP_KIND) {
+			return yamlDoc;
+		}
+	} catch (err) {
+		log(`loadConfigMapFromFile: Loading from file ${file} failed with ${err}`);
+	}
+	return undefined;
+}
+
+export async function saveConfigMapToFile(configMapConfig: ConfigMapConfig, file: string): Promise<boolean> {
+	try {
+		await vscode.workspace.fs.writeFile(vscode.Uri.file(file), Buffer.from(YAML.stringify(configMapConfig)));
+		return true;
+	} catch (err) {
+		log(`saveConfigMapToFile: Saving to file ${file} failed with ${err}`);
+	}
+	return false;
+}
+
+export function setConfigMapValueForKey(configMapConfig: ConfigMapConfig, key: string, value: string): void {
+	configMapConfig.data[key] = value;
+}
+
+export function getConfigMapValueForKey(configMapConfig: ConfigMapConfig, key: string): string | undefined {
+	return configMapConfig.data[key];
 }
