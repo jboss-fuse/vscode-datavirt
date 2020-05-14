@@ -88,3 +88,11 @@ export class Build {
 export class Source {
 	ddl: string;
 }
+
+export class SecretConfig {
+	api_version: string;
+	kind: string;
+	metadata: MetaData;
+	type: string;
+	data: any;
+}

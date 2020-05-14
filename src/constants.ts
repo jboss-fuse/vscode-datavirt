@@ -17,6 +17,8 @@
 'use strict';
 
 export const VDB_KIND: string = 'VirtualDatabase';
+export const SECRET_KIND: string = 'Secret';
+export const SECRET_TYPE_OPAQUE: string = 'Opaque';
 export const DDL_FILE_EXT: string = '.ddl';
 export const TEMPLATE_NAME: string = '$!TEMPLATE!$';
 export const DDL_NAME_PLACEHOLDER: string = '$!VDB_NAME_PLACEHOLDER!$';
