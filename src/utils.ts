@@ -14,11 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { Base64 } from 'js-base64';
 import * as extension from './extension';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as constants from './constants';
-import { DataSourceConfig, DataVirtConfig, SecretRef, ConfigMapRef, Property } from './model/DataVirtModel';
+import { DataSourceConfig, DataVirtConfig, SecretRef, ConfigMapRef, Property, SecretConfig } from './model/DataVirtModel';
 import { log } from './extension';
 import { SchemaTreeNode } from './model/tree/SchemaTreeNode';
 
@@ -169,4 +170,38 @@ export async function openDDLEditor(vdbName: string) {
 export function createOrUpdateLocalReferenceFile(refName: string, refKey: string, entryValue: string, entryType: string) {
 	// TODO: create or update the entry reference in a local yaml file for configMap OR secret format
 	// TODO: implement me!
+}
+
+export async function loadSecretsFromFile(file: string): Promise<SecretConfig> {
+	try {
+		const content = await vscode.workspace.fs.readFile(vscode.Uri.file(file));
+		const yamlDoc:SecretConfig = YAML.parse(content.toString());
+		if (yamlDoc && yamlDoc.kind && yamlDoc.kind === constants.SECRET_KIND) {
+			return yamlDoc;
+		}
+	} catch (err) {
+		log(`loadSecretsFromFile: Loading from file ${file} failed with ${err}`);
+	}
+	return undefined;
+}
+
+export async function saveSecretsToFile(secretConfig: SecretConfig, file: string): Promise<boolean> {
+	try {
+		await vscode.workspace.fs.writeFile(vscode.Uri.file(file), Buffer.from(YAML.stringify(secretConfig)));
+		return true;
+	} catch (err) {
+		log(`saveSecretsToFile: Saving to file ${file} failed with ${err}`);
+	}
+	return false;
+}
+
+export function setSecretValueForKey(secretConfig: SecretConfig, secretKey: string, secretValue: string): void {
+	secretConfig.data[secretKey] = Base64.encode(secretValue);
+}
+
+export function getSecretValueForKey(secretConfig: SecretConfig, secretKey: string): string | undefined {
+	if (secretConfig.data[secretKey]) {
+		return Base64.decode(secretConfig.data[secretKey]);
+	}
+	return undefined;
 }

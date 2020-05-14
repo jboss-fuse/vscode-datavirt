@@ -22,7 +22,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as constants from '../constants';
 import * as utils from '../utils';
-import { DataVirtConfig, ConfigMapRef, KeyRef, SecretRef, DataSourceConfig } from '../model/DataVirtModel';
+import { DataVirtConfig, ConfigMapRef, KeyRef, SecretRef, DataSourceConfig, SecretConfig } from '../model/DataVirtModel';
 
 chai.use(sinonChai);
 const should = chai.should();
@@ -284,6 +284,54 @@ describe('Utils', () => {
 
 		it('should return the key @ name for a configmap reference as label with valid parameters', () => {
 			should.equal('key @ name', utils.generateReferenceValueForLabel(undefined, new ConfigMapRef(new KeyRef('name', 'key'))));
+		});
+	});
+
+	context('Load/Save of a Secrets file', () => {
+
+		let dummyNonSecretFile: string;
+
+		before( () => {
+			dummyNonSecretFile = path.resolve(__dirname, '../../testFixture', `dummy-secret.yaml`);
+			fs.writeFileSync(dummyNonSecretFile, 'test');
+		});
+
+		after( () => {
+			fs.unlinkSync(dummyNonSecretFile);
+		});
+
+		it('should match the secrets model contents between a save and reload to/from a secret file', async() => {
+			const name: string = 'mysecret';
+			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
+			const fpTest: string = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
+			const yamlDoc:SecretConfig = await utils.loadSecretsFromFile(fpOrig);
+			should.exist(yamlDoc);
+			await utils.saveSecretsToFile(yamlDoc, fpTest);
+			should.exist(utils.validateFileNotExisting(name));
+			const yamlDoc2:SecretConfig = await utils.loadSecretsFromFile(fpTest);
+			should.exist(yamlDoc2);
+			yamlDoc.should.deep.equal(yamlDoc2);
+			fs.unlinkSync(fpTest);
+		});
+
+		it('should persist new added secrets entries and be able to retain them from file', async() => {
+			const name: string = 'mysecret';
+			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
+			const fpTest: string = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
+			const yamlDoc:SecretConfig = await utils.loadSecretsFromFile(fpOrig);
+			should.exist(yamlDoc);
+			utils.setSecretValueForKey(yamlDoc, 'mySecretKey', 'ABC123');
+			await utils.saveSecretsToFile(yamlDoc, fpTest);
+			const yamlDoc2:SecretConfig = await utils.loadSecretsFromFile(fpTest);
+			should.exist(yamlDoc2);
+			should.exist(utils.getSecretValueForKey(yamlDoc2, 'mySecretKey'));
+			should.equal(utils.getSecretValueForKey(yamlDoc2, 'mySecretKey'), 'ABC123');
+			fs.unlinkSync(fpTest);
+		});
+
+		it('should return undefined for yaml files which are not kind Secret', async() => {
+			const secrets:SecretConfig = await utils.loadSecretsFromFile(dummyNonSecretFile);
+			should.not.exist(secrets);
 		});
 	});
 });
