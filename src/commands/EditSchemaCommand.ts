@@ -23,7 +23,7 @@ export async function editSchemaCommand(ddlNode: SchemaTreeNode) {
 	const sql: string = ddlNode.getDDL();
 	const tempFile = await utils.createTempFile(ddlNode.getProject().label, sql);
 	const textDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(tempFile);
-	const editor: vscode.TextEditor = await vscode.window.showTextDocument(textDocument, 1, true);
+	const editor: vscode.TextEditor = await vscode.window.showTextDocument(textDocument, vscode.ViewColumn.Active, false);
 	extension.fileToNode.set(tempFile, ddlNode);
 	extension.fileToEditor.set(tempFile, editor);
 }
@@ -35,7 +35,7 @@ export function handleSaveDDL(event: vscode.TextDocumentWillSaveEvent): Promise<
 		const sNode: SchemaTreeNode = extension.fileToNode.get(fileName);
 		if (sNode) {
 			sNode.getProject().dvConfig.spec.build.source.ddl = ddl;
-			await utils.saveModelToFile(sNode.getProject().dvConfig, sNode.getProject().getFile());
+			await (utils.saveModelToFile(sNode.getProject().dvConfig, sNode.getProject().getFile()));
 			resolve();
 		} else {
 			reject();

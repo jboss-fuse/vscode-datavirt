@@ -41,23 +41,22 @@ export async function createVDBCommand() {
 	}
 }
 
-export function handleVDBCreation(filepath: string, fileName: string, templateFolder?: string): Promise<boolean> {
-	return new Promise<boolean>( async (resolve, reject) => {
-		if (fileName && fileName.length>0) {
-			try {
-				const templatePath = templateFolder ? path.join(templateFolder, 'vdb_template.yaml') : path.join(extension.pluginResourcesPath, 'vdb_template.yaml');
-				const targetFile: string = path.join(filepath, `${fileName}.yaml`);
-				await vscode.workspace.fs.copy(vscode.Uri.file(templatePath), vscode.Uri.file(targetFile));
-				const yamlDoc:DataVirtConfig = await utils.loadModelFromFile(targetFile);
-				yamlDoc.metadata.name = fileName;
-				yamlDoc.spec.build.source.ddl = utils.replaceDDLNamePlaceholder(yamlDoc.spec.build.source.ddl, constants.DDL_NAME_PLACEHOLDER, fileName);
-				await utils.saveModelToFile(yamlDoc, targetFile);
-				resolve(true);
-			} catch (error) {
-				reject(error);
-			}
-		} else {
-			reject(new Error('handleVDBCreation: Unable to create the virtual database because no name was given...'));
+export async function handleVDBCreation(filepath: string, fileName: string, templateFolder?: string): Promise<boolean> {
+	if (fileName && fileName.length>0) {
+		try {
+			const templatePath = templateFolder ? path.join(templateFolder, 'vdb_template.yaml') : path.join(extension.pluginResourcesPath, 'vdb_template.yaml');
+			const targetFile: string = path.join(filepath, `${fileName}.yaml`);
+			await vscode.workspace.fs.copy(vscode.Uri.file(templatePath), vscode.Uri.file(targetFile));
+			const yamlDoc:DataVirtConfig = await utils.loadModelFromFile(targetFile);
+			yamlDoc.metadata.name = fileName;
+			yamlDoc.spec.build.source.ddl = utils.replaceDDLNamePlaceholder(yamlDoc.spec.build.source.ddl, constants.DDL_NAME_PLACEHOLDER, fileName);
+			await utils.saveModelToFile(yamlDoc, targetFile);
+			return true;
+		} catch (error) {
+			extension.log(`handleVDBCreation: ${fileName} -> ${error}`);
 		}
-	});
+	} else {
+		extension.log(`handleVDBCreation: Unable to create the virtual database because no name was given...`);
+	}
+	return false;
 }
