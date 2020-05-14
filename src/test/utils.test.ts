@@ -319,7 +319,6 @@ describe('Utils', () => {
 			const yamlDoc2:SecretConfig = await utils.loadSecretsFromFile(fpTest);
 			should.exist(yamlDoc2);
 			yamlDoc.should.deep.equal(yamlDoc2);
-
 		});
 
 		it('should persist new added secrets entries and be able to retain them from file', async() => {
