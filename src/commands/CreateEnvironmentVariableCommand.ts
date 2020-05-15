@@ -66,8 +66,9 @@ async function createEnvironmentVariableCommandForReference(envNode: Environment
 
 		let variableName: string;
 		let variableValue: string;
-		if(utils.doesLocalReferenceFileExist(file, refName, type)) {
-			const predefinedVariables = utils.loadPredefinedVariables(file, refName, type);
+		const refFileExists: boolean = await utils.doesLocalReferenceFileExist(file, refName);
+		if(refFileExists) {
+			const predefinedVariables = await utils.loadPredefinedVariables(file, refName, type);
 
 			const variable: Property = await queryVariable(envNode, predefinedVariables);
 			if (variable === undefined) {
@@ -78,6 +79,9 @@ async function createEnvironmentVariableCommandForReference(envNode: Environment
 			}
 		} else {
 			variableName = await queryVariableName(envNode);
+		}
+		if (variableName === undefined) {
+			return;
 		}
 
 		variableValue = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new variable', value: variableValue ? variableValue : '' });
@@ -137,7 +141,10 @@ async function queryVariable(envNode: EnvironmentTreeNode, predefinedVariables: 
 	names.push(CREATE_NEW_ENTRY);
 
 	predefinedVariables.forEach( (variable: Property) => {
-		names.push(variable.name);
+		// only show entries from the reference file which are not yet used in the environment variables
+		if (utils.getEnvironmentVariableByName(variable.name, envNode.environment) === undefined) {
+			names.push(variable.name);
+		}
 	});
 
 	const selectedVariableName: string = await vscode.window.showQuickPick(names, { canPickMany: false, placeHolder: `Select a variable from the list or "New..." to create a new one` });

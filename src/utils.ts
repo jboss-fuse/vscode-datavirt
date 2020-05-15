@@ -172,16 +172,50 @@ export function createOrUpdateLocalReferenceFile(refName: string, variableName: 
 	// TODO: implement me!
 }
 
-export function doesLocalReferenceFileExist(vdbFile: string, refName: string, refType: string): boolean {
-	// TODO: check if a file exists for the given type and name in the same folder than the vdbFile
-	// TODO: implement me!
-	return false;
+export function getFullReferenceFilePath(vdbFile: string, refName: string): string {
+	return path.join(path.dirname(vdbFile), `${refName}.yaml`);
 }
 
-export function loadPredefinedVariables(vdbFile: string, refName: string, refType: string): Array<Property> {
-	// TODO: load all defined key value pairs from the reference file into an array of property objects -> only name and value will be used
-	// TODO: implement me!
+export async function doesLocalReferenceFileExist(vdbFile: string, refName: string): Promise<boolean> {
+	const refFile: string = getFullReferenceFilePath(vdbFile, refName);
+	return await doesFileExist(refFile);
+}
+
+export async function doesFileExist(file: string): Promise<boolean> {
+	try {
+		await vscode.workspace.fs.stat(vscode.Uri.file(file));
+		return true;
+	} catch (error) {
+		return false;
+	}
+}
+
+export async function loadPredefinedVariables(vdbFile: string, refName: string, refType: string): Promise<Array<Property>> {
+	const refFile: string = getFullReferenceFilePath(vdbFile, refName);
+	if (refType === constants.REFERENCE_TYPE_CONFIGMAP) {
+		return await loadPredefinedVariablesFromConfigMap(refFile);
+	} else if (refType === constants.REFERENCE_TYPE_SECRET) {
+		return await loadPredefinedVariablesFromSecret(refFile);
+	}
 	return new Array<Property>();
+}
+
+export async function loadPredefinedVariablesFromConfigMap(refFile: string): Promise<Array<Property>> {
+	const configMap: ConfigMapConfig = await loadConfigMapFromFile(refFile);
+	const entries: Array<Property> = new Array<Property>();
+	Object.entries(configMap.data).forEach( (entry: [string, any]) => {
+		entries.push(new Property(entry[0], entry[1]));
+	});
+	return entries;
+}
+
+export async function loadPredefinedVariablesFromSecret(refFile: string): Promise<Array<Property>> {
+	const secret: SecretConfig = await loadSecretsFromFile(refFile);
+	const entries: Array<Property> = new Array<Property>();
+	Object.entries(secret.data).forEach( (entry: [string, any]) => {
+		entries.push(new Property(entry[0], Base64.decode(entry[1])));
+	});
+	return entries;
 }
 
 export async function loadSecretsFromFile(file: string): Promise<SecretConfig> {
