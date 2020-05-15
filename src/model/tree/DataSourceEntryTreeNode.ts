@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as extension from '../../extension';
 import * as utils from '../../utils';
 import * as vscode from 'vscode';
 import { DVTreeItem } from './DVTreeItem';
@@ -26,22 +27,26 @@ export class DataSourceEntryTreeNode extends DVTreeItem {
 	value: string | ConfigMapRef | SecretRef;
 
 	constructor(projectNode: DVProjectTreeNode, key: string, value: string, ref: ConfigMapRef | SecretRef) {
-		super('dv.datasourceentry', `${key}: <empty>`, vscode.TreeItemCollapsibleState.None);
+		super('dv.datasource.property', `${key}: <empty>`, vscode.TreeItemCollapsibleState.None);
 		this.setProject(projectNode);
 		this.key = key;
-		utils.generateReferenceValueForLabel(projectNode.file, value, ref).then( (label: string | undefined) => {
-			super.label = `${key}: ${label ? label : '<empty>'}`;
-			super.tooltip = super.label;
-		});
+		utils.generateReferenceValueForLabel(projectNode.file, value, ref)
+			.then( (label: string | undefined) => {
+				this.label = `${key}: ${label ? label : '<empty>'}`;
+				this.tooltip = `Data Source Property: ${this.label}`;
+			})
+			.finally( () => {
+				extension.dataVirtProvider.refreshNode(this);
+			});
 		this.value = value;
 	}
 
 	getIconName(): string {
-		return `dv_datasource_entry.gif`;
+		return `dv_datasource_property.gif`;
 	}
 
 	getToolTip(): string {
-		return `Data Source Entry: ${this.label}`;
+		return `Data Source Property: ${this.label}`;
 	}
 
 	getKey(): string {

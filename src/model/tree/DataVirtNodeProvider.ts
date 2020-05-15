@@ -111,6 +111,10 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 		});
 	}
 
+	public refreshNode(treeItem: DVTreeItem): void {
+		this._onDidChangeTreeData.fire(treeItem);
+	}
+
 	async getSchemaTreeNodeOfProject(name: string): Promise<SchemaTreeNode> {
 		await this.refresh();
 		const projectNode:DVProjectTreeNode = this.treeNodes.find( (node) => node.label === name);
