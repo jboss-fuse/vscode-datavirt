@@ -47,8 +47,7 @@ export class DataSourceTreeNode extends DVTreeItem {
 	initialize(): void {
 		if (this.dataSourceConfig && this.dataSourceConfig.properties) {
 			this.dataSourceConfig.properties.forEach( (element: Property) => {
-				const newItem: DataSourceEntryTreeNode = new DataSourceEntryTreeNode(element.name, element.value, element.valueFrom);
-				newItem.setProject(this.getProject());
+				const newItem: DataSourceEntryTreeNode = new DataSourceEntryTreeNode(this.getProject(), element.name, element.value, element.valueFrom);
 				newItem.parent = this;
 				if (this.children.indexOf(newItem) < 0) {
 					this.children.push(newItem);

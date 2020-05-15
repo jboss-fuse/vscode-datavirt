@@ -18,15 +18,21 @@ import * as utils from '../../utils';
 import * as vscode from 'vscode';
 import { DVTreeItem } from './DVTreeItem';
 import { ConfigMapRef, SecretRef } from '../DataVirtModel';
+import { DVProjectTreeNode } from './DVProjectTreeNode';
 
 export class DataSourceEntryTreeNode extends DVTreeItem {
 
 	key: string;
 	value: string | ConfigMapRef | SecretRef;
 
-	constructor(key: string, value: string, ref: ConfigMapRef | SecretRef) {
-		super('dv.datasourceentry', `${key}: ${utils.generateReferenceValueForLabel(value, ref) ? utils.generateReferenceValueForLabel(value, ref) : '<empty>'}`, vscode.TreeItemCollapsibleState.None);
+	constructor(projectNode: DVProjectTreeNode, key: string, value: string, ref: ConfigMapRef | SecretRef) {
+		super('dv.datasourceentry', `${key}: <empty>`, vscode.TreeItemCollapsibleState.None);
+		this.setProject(projectNode);
 		this.key = key;
+		utils.generateReferenceValueForLabel(projectNode.file, value, ref).then( (label: string | undefined) => {
+			super.label = `${key}: ${label ? label : '<empty>'}`;
+			super.tooltip = super.label;
+		});
 		this.value = value;
 	}
 
