@@ -223,12 +223,12 @@
 				{
 					"group": "dv@1",
 					"command": "datavirt.edit.datasourceentry",
-					"when": "viewItem == dv.datasourceentry"
+					"when": "viewItem == dv.datasource.property"
 				},
 				{
 					"group": "dv@2",
 					"command": "datavirt.delete.datasourceentry",
-					"when": "viewItem == dv.datasourceentry"
+					"when": "viewItem == dv.datasource.property"
 				},
 				{
 					"group": "dv@1",
@@ -248,12 +248,12 @@
 				{
 					"group": "dv@1",
 					"command": "datavirt.edit.envvar",
-					"when": "viewItem == dv.environmentvariable"
+					"when": "viewItem == dv.environment.variable"
 				},
 				{
 					"group": "dv@2",
 					"command": "datavirt.delete.envvar",
-					"when": "viewItem == dv.environmentvariable"
+					"when": "viewItem == dv.environment.variable"
 				},
 				{
 					"group": "dv@1",

@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as extension from '../../extension';
 import * as utils from '../../utils';
 import * as vscode from 'vscode';
 import { DVTreeItem } from './DVTreeItem';
@@ -26,12 +27,16 @@ export class EnvironmentVariableTreeNode extends DVTreeItem {
 	value: string | ConfigMapRef | SecretRef;
 
 	constructor(projectNode: DVProjectTreeNode, key: string, value: string, ref: ConfigMapRef | SecretRef) {
-		super('dv.environmentvariable', `${key}: '<empty>'`, vscode.TreeItemCollapsibleState.None);
+		super('dv.environment.variable', undefined, vscode.TreeItemCollapsibleState.None);
 		this.setProject(projectNode);
-		utils.generateReferenceValueForLabel(projectNode.file, value, ref).then( (label: string | undefined) => {
-			super.label = `${key}: ${label ? label : '<empty>'}`;
-			super.tooltip = super.label;
-		});
+		utils.generateReferenceValueForLabel(projectNode.file, value, ref)
+			.then( (label: string | undefined) => {
+				this.label = `${key}: ${label ? label : '<empty>'}`;
+				this.tooltip = `Environment Variable: ${this.label}`;
+			})
+			.finally( () => {
+				extension.dataVirtProvider.refreshNode(this);
+			});
 		this.key = key;
 		this.value = value;
 	}

@@ -225,14 +225,16 @@ export async function loadPredefinedVariablesFromSecret(refFile: string): Promis
 }
 
 export async function loadSecretsFromFile(file: string): Promise<SecretConfig> {
-	try {
-		const content = await vscode.workspace.fs.readFile(vscode.Uri.file(file));
-		const yamlDoc:SecretConfig = YAML.parse(content.toString());
-		if (yamlDoc && yamlDoc.kind && yamlDoc.kind === constants.SECRET_KIND) {
-			return yamlDoc;
+	if (await doesFileExist(file)) {
+		try {
+			const content = await vscode.workspace.fs.readFile(vscode.Uri.file(file));
+			const yamlDoc:SecretConfig = YAML.parse(content.toString());
+			if (yamlDoc && yamlDoc.kind && yamlDoc.kind === constants.SECRET_KIND) {
+				return yamlDoc;
+			}
+		} catch (err) {
+			log(`loadSecretsFromFile: Loading from file ${file} failed with ${err}`);
 		}
-	} catch (err) {
-		log(`loadSecretsFromFile: Loading from file ${file} failed with ${err}`);
 	}
 	return undefined;
 }
@@ -260,10 +262,12 @@ export function getSecretValueForKey(secretConfig: SecretConfig, secretKey: stri
 
 export async function loadConfigMapFromFile(file: string): Promise<ConfigMapConfig> {
 	try {
-		const content = await vscode.workspace.fs.readFile(vscode.Uri.file(file));
-		const yamlDoc:ConfigMapConfig = YAML.parse(content.toString());
-		if (yamlDoc && yamlDoc.kind && yamlDoc.kind === constants.CONFIGMAP_KIND) {
-			return yamlDoc;
+		if (await doesFileExist(file)) {
+			const content = await vscode.workspace.fs.readFile(vscode.Uri.file(file));
+			const yamlDoc:ConfigMapConfig = YAML.parse(content.toString());
+			if (yamlDoc && yamlDoc.kind && yamlDoc.kind === constants.CONFIGMAP_KIND) {
+				return yamlDoc;
+			}
 		}
 	} catch (err) {
 		log(`loadConfigMapFromFile: Loading from file ${file} failed with ${err}`);
