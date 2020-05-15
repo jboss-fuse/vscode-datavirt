@@ -343,6 +343,7 @@ describe('Utils', () => {
 	context('Load/Save of a ConfigMap file', () => {
 
 		let dummyNonConfigMapFile: string;
+		let fpTest: string;
 
 		before( () => {
 			dummyNonConfigMapFile = path.resolve(__dirname, '../../testFixture', `dummy-configmap.yaml`);
@@ -353,10 +354,16 @@ describe('Utils', () => {
 			fs.unlinkSync(dummyNonConfigMapFile);
 		});
 
+		afterEach(() => {
+			if (fpTest && fs.existsSync(fpTest)) {
+				fs.unlinkSync(fpTest);
+			}
+		});
+
 		it('should match the configmap model contents between a save and reload to/from a configmap file', async() => {
 			const name: string = 'myconfigmap';
 			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
-			const fpTest: string = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
+			fpTest = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
 			const yamlDoc:ConfigMapConfig = await utils.loadConfigMapFromFile(fpOrig);
 			should.exist(yamlDoc);
 			await utils.saveConfigMapToFile(yamlDoc, fpTest);
@@ -364,22 +371,19 @@ describe('Utils', () => {
 			const yamlDoc2:ConfigMapConfig = await utils.loadConfigMapFromFile(fpTest);
 			should.exist(yamlDoc2);
 			yamlDoc.should.deep.equal(yamlDoc2);
-			fs.unlinkSync(fpTest);
 		});
 
 		it('should persist new added configmap entries and be able to retain them from file', async() => {
 			const name: string = 'myconfigmap';
 			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
-			const fpTest: string = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
+			fpTest = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
 			const yamlDoc:ConfigMapConfig = await utils.loadConfigMapFromFile(fpOrig);
 			should.exist(yamlDoc);
 			utils.setConfigMapValueForKey(yamlDoc, 'myConfigMapKey', 'ABC123');
 			await utils.saveConfigMapToFile(yamlDoc, fpTest);
 			const yamlDoc2:ConfigMapConfig = await utils.loadConfigMapFromFile(fpTest);
 			should.exist(yamlDoc2);
-			should.exist(utils.getConfigMapValueForKey(yamlDoc2, 'myConfigMapKey'));
 			should.equal(utils.getConfigMapValueForKey(yamlDoc2, 'myConfigMapKey'), 'ABC123');
-			fs.unlinkSync(fpTest);
 		});
 
 		it('should return undefined for yaml files which are not kind Secret', async() => {
