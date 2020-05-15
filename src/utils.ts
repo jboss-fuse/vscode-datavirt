@@ -94,14 +94,20 @@ export async function validateFileNotExisting(name: string): Promise<string | un
 	return 'There is already a file with the same name. Please choose a different name.';
 }
 
-export function generateReferenceValueForLabel(value: string, ref: ConfigMapRef | SecretRef): string {
+export async function generateReferenceValueForLabel(vdbFile: string, value: string, ref: ConfigMapRef | SecretRef): Promise<string> {
 	if (ref) {
 		if (isSecretRef(ref)) {
 			const secretRef: SecretRef = ref;
-			return `${secretRef.secretKeyRef.key} @ ${secretRef.secretKeyRef.name}`;
+			const refFile: string = getFullReferenceFilePath(vdbFile, secretRef.secretKeyRef.name);
+			const secret: SecretConfig = await loadSecretsFromFile(refFile);
+			const value: string = getSecretValueForKey(secret, secretRef.secretKeyRef.key);
+			return `${value ? value : '<undefined>'} (${secretRef.secretKeyRef.name})`;
 		} else if (isConfigMapRef(ref)) {
 			const configMapRef: ConfigMapRef = ref;
-			return `${configMapRef.configMapKeyRef.key} @ ${configMapRef.configMapKeyRef.name}`;
+			const refFile: string = getFullReferenceFilePath(vdbFile, configMapRef.configMapKeyRef.name);
+			const configMap: ConfigMapConfig = await loadConfigMapFromFile(refFile);
+			const value: string = getConfigMapValueForKey(configMap, configMapRef.configMapKeyRef.key);
+			return `${value ? value : '<undefined>'} (${configMapRef.configMapKeyRef.name})`;
 		}
 	}
 	return value;
@@ -167,7 +173,7 @@ export async function openDDLEditor(vdbName: string) {
 	}
 }
 
-export function createOrUpdateLocalReferenceFile(refName: string, variableName: string, variableValue: string, refType: string) {
+export async function createOrUpdateLocalReferenceFile(refName: string, variableName: string, variableValue: string, refType: string) {
 	// TODO: create or update the entry reference in a local yaml file for configMap OR secret format
 	// TODO: implement me!
 }
@@ -246,7 +252,7 @@ export function setSecretValueForKey(secretConfig: SecretConfig, secretKey: stri
 }
 
 export function getSecretValueForKey(secretConfig: SecretConfig, secretKey: string): string | undefined {
-	if (secretConfig.data[secretKey]) {
+	if (secretConfig && secretConfig.data && secretConfig.data[secretKey]) {
 		return Base64.decode(secretConfig.data[secretKey]);
 	}
 	return undefined;
@@ -280,5 +286,8 @@ export function setConfigMapValueForKey(configMapConfig: ConfigMapConfig, key: s
 }
 
 export function getConfigMapValueForKey(configMapConfig: ConfigMapConfig, key: string): string | undefined {
-	return configMapConfig.data[key];
+	if (configMapConfig && configMapConfig.data && configMapConfig.data[key]) {
+		return configMapConfig.data[key];
+	}
+	return undefined;
 }

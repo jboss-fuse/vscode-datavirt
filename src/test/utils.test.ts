@@ -271,20 +271,23 @@ describe('Utils', () => {
 	});
 
 	context('DataSource Entry Label Creation', () => {
-		it('should return the name of a non-reference as label with valid parameters', () => {
-			should.equal('myValue', utils.generateReferenceValueForLabel('myValue', undefined));
+		const secretFile: string = path.resolve(__dirname, '../../testFixture', `mysecret.yaml`);
+		const configMapFile: string = path.resolve(__dirname, '../../testFixture', `myconfigmap.yaml`);
+
+		it('should return the name of a non-reference as label with valid parameters', async() => {
+			should.equal('myValue', await utils.generateReferenceValueForLabel(secretFile, 'myValue', undefined));
 		});
 
-		it('should return undefined for a non-reference with undefined value parameter', () => {
-			should.equal(undefined, utils.generateReferenceValueForLabel(undefined, undefined));
+		it('should return undefined for a non-reference with undefined value parameter', async() => {
+			should.equal(undefined, await utils.generateReferenceValueForLabel(secretFile, undefined, undefined));
 		});
 
-		it('should return the key @ name for a secrets reference as label with valid parameters', () => {
-			should.equal('key @ name', utils.generateReferenceValueForLabel(undefined, new SecretRef(new KeyRef('name', 'key'))));
+		it('should return value (refName) for a secrets reference as label with valid parameters', async() => {
+			should.equal('admin (mysecret)', await utils.generateReferenceValueForLabel(secretFile, undefined, new SecretRef(new KeyRef('mysecret', 'username'))));
 		});
 
-		it('should return the key @ name for a configmap reference as label with valid parameters', () => {
-			should.equal('key @ name', utils.generateReferenceValueForLabel(undefined, new ConfigMapRef(new KeyRef('name', 'key'))));
+		it('should return value (refName) for a configmap reference as label with valid parameters', async() => {
+			should.equal('special.properties (myconfigmap)', await utils.generateReferenceValueForLabel(configMapFile, undefined, new ConfigMapRef(new KeyRef('myconfigmap', 'file_name'))));
 		});
 	});
 

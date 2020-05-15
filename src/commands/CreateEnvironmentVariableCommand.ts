@@ -66,6 +66,7 @@ async function createEnvironmentVariableCommandForReference(envNode: Environment
 
 		let variableName: string;
 		let variableValue: string;
+		let valueFromRefChanged: boolean = false;
 		const refFileExists: boolean = await utils.doesLocalReferenceFileExist(file, refName);
 		if(refFileExists) {
 			const predefinedVariables = await utils.loadPredefinedVariables(file, refName, type);
@@ -84,12 +85,17 @@ async function createEnvironmentVariableCommandForReference(envNode: Environment
 			return;
 		}
 
-		variableValue = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new variable', value: variableValue ? variableValue : '' });
-		if (variableValue === undefined) {
+		const variableValueNew = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new variable', value: variableValue ? variableValue : '' });
+		if (variableValueNew === undefined) {
 			return;
 		}
 
-		const success: boolean = await handleEnvironmentVariableCreation(yaml, envNode.environment, file, type, variableName, variableValue, refName);
+		if (variableValueNew !== variableValue) {
+			variableValue = variableValueNew;
+			valueFromRefChanged = true;
+		}
+
+		const success: boolean = await handleEnvironmentVariableCreation(yaml, envNode.environment, file, type, variableName, variableValue, refName, valueFromRefChanged);
 		if (success) {
 			vscode.window.showInformationMessage(`New environment variable ${variableName} has been created successfully...`);
 		} else {
@@ -98,14 +104,16 @@ async function createEnvironmentVariableCommandForReference(envNode: Environment
 	}
 }
 
-export function handleEnvironmentVariableCreation(dvConfig: DataVirtConfig, environment: Property[], file: string, variableType: string, variableName: string, variableValue: string, refName?: string): Promise<boolean> {
+export function handleEnvironmentVariableCreation(dvConfig: DataVirtConfig, environment: Property[], file: string, variableType: string, variableName: string, variableValue: string, refName?: string, updateValueInRefFile: boolean = false): Promise<boolean> {
 	return new Promise<boolean>( async (resolve) => {
 		if (dvConfig && variableType && environment && file && variableName) {
 			try {
 				const entry: Property = utils.getEnvironmentVariableByName(variableName, environment);
 				if (!entry) {
 					setEnvironmentVariableValue(environment, variableType, variableName, variableValue, refName);
-					utils.createOrUpdateLocalReferenceFile(refName, variableName, variableValue, variableType);
+					if (updateValueInRefFile) {
+						await utils.createOrUpdateLocalReferenceFile(refName, variableName, variableValue, variableType);
+					}
 					await utils.saveModelToFile(dvConfig, file);
 					resolve(true);
 				} else {
