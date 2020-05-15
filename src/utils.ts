@@ -167,9 +167,21 @@ export async function openDDLEditor(vdbName: string) {
 	}
 }
 
-export function createOrUpdateLocalReferenceFile(refName: string, refKey: string, entryValue: string, entryType: string) {
+export function createOrUpdateLocalReferenceFile(refName: string, variableName: string, variableValue: string, refType: string) {
 	// TODO: create or update the entry reference in a local yaml file for configMap OR secret format
 	// TODO: implement me!
+}
+
+export function doesLocalReferenceFileExist(vdbFile: string, refName: string, refType: string): boolean {
+	// TODO: check if a file exists for the given type and name in the same folder than the vdbFile
+	// TODO: implement me!
+	return false;
+}
+
+export function loadPredefinedVariables(vdbFile: string, refName: string, refType: string): Array<Property> {
+	// TODO: load all defined key value pairs from the reference file into an array of property objects -> only name and value will be used
+	// TODO: implement me!
+	return new Array<Property>();
 }
 
 export async function loadSecretsFromFile(file: string): Promise<SecretConfig> {
