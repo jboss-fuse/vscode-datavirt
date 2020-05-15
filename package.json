@@ -285,7 +285,6 @@
 		"tslint": "gulp tslint"
 	},
 	"dependencies": {
-		"fs": "^0.0.1-security",
 		"js-base64": "^2.5.2",
 		"path": "^0.12.7",
 		"tmp": "^0.2.1",
@@ -304,6 +303,7 @@
 		"async-wait-until": "^1.2.4",
 		"chai": "^4.2.0",
 		"decache": "^4.6.0",
+		"fs": "^0.0.1-security",
 		"gulp": "^4.0.2",
 		"gulp-tslint": "^8.1.4",
 		"istanbul": "^0.4.5",
