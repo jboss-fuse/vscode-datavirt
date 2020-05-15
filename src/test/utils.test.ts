@@ -127,6 +127,7 @@ describe('Utils', () => {
 	context('Load/Save of a VDB file', () => {
 
 		let dummyNonVDBFile: string;
+		let fpTest: string;
 
 		before( () => {
 			dummyNonVDBFile = path.resolve(__dirname, '../../testFixture', `dummy.yaml`);
@@ -135,12 +136,13 @@ describe('Utils', () => {
 
 		after( () => {
 			fs.unlinkSync(dummyNonVDBFile);
+			fs.unlinkSync(fpTest);
 		});
 
 		it('should match the vdb model contents between a save and reload to/from a vdb file', async () => {
 			const name: string = 'test';
 			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
-			const fpTest: string = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
+			fpTest = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
 			const yamlDoc:DataVirtConfig = await utils.loadModelFromFile(fpOrig);
 			should.exist(yamlDoc);
 			await utils.saveModelToFile(yamlDoc, fpTest);
@@ -148,7 +150,6 @@ describe('Utils', () => {
 			const yamlDoc2:DataVirtConfig = await utils.loadModelFromFile(fpTest);
 			should.exist(yamlDoc2);
 			yamlDoc.should.deep.equal(yamlDoc2);
-			fs.unlinkSync(fpTest);
 		});
 
 		it('should return undefined for yaml files which are not kind VirtualDatabase', async() => {
@@ -290,6 +291,7 @@ describe('Utils', () => {
 	context('Load/Save of a Secrets file', () => {
 
 		let dummyNonSecretFile: string;
+		let fpTest: string;
 
 		before( () => {
 			dummyNonSecretFile = path.resolve(__dirname, '../../testFixture', `dummy-secret.yaml`);
@@ -300,10 +302,16 @@ describe('Utils', () => {
 			fs.unlinkSync(dummyNonSecretFile);
 		});
 
+		afterEach(() => {
+			if (fpTest && fs.existsSync(fpTest)) {
+				fs.unlinkSync(fpTest);
+			}
+		});
+
 		it('should match the secrets model contents between a save and reload to/from a secret file', async() => {
 			const name: string = 'mysecret';
 			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
-			const fpTest: string = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
+			fpTest = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
 			const yamlDoc:SecretConfig = await utils.loadSecretsFromFile(fpOrig);
 			should.exist(yamlDoc);
 			await utils.saveSecretsToFile(yamlDoc, fpTest);
@@ -311,22 +319,20 @@ describe('Utils', () => {
 			const yamlDoc2:SecretConfig = await utils.loadSecretsFromFile(fpTest);
 			should.exist(yamlDoc2);
 			yamlDoc.should.deep.equal(yamlDoc2);
-			fs.unlinkSync(fpTest);
+
 		});
 
 		it('should persist new added secrets entries and be able to retain them from file', async() => {
 			const name: string = 'mysecret';
 			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
-			const fpTest: string = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
+			fpTest = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
 			const yamlDoc:SecretConfig = await utils.loadSecretsFromFile(fpOrig);
 			should.exist(yamlDoc);
 			utils.setSecretValueForKey(yamlDoc, 'mySecretKey', 'ABC123');
 			await utils.saveSecretsToFile(yamlDoc, fpTest);
 			const yamlDoc2:SecretConfig = await utils.loadSecretsFromFile(fpTest);
 			should.exist(yamlDoc2);
-			should.exist(utils.getSecretValueForKey(yamlDoc2, 'mySecretKey'));
 			should.equal(utils.getSecretValueForKey(yamlDoc2, 'mySecretKey'), 'ABC123');
-			fs.unlinkSync(fpTest);
 		});
 
 		it('should return undefined for yaml files which are not kind Secret', async() => {
