@@ -21,6 +21,8 @@ import * as vscode from 'vscode';
 import { DataSourceTreeNode } from '../model/tree/DataSourceTreeNode';
 import { DataVirtConfig, DataSourceConfig, ConfigMapRef, SecretRef, Property, KeyRef } from '../model/DataVirtModel';
 
+const CREATE_NEW_ENTRY: string = 'New...';
+
 export async function createDataSourceEntryCommand(dsNode: DataSourceTreeNode) {
 	let desiredType: string;
 	if (dsNode.isEmpty()) {
@@ -80,12 +82,25 @@ async function createDataSourceEntryCommandForReference(dsNode: DataSourceTreeNo
 			}
 		}
 
-		let entryName: string = await queryPropertyName(dsNode);
-		if (entryName === undefined) {
-			return;
+		let entryName: string;
+		let entryValue: string;
+		const refFileExists: boolean = await utils.doesLocalReferenceFileExist(dsNode.getProject().file, refName);
+		if(refFileExists) {
+			const predefinedVariables = await utils.loadPredefinedVariables(dsNode.getProject().file, refName, type);
+			const newProperty: Property = await queryProperty(dsNode, predefinedVariables);
+			if (newProperty === undefined) {
+				return;
+			}
+			entryName = newProperty.name;
+			entryValue = newProperty.value;
+		} else {
+			let entryName: string = await queryPropertyName(dsNode);
+			if (entryName === undefined) {
+				return;
+			}
 		}
 
-		let entryValue:string = await vscode.window.showInputBox( { placeHolder: 'Enter the value of the new property' });
+		entryValue = await vscode.window.showInputBox( { value: entryValue, prompt: 'Enter the value of the new property' });
 		if (entryValue === undefined) {
 			return;
 		}
@@ -98,6 +113,35 @@ async function createDataSourceEntryCommandForReference(dsNode: DataSourceTreeNo
 		} else {
 			vscode.window.showErrorMessage(`An error occured when trying to create a new datasource property ${entryName} in datasource ${dsNode.label}...`);
 		}
+	}
+}
+
+async function queryProperty(dsNode: DataSourceTreeNode, predefinedVariables: Array<Property>): Promise<Property | undefined> {
+	const names: string[] = new Array<string>();
+	names.push(CREATE_NEW_ENTRY);
+
+	predefinedVariables.forEach( (variable: Property) => {
+		// only show entries from the reference file which are not yet used in the datasource properties
+		if (utils.getDataSourceEntryByName(variable.name, dsNode.dataSourceConfig) === undefined) {
+			names.push(variable.name);
+		}
+	});
+
+	const selectedPropertyName: string = await vscode.window.showQuickPick(names, { canPickMany: false, placeHolder: `Select a property from the list or "New..." to create a new one` });
+	if (selectedPropertyName === undefined) {
+		return undefined;
+	}
+
+	if (selectedPropertyName === CREATE_NEW_ENTRY) {
+		const propertyName: string = await queryPropertyName(dsNode);
+		if (propertyName === undefined) {
+			return;
+		}
+		return new Property(propertyName, '', undefined);
+	} else {
+		return predefinedVariables.find( (value: Property) => {
+			return value.name === selectedPropertyName;
+		});
 	}
 }
 
