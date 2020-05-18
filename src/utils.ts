@@ -173,9 +173,17 @@ export async function openDDLEditor(vdbName: string) {
 	}
 }
 
-export async function createOrUpdateLocalReferenceFile(refName: string, variableName: string, variableValue: string, refType: string) {
-	// TODO: create or update the entry reference in a local yaml file for configMap OR secret format
-	// TODO: implement me!
+export async function createOrUpdateLocalReferenceFile(vdbFile: string, refName: string, variableName: string, variableValue: string, refType: string) {
+	const refFile: string = getFullReferenceFilePath(vdbFile, refName);
+	if (refType === constants.REFERENCE_TYPE_CONFIGMAP) {
+		const configMap: ConfigMapConfig = await loadConfigMapFromFile(refFile);
+		setConfigMapValueForKey(configMap, variableName, variableValue);
+		await saveConfigMapToFile(configMap, refFile);
+	} else if (refType === constants.REFERENCE_TYPE_SECRET) {
+		const secret: SecretConfig = await loadSecretsFromFile(refFile);
+		setSecretValueForKey(secret, variableName, variableValue);
+		await saveSecretsToFile(secret, refFile);
+	}
 }
 
 export function getFullReferenceFilePath(vdbFile: string, refName: string): string {

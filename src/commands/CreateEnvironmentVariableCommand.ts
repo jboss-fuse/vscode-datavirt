@@ -112,7 +112,7 @@ export function handleEnvironmentVariableCreation(dvConfig: DataVirtConfig, envi
 				if (!entry) {
 					setEnvironmentVariableValue(environment, variableType, variableName, variableValue, refName);
 					if (updateValueInRefFile) {
-						await utils.createOrUpdateLocalReferenceFile(refName, variableName, variableValue, variableType);
+						await utils.createOrUpdateLocalReferenceFile(file, refName, variableName, variableValue, variableType);
 					}
 					await utils.saveModelToFile(dvConfig, file);
 					resolve(true);
