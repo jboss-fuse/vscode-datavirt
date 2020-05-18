@@ -111,7 +111,7 @@ export function handleDataSourceEntryCreation(dvConfig: DataVirtConfig, dsConfig
 						dsConfig.properties = new Array<Property>();
 					}
 					setDataSourceEntryValue(dsConfig.properties, entryType, entryName, entryValue, refName, refKey);
-					utils.createOrUpdateLocalReferenceFile(refName, refKey, entryValue, entryType);
+					utils.createOrUpdateLocalReferenceFile(file, refName, refKey, entryValue, entryType);
 					await utils.saveModelToFile(dvConfig, file);
 					resolve(true);
 				} else {
