@@ -56,18 +56,18 @@
 				"category": "dv"
 			},
 			{
+				"title": "Generate ConfigMap",
+				"command": "datavirt.datasource.convert.to.configmap",
+				"category": "dv"
+			},
+			{
+				"title": "Generate Secret",
+				"command": "datavirt.datasource.convert.to.secret",
+				"category": "dv"
+			},
+			{
 				"title": "New Property",
-				"command": "datavirt.create.datasourceentry.value",
-				"category": "dv"
-			},
-			{
-				"title": "New Property from Secret",
-				"command": "datavirt.create.datasourceentry.secret",
-				"category": "dv"
-			},
-			{
-				"title": "New Property from ConfigMap",
-				"command": "datavirt.create.datasourceentry.configmap",
+				"command": "datavirt.create.datasourceentry",
 				"category": "dv"
 			},
 			{
@@ -130,19 +130,19 @@
 					"when": "false"
 				},
 				{
+					"command": "datavirt.datasource.convert.to.configmap",
+					"when": "false"
+				},
+				{
+					"command": "datavirt.datasource.convert.to.secret",
+					"when": "false"
+				},
+				{
 					"command": "datavirt.delete.vdb",
 					"when": "false"
 				},
 				{
-					"command": "datavirt.create.datasourceentry.value",
-					"when": "false"
-				},
-				{
-					"command": "datavirt.create.datasourceentry.secret",
-					"when": "false"
-				},
-				{
-					"command": "datavirt.create.datasourceentry.configmap",
+					"command": "datavirt.create.datasourceentry",
 					"when": "false"
 				},
 				{
@@ -201,23 +201,23 @@
 					"when": "viewItem == dv.datasources"
 				},
 				{
+					"group": "dv_convert@2",
+					"command": "datavirt.datasource.convert.to.secret",
+					"when": "viewItem == dv.datasource"
+				},
+				{
+					"group": "dv_convert@1",
+					"command": "datavirt.datasource.convert.to.configmap",
+					"when": "viewItem == dv.datasource"
+				},
+				{
 					"group": "dv_extra@1",
 					"command": "datavirt.delete.datasource",
 					"when": "viewItem == dv.datasource"
 				},
 				{
 					"group": "dv@1",
-					"command": "datavirt.create.datasourceentry.value",
-					"when": "viewItem == dv.datasource"
-				},
-				{
-					"group": "dv@3",
-					"command": "datavirt.create.datasourceentry.secret",
-					"when": "viewItem == dv.datasource"
-				},
-				{
-					"group": "dv@2",
-					"command": "datavirt.create.datasourceentry.configmap",
+					"command": "datavirt.create.datasourceentry",
 					"when": "viewItem == dv.datasource"
 				},
 				{

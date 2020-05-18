@@ -21,6 +21,24 @@ import * as vscode from 'vscode';
 import { DataSourceTreeNode } from '../model/tree/DataSourceTreeNode';
 import { DataVirtConfig, DataSourceConfig, ConfigMapRef, SecretRef, Property, KeyRef } from '../model/DataVirtModel';
 
+export async function createDataSourceEntryCommand(dsNode: DataSourceTreeNode) {
+	let desiredType: string;
+	if (dsNode.isEmpty()) {
+		desiredType = await vscode.window.showQuickPick([ constants.REFERENCE_TYPE_VALUE, constants.REFERENCE_TYPE_CONFIGMAP, constants.REFERENCE_TYPE_SECRET], {canPickMany: false, placeHolder: 'Select the kind of datasource you want to create.'});
+	}
+	await createDataSourceEntry(dsNode, desiredType);
+}
+
+async function createDataSourceEntry(dsNode: DataSourceTreeNode, dsPropertiesType: string) {
+	if (constants.REFERENCE_TYPE_VALUE === dsPropertiesType || dsNode.isValueType()) {
+		await createDataSourceEntryCommandForValue(dsNode);
+	} else if (constants.REFERENCE_TYPE_CONFIGMAP === dsPropertiesType || dsNode.isConfigMapType()) {
+		await createDataSourceEntryCommandForConfigMap(dsNode);
+	} else if (constants.REFERENCE_TYPE_SECRET === dsPropertiesType || dsNode.isSecretType()) {
+		await createDataSourceEntryCommandForSecret(dsNode);
+	}
+}
+
 export async function createDataSourceEntryCommandForValue(dsNode: DataSourceTreeNode) {
 	if (dsNode) {
 		let entryName: string = await queryPropertyName(dsNode);
@@ -54,18 +72,16 @@ export async function createDataSourceEntryCommandForConfigMap(dsNode: DataSourc
 
 async function createDataSourceEntryCommandForReference(dsNode: DataSourceTreeNode, type: string) {
 	if (dsNode) {
+		let refName: string = dsNode.getReferenceName();
+		if(dsNode.isEmpty()) {
+			refName = await vscode.window.showInputBox( { validateInput: utils.ensureValueIsNotEmpty, placeHolder: 'Enter the name of the reference' });
+			if (refName === undefined) {
+				return;
+			}
+		}
+
 		let entryName: string = await queryPropertyName(dsNode);
 		if (entryName === undefined) {
-			return;
-		}
-
-		let refName: string = await vscode.window.showInputBox( { validateInput: utils.ensureValueIsNotEmpty, placeHolder: 'Enter the name of the reference' });
-		if (refName === undefined) {
-			return;
-		}
-
-		let refKey: string = await vscode.window.showInputBox( { validateInput: utils.ensureValueIsNotEmpty, placeHolder: 'Enter the key for the reference' });
-		if (refKey === undefined) {
 			return;
 		}
 
@@ -76,7 +92,7 @@ async function createDataSourceEntryCommandForReference(dsNode: DataSourceTreeNo
 
 		const yaml: DataVirtConfig = dsNode.getProject().dvConfig;
 		const file: string = dsNode.getProject().file;
-		let success: boolean = await handleDataSourceEntryCreation(yaml, dsNode.dataSourceConfig, file, type, entryName, entryValue, refName, refKey);
+		let success: boolean = await handleDataSourceEntryCreation(yaml, dsNode.dataSourceConfig, file, type, entryName, entryValue, refName, entryName);
 		if (success) {
 			vscode.window.showInformationMessage(`New datasource property ${entryName} has been created successfully...`);
 		} else {
@@ -91,6 +107,9 @@ export function handleDataSourceEntryCreation(dvConfig: DataVirtConfig, dsConfig
 			try {
 				const entry: Property = utils.getDataSourceEntryByName(entryName, dsConfig);
 				if (!entry) {
+					if (!dsConfig.properties) {
+						dsConfig.properties = new Array<Property>();
+					}
 					setDataSourceEntryValue(dsConfig.properties, entryType, entryName, entryValue, refName, refKey);
 					utils.createOrUpdateLocalReferenceFile(refName, refKey, entryValue, entryType);
 					await utils.saveModelToFile(dvConfig, file);

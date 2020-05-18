@@ -59,7 +59,7 @@ describe('Commands Tests', () => {
 	}
 
 	async function createDataSource(dataSourceName?: string) {
-		const createdDS = await createDSCommand.handleDataSourceCreation(dataSourceName ? dataSourceName : dsName, dsType, dvConfig, vdbFile);
+		const createdDS = await createDSCommand.createDataSource(dataSourceName ? dataSourceName : dsName, dsType, dvConfig, vdbFile);
 		should.equal(true, createdDS, 'Execution of the Create DataSource command returned false');
 
 		const dvConfig2: DataVirtConfig = await utils.loadModelFromFile(vdbFile);
@@ -92,7 +92,7 @@ describe('Commands Tests', () => {
 		});
 
 		it('should generate a valid datasource definition inside a VDB when handing over valid parameters', async () => {
-			const createdDS = await createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, vdbFile);
+			const createdDS = await createDSCommand.createDataSource(dsName, dsType, dvConfig, vdbFile);
 			should.equal(true, createdDS, 'Execution of the Create DataSource command returned false');
 			const dvConfig2: DataVirtConfig = await utils.loadModelFromFile(vdbFile);
 			dvConfig2.should.deep.equal(dvConfig);
@@ -100,22 +100,22 @@ describe('Commands Tests', () => {
 		});
 
 		it('should not generate a datasource definition inside a VDB when handing invalid name', async () => {
-			const createdDS = await createDSCommand.handleDataSourceCreation(undefined, dsType, dvConfig, vdbFile);
+			const createdDS = await createDSCommand.createDataSource(undefined, dsType, dvConfig, vdbFile);
 			should.equal(false, createdDS, 'Execution of the Create DataSource command returned true, but should not');
 		});
 
 		it('should not generate a datasource definition inside a VDB when handing invalid type', async () => {
-			const createdDS = await createDSCommand.handleDataSourceCreation(dsName, undefined, dvConfig, vdbFile);
+			const createdDS = await createDSCommand.createDataSource(dsName, undefined, dvConfig, vdbFile);
 			should.equal(false, createdDS, 'Execution of the Create DataSource command returned true, but should not');
 		});
 
 		it('should not generate a datasource definition inside a VDB when handing invalid model', async () => {
-			const createdDS = await createDSCommand.handleDataSourceCreation(dsName, dsType, undefined, vdbFile);
+			const createdDS = await createDSCommand.createDataSource(dsName, dsType, undefined, vdbFile);
 			should.equal(false, createdDS, 'Execution of the Create DataSource command returned true, but should not');
 		});
 
 		it('should not generate a datasource definition inside a VDB when handing invalid file', async () => {
-			const createdDS = await createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, undefined);
+			const createdDS = await createDSCommand.createDataSource(dsName, dsType, dvConfig, undefined);
 			should.equal(false, createdDS, 'Execution of the Create DataSource command returned true, but should not');
 		});
 	});
@@ -152,7 +152,7 @@ describe('Commands Tests', () => {
 		it('should not delete all datasources when deleting 1 of 2 datasources (regression test #45)', async () => {
 			const newDSName = 'SOURCE2';
 
-			const createdDS = await createDSCommand.handleDataSourceCreation(newDSName, dsType, dvConfig, vdbFile);
+			const createdDS = await createDSCommand.createDataSource(newDSName, dsType, dvConfig, vdbFile);
 			should.equal(true, createdDS, 'Execution of the Create DataSource command returned false');
 
 			dvConfig = await utils.loadModelFromFile(vdbFile);

@@ -65,7 +65,7 @@ describe('Commands Tests', () => {
 		fs.existsSync(vdbFile).should.equal(true);
 		dvConfig = await utils.loadModelFromFile(vdbFile);
 
-		const createdDS = await createDSCommand.handleDataSourceCreation(dsName, dsType, dvConfig, vdbFile);
+		const createdDS = await createDSCommand.createDataSource(dsName, dsType, dvConfig, vdbFile);
 		should.equal(true, createdDS, 'Execution of the Create DataSource command returned false');
 
 		const dvConfig2: DataVirtConfig = await utils.loadModelFromFile(vdbFile);

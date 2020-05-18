@@ -21,17 +21,17 @@ import * as vscode from 'vscode';
 import { DataSourcesTreeNode } from '../model/tree/DataSourcesTreeNode';
 import { DataVirtConfig, DataSourceConfig, Property } from '../model/DataVirtModel';
 
-export async function createDataSourceCommand(dsTreeNode: DataSourcesTreeNode) {
+export async function createDataSourceCommand(dsNode: DataSourcesTreeNode) {
 	const dsName: string = await vscode.window.showInputBox( { validateInput: (name: string) => {
 		let msg: string = utils.validateName(name);
 		if (!msg) {
-			if (utils.getDataSourceByName(dsTreeNode.getProject().dvConfig, name)) {
+			if (utils.getDataSourceByName(dsNode.getProject().dvConfig, name)) {
 				msg = `There is already a datasource with the name ${name}.`;
 			}
 		}
 		return msg;
 	}, placeHolder: 'Enter the name of the new datasource'});
-	if (!dsName) {
+	if (dsName === undefined) {
 		return;
 	}
 
@@ -48,50 +48,48 @@ export async function createDataSourceCommand(dsTreeNode: DataSourcesTreeNode) {
 		}
 	}
 
-	const dvConfig: DataVirtConfig = dsTreeNode.getProject().dvConfig;
+	const dvConfig: DataVirtConfig = dsNode.getProject().dvConfig;
 	if (dvConfig) {
-		const success: boolean = await handleDataSourceCreation(dsName, dsType, dvConfig, dsTreeNode.getProject().getFile(), dsRelDBType);
+		const success: boolean = await createDataSource(dsName, dsType, dvConfig, dsNode.getProject().getFile(), dsRelDBType);
 		if (success) {
 			vscode.window.showInformationMessage(`New datasource ${dsName} has been created successfully...`);
 		} else {
-			vscode.window.showErrorMessage(`An error occured when trying to create a new datasource...`);
+			vscode.window.showErrorMessage(`An error occured when trying to create a new datasource with name ${dsName}...`);
 		}
 	}
 }
 
-export function handleDataSourceCreation(dsName: string, dsType: string, dvConfig: DataVirtConfig, file: string, dsRelDBType?: string): Promise<boolean> {
-	return new Promise<boolean>( async(resolve) => {
-		if (dsName && dsType && dvConfig && file) {
-			try {
-				let dsConfig: DataSourceConfig = extension.DATASOURCE_TYPES.get(dsType);
-				if (dsType === constants.RELATIONAL_DB_KEY) {
-					dsConfig.type = dsRelDBType;
-				}
-				dsConfig.name = dsName;
-				// preset empty property values
-				dsConfig.properties.forEach((element: Property) => {
-					if (!element.value) {
-						element.value = constants.EMPTY_VALUE;
-					}
-				});
-				if (!dvConfig.spec.datasources) {
-					dvConfig.spec.datasources = new Array<DataSourceConfig>();
-				}
-				dvConfig.spec.datasources.push(dsConfig);
-				await utils.saveModelToFile(dvConfig, file);
-				resolve(true);
-			} catch (error) {
-				extension.log(error);
-				resolve(false);
+export async function createDataSource(dsName: string, dsType: string, dvConfig: DataVirtConfig, file: string, dsRelDBType?: string): Promise<boolean> {
+	if (dsName && dsType && dvConfig && file) {
+		try {
+			let dsConfig: DataSourceConfig = extension.DATASOURCE_TYPES.get(dsType);
+			if (dsType === constants.RELATIONAL_DB_KEY) {
+				dsConfig.type = dsRelDBType;
 			}
-		} else {
-			let missing: string = '';
-			missing = utils.checkForValue(dsName, 'Name', missing);
-			missing = utils.checkForValue(dsType, 'Type', missing);
-			missing = utils.checkForValue(dvConfig, 'VDB Model',  missing);
-			missing = utils.checkForValue(file, 'VDB File', missing);
-			extension.log(`handleDataSourceCreation: Unable to create the datasource because of missing parameter(s) ${missing}...`);
-			resolve(false);
+			dsConfig.name = dsName;
+			// preset empty property values
+			dsConfig.properties.forEach((element: Property) => {
+				if (!element.value) {
+					element.value = constants.EMPTY_VALUE;
+				}
+			});
+			if (!dvConfig.spec.datasources) {
+				dvConfig.spec.datasources = new Array<DataSourceConfig>();
+			}
+			dvConfig.spec.datasources.push(dsConfig);
+			await utils.saveModelToFile(dvConfig, file);
+		} catch (error) {
+			extension.log(error);
+			return false;
 		}
-	});
+	} else {
+		let missing: string = '';
+		missing = utils.checkForValue(dsName, 'Name', missing);
+		missing = utils.checkForValue(dsType, 'Type', missing);
+		missing = utils.checkForValue(dvConfig, 'VDB Model',  missing);
+		missing = utils.checkForValue(file, 'VDB File', missing);
+		extension.log(`handleDataSourceCreation: Unable to create the datasource because of missing parameter(s) ${missing}...`);
+		return false;
+	}
+	return true;
 }
