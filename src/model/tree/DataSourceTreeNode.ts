@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 import * as vscode from 'vscode';
-import { DataSourceConfig, Property } from '../DataVirtModel';
+import { DataSourceConfig, Property, ConfigMapRef, SecretRef } from '../DataVirtModel';
 import { DataSourceEntryTreeNode } from './DataSourceEntryTreeNode';
 import { DVTreeItem } from './DVTreeItem';
+import * as utils from '../../utils';
 
 export class DataSourceTreeNode extends DVTreeItem {
 
@@ -54,5 +55,38 @@ export class DataSourceTreeNode extends DVTreeItem {
 				}
 			});
 		}
+	}
+
+	isEmpty(): boolean {
+		return !this.dataSourceConfig.properties || this.dataSourceConfig.properties.length === 0;
+	}
+
+	isValueType(): boolean {
+		return !this.isEmpty() &&
+			!utils.isConfigMapRef(this.dataSourceConfig.properties[0].valueFrom) &&
+			!utils.isSecretRef(this.dataSourceConfig.properties[0].valueFrom);
+	}
+
+	isSecretType(): boolean {
+		return !this.isEmpty() &&
+			utils.isSecretRef(this.dataSourceConfig.properties[0].valueFrom);
+	}
+
+	isConfigMapType(): boolean {
+		return !this.isEmpty() &&
+			utils.isConfigMapRef(this.dataSourceConfig.properties[0].valueFrom);
+	}
+
+	getReferenceName(): string {
+		if (!this.isEmpty()) {
+			if (utils.isConfigMapRef(this.dataSourceConfig.properties[0].valueFrom)) {
+				const ref: ConfigMapRef = this.dataSourceConfig.properties[0].valueFrom;
+				return ref.configMapKeyRef.name;
+			} else if (utils.isSecretRef(this.dataSourceConfig.properties[0].valueFrom)) {
+				const ref: SecretRef = this.dataSourceConfig.properties[0].valueFrom;
+				return ref.secretKeyRef.name;
+			}
+		}
+		return undefined;
 	}
 }

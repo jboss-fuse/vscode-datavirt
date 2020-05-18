@@ -19,8 +19,9 @@
 import * as vscode from 'vscode';
 import { AmazonS3DataSource } from './model/datasources/AmazonS3DataSource';
 import * as constants from './constants';
+import { convertDataSourceToSecret, convertDataSourceToConfigMap } from './commands/ConvertDataSourceCommand';
 import { createDataSourceCommand } from './commands/CreateDataSourceCommand';
-import { createDataSourceEntryCommandForConfigMap, createDataSourceEntryCommandForValue, createDataSourceEntryCommandForSecret } from './commands/CreateDataSourceEntryCommand';
+import { createDataSourceEntryCommand } from './commands/CreateDataSourceEntryCommand';
 import { createEnvironmentVariableCommandForConfigMap, createEnvironmentVariableCommandForValue, createEnvironmentVariableCommandForSecret } from './commands/CreateEnvironmentVariableCommand';
 import { createVDBCommand } from './commands/CreateVDBCommand';
 import { DataVirtNodeProvider } from './model/tree/DataVirtNodeProvider';
@@ -92,9 +93,9 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.delete.vdb', deleteVDBCommand));
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.datasource', createDataSourceCommand));
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.delete.datasource', deleteDataSourceCommand));
-	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.datasourceentry.value', createDataSourceEntryCommandForValue));
-	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.datasourceentry.secret', createDataSourceEntryCommandForSecret));
-	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.datasourceentry.configmap', createDataSourceEntryCommandForConfigMap));
+	context.subscriptions.push(vscode.commands.registerCommand('datavirt.datasource.convert.to.configmap', convertDataSourceToConfigMap));
+	context.subscriptions.push(vscode.commands.registerCommand('datavirt.datasource.convert.to.secret', convertDataSourceToSecret));
+	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.datasourceentry', createDataSourceEntryCommand));
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.edit.datasourceentry', editDataSourceEntryCommand));
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.delete.datasourceentry', deleteDataSourceEntryCommand));
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.create.envvar.value', createEnvironmentVariableCommandForValue));
