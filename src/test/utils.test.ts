@@ -283,11 +283,11 @@ describe('Utils', () => {
 		});
 
 		it('should return value (refName) for a secrets reference as label with valid parameters', async() => {
-			should.equal('admin (mysecret)', await utils.generateReferenceValueForLabel(secretFile, undefined, new SecretRef(new KeyRef('mysecret', 'username'))));
+			should.equal('admin (Secret: mysecret)', await utils.generateReferenceValueForLabel(secretFile, undefined, new SecretRef(new KeyRef('mysecret', 'username'))));
 		});
 
 		it('should return value (refName) for a configmap reference as label with valid parameters', async() => {
-			should.equal('special.properties (myconfigmap)', await utils.generateReferenceValueForLabel(configMapFile, undefined, new ConfigMapRef(new KeyRef('myconfigmap', 'file_name'))));
+			should.equal('special.properties (ConfigMap: myconfigmap)', await utils.generateReferenceValueForLabel(configMapFile, undefined, new ConfigMapRef(new KeyRef('myconfigmap', 'file_name'))));
 		});
 	});
 
