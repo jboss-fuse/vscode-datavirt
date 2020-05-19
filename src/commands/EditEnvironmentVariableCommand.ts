@@ -17,7 +17,7 @@
 import * as extension from '../extension';
 import * as utils from '../utils';
 import * as vscode from 'vscode';
-import { DataVirtConfig, Property, SecretRef, ConfigMapRef, KeyRef } from '../model/DataVirtModel';
+import { DataVirtConfig, Property, SecretRef, ConfigMapRef, KeyRef, SecretConfig, ConfigMapConfig } from '../model/DataVirtModel';
 import { EnvironmentVariableTreeNode } from '../model/tree/EnvironmentVariableTreeNode';
 
 export function editEnvironmentVariableCommand(envVarTreeNode: EnvironmentVariableTreeNode) {
@@ -43,53 +43,45 @@ export function editValueEntryType(envVarTreeNode: EnvironmentVariableTreeNode, 
 		});
 }
 
-export function editReferenceEntryType(envVarTreeNode: EnvironmentVariableTreeNode, environment: Property[], entry: Property) {
+export async function editReferenceEntryType(envVarTreeNode: EnvironmentVariableTreeNode, environment: Property[], entry: Property) {
 	const ref: ConfigMapRef | SecretRef = entry.valueFrom;
-	let oldName: string;
-	let oldKey: string;
+
 	if (utils.isSecretRef(ref)) {
 		const secRef : SecretRef = ref;
-		oldName = secRef.secretKeyRef.name;
-		oldKey = secRef.secretKeyRef.key;
+		const refFile: string = utils.getFullReferenceFilePath(envVarTreeNode.getProject().file, secRef.secretKeyRef.name);
+		const secret:  SecretConfig = await utils.loadSecretsFromFile(refFile);
+		const oldValue: string = utils.getSecretValueForKey(secret, secRef.secretKeyRef.key);
+		const newValue: string = await queryNewValue(oldValue);
+		if (newValue !== undefined && oldValue !== newValue) {
+			utils.setSecretValueForKey(secret, secRef.secretKeyRef.key, newValue);
+			await utils.saveSecretsToFile(secret, refFile);
+			await showFeedback(true, secRef.secretKeyRef.key);
+		}
 	} else if (utils.isConfigMapRef(ref)) {
 		const mapRef : ConfigMapRef = ref;
-		oldName = mapRef.configMapKeyRef.name;
-		oldKey = mapRef.configMapKeyRef.key;
+		const refFile: string = utils.getFullReferenceFilePath(envVarTreeNode.getProject().file, mapRef.configMapKeyRef.name);
+		const configMap:  ConfigMapConfig = await utils.loadConfigMapFromFile(refFile);
+		const oldValue: string = utils.getConfigMapValueForKey(configMap, mapRef.configMapKeyRef.key);
+		const newValue: string = await queryNewValue(oldValue);
+		if (newValue !== undefined && oldValue !== newValue) {
+			utils.setConfigMapValueForKey(configMap, mapRef.configMapKeyRef.key, newValue);
+			await utils.saveConfigMapToFile(configMap, refFile);
+			await showFeedback(true, mapRef.configMapKeyRef.key);
+		}
 	} else {
 		return;
 	}
-	vscode.window.showInputBox( {prompt: 'Enter the new reference name', validateInput: utils.ensureValueIsNotEmpty, value: oldName })
-		.then( (newRefName: string) => {
-			if (newRefName === undefined) {
-				return;
-			}
-			vscode.window.showInputBox( {prompt: 'Enter the new reference key', validateInput: utils.ensureValueIsNotEmpty, value: oldKey})
-				.then( (newRefKey: string) => {
-					if (newRefKey === undefined) {
-						return;
-					}
-					let newRefValue: ConfigMapRef | SecretRef;
-					if (utils.isSecretRef(ref)) {
-						newRefValue = new SecretRef(new KeyRef(newRefName, newRefKey));
-					} else if (utils.isConfigMapRef(ref)) {
-						newRefValue = new ConfigMapRef(new KeyRef(newRefName, newRefKey));
-					} else {
-						extension.log(`Error modifying an environment variable ${newRefKey} @ ${newRefName}. The entry is neither a secret nor a config map. Please check and correct the sources in ${envVarTreeNode.getProject().file}.`);
-						return;
-					}
-					handleEnvironmentVariableEdit(envVarTreeNode.getProject().dvConfig, environment, envVarTreeNode.getProject().getFile(), envVarTreeNode.getKey(), undefined, newRefValue)
-						.then( (success: boolean) => {
-							showFeedback(success, envVarTreeNode.getKey());
-						});
-				});
-		});
 }
 
-function showFeedback(success: boolean, key: string) {
+async function queryNewValue(oldValue: string): Promise<string | undefined> {
+	return await vscode.window.showInputBox( {value: oldValue, prompt: 'Enter the new value.'} );
+}
+
+async function showFeedback(success: boolean, key: string) {
 	if (success) {
-		vscode.window.showInformationMessage(`Environment variable ${key} has been modified...`);
+		await vscode.window.showInformationMessage(`Environment variable ${key} has been modified...`);
 	} else {
-		vscode.window.showErrorMessage(`An error occured when trying to modify the environment variable ${key}...`);
+		await vscode.window.showErrorMessage(`An error occured when trying to modify the environment variable ${key}...`);
 	}
 }
 
