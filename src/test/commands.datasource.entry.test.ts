@@ -128,28 +128,6 @@ describe('Commands Tests', () => {
 			}));
 		});
 
-		it('should create a secret reference datasource entry inside a datasource when handing over valid parameters', async () => {
-			const oldLen: number = dvConfig.spec.datasources[0].properties.length;
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.REFERENCE_TYPE_SECRET, entryName, entryValue, 'refName', 'refKey');
-			should.equal(true, created, 'Execution of the Create DataSource Entry command returned false');
-
-			dvConfig.spec.datasources[0].properties.length.should.equal(oldLen+1);
-			should.exist(dvConfig.spec.datasources[0].properties.find( (element: Property) => {
-				return element.name === entryName && utils.isSecretRef(element.valueFrom) && element.valueFrom.secretKeyRef.key === 'refKey' && element.valueFrom.secretKeyRef.name === 'refName';
-			}));
-		});
-
-		it('should create a configmap reference datasource entry inside a datasource when handing over valid parameters', async () => {
-			const oldLen: number = dvConfig.spec.datasources[0].properties.length;
-			const created = await createDSEntryCommand.handleDataSourceEntryCreation(dvConfig, dsConfig, vdbFile, constants.REFERENCE_TYPE_CONFIGMAP, entryName, entryValue, 'refName', 'refKey');
-			should.equal(true, created, 'Execution of the Create DataSource Entry command returned false');
-
-			dvConfig.spec.datasources[0].properties.length.should.equal(oldLen+1);
-			should.exist(dvConfig.spec.datasources[0].properties.find( (element: Property) => {
-				return element.name === entryName && utils.isConfigMapRef(element.valueFrom) && element.valueFrom.configMapKeyRef.key === 'refKey' && element.valueFrom.configMapKeyRef.name === 'refName';
-			}));
-		});
-
 		it('should not create a datasource entry inside a datasource when handing over invalid model', async () => {
 			const created = await createDSEntryCommand.handleDataSourceEntryCreation(undefined, dsConfig, vdbFile, constants.REFERENCE_TYPE_VALUE, entryName, entryValue);
 			should.equal(false, created, 'Execution of the Create DataSource Entry command returned true, but should not.');

@@ -258,6 +258,9 @@ export async function saveSecretsToFile(secretConfig: SecretConfig, file: string
 }
 
 export function setSecretValueForKey(secretConfig: SecretConfig, secretKey: string, secretValue: string): void {
+	if (!secretConfig.data) {
+		secretConfig.data = new Object();
+	}
 	secretConfig.data[secretKey] = Base64.encode(secretValue);
 }
 
@@ -294,6 +297,9 @@ export async function saveConfigMapToFile(configMapConfig: ConfigMapConfig, file
 }
 
 export function setConfigMapValueForKey(configMapConfig: ConfigMapConfig, key: string, value: string): void {
+	if (!configMapConfig.data) {
+		configMapConfig.data = new Object();
+	}
 	configMapConfig.data[key] = value;
 }
 
