@@ -66,7 +66,7 @@ describe('Commands Tests', () => {
 
 	async function createEnvironmentVariableWithValidParameters(dvConfig: DataVirtConfig, vdbFile: string, entryType: string, entryName: string, entryValue: string, refName: string, refKey: string) {
 		const oldLen: number = dvConfig.spec.env.length;
-		const created = await createEnvVarCommand.handleEnvironmentVariableCreation(dvConfig, dvConfig.spec.env, vdbFile, entryType, entryName, entryValue, refName);
+		const created = await createEnvVarCommand.handleEnvironmentVariableCreation(dvConfig, dvConfig.spec.env, vdbFile, entryType, entryName, entryValue);
 		should.equal(true, created, 'Execution of the Create Environment Variable command returned false');
 
 		dvConfig.spec.env.length.should.equal(oldLen+1);

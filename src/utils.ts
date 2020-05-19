@@ -101,13 +101,13 @@ export async function generateReferenceValueForLabel(vdbFile: string, value: str
 			const refFile: string = getFullReferenceFilePath(vdbFile, secretRef.secretKeyRef.name);
 			const secret: SecretConfig = await loadSecretsFromFile(refFile);
 			const value: string = getSecretValueForKey(secret, secretRef.secretKeyRef.key);
-			return `${value ? value : '<undefined>'} (${secretRef.secretKeyRef.name})`;
+			return `${value ? value : '<undefined>'} (Secret: ${secretRef.secretKeyRef.name})`;
 		} else if (isConfigMapRef(ref)) {
 			const configMapRef: ConfigMapRef = ref;
 			const refFile: string = getFullReferenceFilePath(vdbFile, configMapRef.configMapKeyRef.name);
 			const configMap: ConfigMapConfig = await loadConfigMapFromFile(refFile);
 			const value: string = getConfigMapValueForKey(configMap, configMapRef.configMapKeyRef.key);
-			return `${value ? value : '<undefined>'} (${configMapRef.configMapKeyRef.name})`;
+			return `${value ? value : '<undefined>'} (ConfigMap: ${configMapRef.configMapKeyRef.name})`;
 		}
 	}
 	return value;
@@ -140,11 +140,11 @@ export function getEnvironmentVariableByName(name: string, enviroment: Property[
 	return undefined;
 }
 
-export function isSecretRef(ref: SecretRef | ConfigMapRef): ref is SecretRef {
+export function isSecretRef(ref: SecretRef | ConfigMapRef | string): ref is SecretRef {
 	return ref && (ref as SecretRef).secretKeyRef !== undefined;
 }
 
-export function isConfigMapRef(ref: SecretRef | ConfigMapRef): ref is ConfigMapRef {
+export function isConfigMapRef(ref: SecretRef | ConfigMapRef | string): ref is ConfigMapRef {
 	return ref && (ref as ConfigMapRef).configMapKeyRef !== undefined;
 }
 

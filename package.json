@@ -81,18 +81,18 @@
 				"category": "dv"
 			},
 			{
+				"title": "Generate ConfigMap",
+				"command": "datavirt.envvar.convert.to.configmap",
+				"category": "dv"
+			},
+			{
+				"title": "Generate Secret",
+				"command": "datavirt.envvar.convert.to.secret",
+				"category": "dv"
+			},
+			{
 				"title": "New Variable",
-				"command": "datavirt.create.envvar.value",
-				"category": "dv"
-			},
-			{
-				"title": "New Variable from Secret",
-				"command": "datavirt.create.envvar.secret",
-				"category": "dv"
-			},
-			{
-				"title": "New Variable from ConfigMap",
-				"command": "datavirt.create.envvar.configmap",
+				"command": "datavirt.create.envvar",
 				"category": "dv"
 			},
 			{
@@ -154,15 +154,7 @@
 					"when": "false"
 				},
 				{
-					"command": "datavirt.create.envvar.value",
-					"when": "false"
-				},
-				{
-					"command": "datavirt.create.envvar.secret",
-					"when": "false"
-				},
-				{
-					"command": "datavirt.create.envvar.configmap",
+					"command": "datavirt.create.envvar",
 					"when": "false"
 				},
 				{
@@ -171,6 +163,14 @@
 				},
 				{
 					"command": "datavirt.delete.envvar",
+					"when": "false"
+				},
+				{
+					"command": "datavirt.envvar.convert.to.configmap",
+					"when": "false"
+				},
+				{
+					"command": "datavirt.envvar.convert.to.secret",
 					"when": "false"
 				},
 				{
@@ -232,17 +232,7 @@
 				},
 				{
 					"group": "dv@1",
-					"command": "datavirt.create.envvar.value",
-					"when": "viewItem == dv.environment"
-				},
-				{
-					"group": "dv@3",
-					"command": "datavirt.create.envvar.secret",
-					"when": "viewItem == dv.environment"
-				},
-				{
-					"group": "dv@2",
-					"command": "datavirt.create.envvar.configmap",
+					"command": "datavirt.create.envvar",
 					"when": "viewItem == dv.environment"
 				},
 				{
@@ -251,7 +241,17 @@
 					"when": "viewItem == dv.environment.variable"
 				},
 				{
-					"group": "dv@2",
+					"group": "dv_convert@2",
+					"command": "datavirt.envvar.convert.to.secret",
+					"when": "viewItem == dv.environment.variable"
+				},
+				{
+					"group": "dv_convert@1",
+					"command": "datavirt.envvar.convert.to.configmap",
+					"when": "viewItem == dv.environment.variable"
+				},
+				{
+					"group": "dv_extra@1",
 					"command": "datavirt.delete.envvar",
 					"when": "viewItem == dv.environment.variable"
 				},

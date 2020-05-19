@@ -24,7 +24,8 @@ import { DVProjectTreeNode } from './DVProjectTreeNode';
 export class EnvironmentVariableTreeNode extends DVTreeItem {
 
 	key: string;
-	value: string | ConfigMapRef | SecretRef;
+	value: string;
+	ref: ConfigMapRef | SecretRef;
 
 	constructor(projectNode: DVProjectTreeNode, key: string, value: string, ref: ConfigMapRef | SecretRef) {
 		super('dv.environment.variable', undefined, vscode.TreeItemCollapsibleState.None);
@@ -39,6 +40,7 @@ export class EnvironmentVariableTreeNode extends DVTreeItem {
 			});
 		this.key = key;
 		this.value = value;
+		this.ref = ref;
 	}
 
 	getIconName(): string {
@@ -59,10 +61,35 @@ export class EnvironmentVariableTreeNode extends DVTreeItem {
 	}
 
 	getValue(): string | ConfigMapRef | SecretRef {
-		return this.value;
+		return this.value ? this.value : this.ref;
 	}
 
 	setValue(value: string): void {
 		this.value = value;
+	}
+
+	isValueType(): boolean {
+		const iscfg: boolean = utils.isConfigMapRef(this.getValue());
+		const issec: boolean = utils.isSecretRef(this.getValue());
+		return !iscfg && !issec;
+	}
+
+	isSecretType(): boolean {
+		return utils.isSecretRef(this.value);
+	}
+
+	isConfigMapType(): boolean {
+		return utils.isConfigMapRef(this.value);
+	}
+
+	getReferenceName(): string {
+		if (utils.isConfigMapRef(this.value)) {
+			const ref: ConfigMapRef = this.value;
+			return ref.configMapKeyRef.name;
+		} else if (utils.isSecretRef(this.value)) {
+			const ref: SecretRef = this.value;
+			return ref.secretKeyRef.name;
+		}
+		return undefined;
 	}
 }
