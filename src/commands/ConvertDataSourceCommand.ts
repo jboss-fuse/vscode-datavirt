@@ -56,22 +56,11 @@ export async function convertDataSourceToRef(dsConfig: DataSourceConfig, refName
 	if (refName && refType && dvConfig && file) {
 		try {
 			if (refType === constants.REFERENCE_TYPE_CONFIGMAP) {
-				const configMapRef: ConfigMapConfig = new ConfigMapConfig();
-				configMapRef.api_version = 'v1';
-				configMapRef.kind = constants.CONFIGMAP_KIND;
-				configMapRef.metadata = new MetaData();
-				configMapRef.metadata.name = refName;
-				configMapRef.data = new Object();
+				const configMapRef: ConfigMapConfig = utils.createEmptyConfigMap(refName);
 				convertConfigMapEntries(configMapRef, dsConfig.properties);
 				utils.saveConfigMapToFile(configMapRef, utils.getFullReferenceFilePath(file, refName));
 			} else if (refType === constants.REFERENCE_TYPE_SECRET) {
-				const secretRef: SecretConfig = new SecretConfig();
-				secretRef.type = constants.SECRET_TYPE_OPAQUE;
-				secretRef.api_version = 'v1';
-				secretRef.kind = constants.SECRET_KIND;
-				secretRef.metadata = new MetaData();
-				secretRef.metadata.name = refName;
-				secretRef.data = new Object();
+				const secretRef: SecretConfig = utils.createEmptySecret(refName);
 				convertSecretEntries(secretRef, dsConfig.properties);
 				utils.saveSecretsToFile(secretRef, utils.getFullReferenceFilePath(file, refName));
 			} else {

@@ -19,7 +19,7 @@ import * as extension from './extension';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as constants from './constants';
-import { DataSourceConfig, DataVirtConfig, SecretRef, ConfigMapRef, Property, SecretConfig, ConfigMapConfig } from './model/DataVirtModel';
+import { DataSourceConfig, DataVirtConfig, SecretRef, ConfigMapRef, Property, SecretConfig, ConfigMapConfig, MetaData } from './model/DataVirtModel';
 import { log } from './extension';
 import { SchemaTreeNode } from './model/tree/SchemaTreeNode';
 
@@ -308,4 +308,25 @@ export function getConfigMapValueForKey(configMapConfig: ConfigMapConfig, key: s
 		return configMapConfig.data[key];
 	}
 	return undefined;
+}
+
+export function createEmptySecret(name: string): SecretConfig {
+	const secretRef: SecretConfig = new SecretConfig();
+	secretRef.type = constants.SECRET_TYPE_OPAQUE;
+	secretRef.api_version = 'v1';
+	secretRef.kind = constants.SECRET_KIND;
+	secretRef.metadata = new MetaData();
+	secretRef.metadata.name = name;
+	secretRef.data = new Object();
+	return secretRef;
+}
+
+export function createEmptyConfigMap(name: string): ConfigMapConfig {
+	const configMapRef: ConfigMapConfig = new ConfigMapConfig();
+	configMapRef.api_version = 'v1';
+	configMapRef.kind = constants.CONFIGMAP_KIND;
+	configMapRef.metadata = new MetaData();
+	configMapRef.metadata.name = name;
+	configMapRef.data = new Object();
+	return configMapRef;
 }
