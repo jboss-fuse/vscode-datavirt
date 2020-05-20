@@ -18,7 +18,7 @@ import * as constants from '../constants';
 import * as extension from '../extension';
 import * as utils from '../utils';
 import * as vscode from 'vscode';
-import { DataVirtConfig, Property, ConfigMapConfig, SecretConfig, MetaData, ConfigMapRef, KeyRef, SecretRef } from '../model/DataVirtModel';
+import { DataVirtConfig, Property, ConfigMapConfig, SecretConfig, ConfigMapRef, KeyRef, SecretRef } from '../model/DataVirtModel';
 import { EnvironmentVariableTreeNode } from '../model/tree/EnvironmentVariableTreeNode';
 import { EnvironmentTreeNode } from '../model/tree/EnvironmentNode';
 
@@ -43,7 +43,7 @@ async function convertEnvironmentVariable(envVarNode: EnvironmentVariableTreeNod
 
 	const dvConfig: DataVirtConfig = envVarNode.getProject().dvConfig;
 	if (dvConfig) {
-		const success: boolean = await createEnvironmentVariable(envVarNode, refName, refType, dvConfig, envVarNode.getProject().getFile());
+		const success: boolean = await convertEnvironmentVariableToRef(envVarNode, refName, refType, dvConfig, envVarNode.getProject().getFile());
 		if (success) {
 			vscode.window.showInformationMessage(`Datasource ${envVarNode.key} has been migrated to ${refType}...`);
 		} else {
@@ -52,7 +52,7 @@ async function convertEnvironmentVariable(envVarNode: EnvironmentVariableTreeNod
 	}
 }
 
-export async function createEnvironmentVariable(envVarNode: EnvironmentVariableTreeNode, refName: string, refType: string, dvConfig: DataVirtConfig, file: string): Promise<boolean> {
+export async function convertEnvironmentVariableToRef(envVarNode: EnvironmentVariableTreeNode, refName: string, refType: string, dvConfig: DataVirtConfig, file: string): Promise<boolean> {
 	if (refName && refType && dvConfig && file) {
 		try {
 			if (refType === constants.REFERENCE_TYPE_CONFIGMAP) {

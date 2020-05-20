@@ -18,7 +18,7 @@ import * as constants from '../constants';
 import * as extension from '../extension';
 import * as utils from '../utils';
 import * as vscode from 'vscode';
-import { DataVirtConfig, DataSourceConfig, Property, ConfigMapConfig, SecretConfig, MetaData, ConfigMapRef, KeyRef, SecretRef } from '../model/DataVirtModel';
+import { DataVirtConfig, DataSourceConfig, Property, ConfigMapConfig, SecretConfig, ConfigMapRef, KeyRef, SecretRef } from '../model/DataVirtModel';
 import { DataSourceTreeNode } from '../model/tree/DataSourceTreeNode';
 
 export async function convertDataSourceToSecret(dsNode: DataSourceTreeNode) {
