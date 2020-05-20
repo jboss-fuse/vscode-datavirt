@@ -69,7 +69,7 @@ export function ensureValueIsNotEmpty(value: string): string | undefined {
 }
 
 export function validateDataSourcePropertyName(name: string): string | undefined {
-	if (name && /^[a-zA-Z]{1}[a-zA-Z0-9_-.]{3,252}$/.test(name)) {
+	if (name && /^[a-zA-Z]{1}[a-zA-Z0-9-._]{3,252}$/.test(name)) {
 		return undefined;
 	} else {
 		return 'The entered name does not comply with the naming conventions. ([a-Z0-9.-] and length of 4-253 characters)';
