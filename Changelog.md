@@ -3,7 +3,7 @@
 ## 0.0.1
 
 - completion to create a Database view in *.ddl files
-- added support for ConfigMap / Secret (for both environment variables and datasource properties)
+- added support for Converting environment variables and datasource properties to ConfigMap / Secret references
 - added support for environment variables
 - added support for data sources and datasource properties
 - added support for modifying the DDL part of the VDB in an editor
