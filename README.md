@@ -6,8 +6,13 @@
 
 ## Features
 
-...
-
+- create and delete virtual databases
+- create and delete datasources of predefined types
+- create, modify and delete datasource properties
+- convert datasources to a secret or configmap
+- create, modify and delete environment variables
+- convert environment variables to a secret or configmap
+- modify the DDL part of the virtual database
 
 ## How to contribute
 
