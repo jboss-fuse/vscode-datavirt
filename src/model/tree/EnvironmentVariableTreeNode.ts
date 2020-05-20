@@ -75,19 +75,19 @@ export class EnvironmentVariableTreeNode extends DVTreeItem {
 	}
 
 	isSecretType(): boolean {
-		return utils.isSecretRef(this.value);
+		return utils.isSecretRef(this.ref);
 	}
 
 	isConfigMapType(): boolean {
-		return utils.isConfigMapRef(this.value);
+		return utils.isConfigMapRef(this.ref);
 	}
 
 	getReferenceName(): string {
-		if (utils.isConfigMapRef(this.value)) {
-			const ref: ConfigMapRef = this.value;
+		if (utils.isConfigMapRef(this.ref)) {
+			const ref: ConfigMapRef = this.ref;
 			return ref.configMapKeyRef.name;
-		} else if (utils.isSecretRef(this.value)) {
-			const ref: SecretRef = this.value;
+		} else if (utils.isSecretRef(this.ref)) {
+			const ref: SecretRef = this.ref;
 			return ref.secretKeyRef.name;
 		}
 		return undefined;
