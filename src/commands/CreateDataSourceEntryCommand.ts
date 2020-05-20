@@ -187,10 +187,10 @@ function setDataSourceEntryValue(entries: Property[], entryType: string, entryNa
 }
 
 async function queryPropertyName(dsNode: DataSourceTreeNode): Promise<string | undefined> {
-	return await vscode.window.showInputBox( { validateInput: (value: string) => {
-		if(utils.getDataSourceEntryByName(value, dsNode.dataSourceConfig)) {
-			return `There is already a property with the name ${value}.`;
+	return await vscode.window.showInputBox( { validateInput: (name: string) => {
+		if(utils.getDataSourceEntryByName(name, dsNode.dataSourceConfig)) {
+			return `There is already a property with the name ${name}.`;
 		}
-		return utils.ensureValueIsNotEmpty(value);
+		return utils.validateDataSourcePropertyName(name);
 	}, placeHolder: 'Enter the name of the new property' });
 }

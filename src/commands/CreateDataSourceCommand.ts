@@ -23,7 +23,7 @@ import { DataVirtConfig, DataSourceConfig, Property } from '../model/DataVirtMod
 
 export async function createDataSourceCommand(dsNode: DataSourcesTreeNode) {
 	const dsName: string = await vscode.window.showInputBox( { validateInput: (name: string) => {
-		let msg: string = utils.validateName(name);
+		let msg: string = utils.validateDataSourceName(name);
 		if (!msg) {
 			if (utils.getDataSourceByName(dsNode.getProject().dvConfig, name)) {
 				msg = `There is already a datasource with the name ${name}.`;
