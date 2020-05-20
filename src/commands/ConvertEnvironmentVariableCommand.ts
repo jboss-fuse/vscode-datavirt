@@ -56,27 +56,18 @@ export async function createEnvironmentVariable(envVarNode: EnvironmentVariableT
 	if (refName && refType && dvConfig && file) {
 		try {
 			if (refType === constants.REFERENCE_TYPE_CONFIGMAP) {
-				let configMapRef: ConfigMapConfig = new ConfigMapConfig();
+				let configMapRef: ConfigMapConfig;
 				if (!await utils.doesLocalReferenceFileExist(file, refName)) {
-					configMapRef.api_version = 'v1';
-					configMapRef.kind = constants.CONFIGMAP_KIND;
-					configMapRef.metadata = new MetaData();
-					configMapRef.metadata.name = refName;
-					configMapRef.data = new Object();
+					configMapRef = utils.createEmptyConfigMap(refName);
 				} else {
 					configMapRef = await utils.loadConfigMapFromFile(utils.getFullReferenceFilePath(file, refName));
 				}
 				convertToConfigMap(configMapRef, envVarNode);
 				await utils.saveConfigMapToFile(configMapRef, utils.getFullReferenceFilePath(file, refName));
 			} else if (refType === constants.REFERENCE_TYPE_SECRET) {
-				let secretRef: SecretConfig = new SecretConfig();
+				let secretRef: SecretConfig;
 				if (!await utils.doesLocalReferenceFileExist(file, refName)) {
-					secretRef.type = constants.SECRET_TYPE_OPAQUE;
-					secretRef.api_version = 'v1';
-					secretRef.kind = constants.SECRET_KIND;
-					secretRef.metadata = new MetaData();
-					secretRef.metadata.name = refName;
-					secretRef.data = new Object();
+					secretRef = utils.createEmptySecret(refName);
 				} else {
 					secretRef = await utils.loadSecretsFromFile(utils.getFullReferenceFilePath(file, refName));
 				}
