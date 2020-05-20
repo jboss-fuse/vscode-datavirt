@@ -56,12 +56,12 @@
 				"category": "dv"
 			},
 			{
-				"title": "Generate ConfigMap",
+				"title": "Convert to ConfigMap",
 				"command": "datavirt.datasource.convert.to.configmap",
 				"category": "dv"
 			},
 			{
-				"title": "Generate Secret",
+				"title": "Convert to Secret",
 				"command": "datavirt.datasource.convert.to.secret",
 				"category": "dv"
 			},

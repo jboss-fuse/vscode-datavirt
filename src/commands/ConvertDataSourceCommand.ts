@@ -43,7 +43,7 @@ async function convertDataSource(dsNode: DataSourceTreeNode, refType: string) {
 
 	const dvConfig: DataVirtConfig = dsNode.getProject().dvConfig;
 	if (dvConfig) {
-		const success: boolean = await createDataSource(dsNode.dataSourceConfig, refName, refType, dvConfig, dsNode.getProject().getFile());
+		const success: boolean = await convertDataSourceToRef(dsNode.dataSourceConfig, refName, refType, dvConfig, dsNode.getProject().getFile());
 		if (success) {
 			vscode.window.showInformationMessage(`Datasource ${dsNode.dataSourceConfig.name} has been migrated to ${refType}...`);
 		} else {
@@ -52,7 +52,7 @@ async function convertDataSource(dsNode: DataSourceTreeNode, refType: string) {
 	}
 }
 
-export async function createDataSource(dsConfig: DataSourceConfig, refName: string, refType: string, dvConfig: DataVirtConfig, file: string): Promise<boolean> {
+export async function convertDataSourceToRef(dsConfig: DataSourceConfig, refName: string, refType: string, dvConfig: DataVirtConfig, file: string): Promise<boolean> {
 	if (refName && refType && dvConfig && file) {
 		try {
 			if (refType === constants.REFERENCE_TYPE_CONFIGMAP) {
