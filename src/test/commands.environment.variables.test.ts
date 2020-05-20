@@ -60,11 +60,11 @@ describe('Commands Tests', () => {
 		dvConfig = await utils.loadModelFromFile(vdbFile);
 
 		if (createEnvVar) {
-			await createEnvironmentVariableWithValidParameters(dvConfig, vdbFile, constants.REFERENCE_TYPE_VALUE, entryName, entryValue, undefined, undefined);
+			await createEnvironmentVariableWithValidParameters(dvConfig, vdbFile, constants.REFERENCE_TYPE_VALUE, entryName, entryValue);
 		}
 	}
 
-	async function createEnvironmentVariableWithValidParameters(dvConfig: DataVirtConfig, vdbFile: string, entryType: string, entryName: string, entryValue: string, refName: string, refKey: string) {
+	async function createEnvironmentVariableWithValidParameters(dvConfig: DataVirtConfig, vdbFile: string, entryType: string, entryName: string, entryValue: string) {
 		const oldLen: number = dvConfig.spec.env.length;
 		const created = await createEnvVarCommand.handleEnvironmentVariableCreation(dvConfig, dvConfig.spec.env, vdbFile, entryType, entryName, entryValue);
 		should.equal(true, created, 'Execution of the Create Environment Variable command returned false');
@@ -108,23 +108,15 @@ describe('Commands Tests', () => {
 		});
 
 		it('should create an environment variable when handing over valid parameters', async () => {
-			await createEnvironmentVariableWithValidParameters(dvConfig, vdbFile, constants.REFERENCE_TYPE_VALUE, entryName, entryValue, undefined, undefined);
+			await createEnvironmentVariableWithValidParameters(dvConfig, vdbFile, constants.REFERENCE_TYPE_VALUE, entryName, entryValue);
 		});
 
 		it('should create an environment variable when handing over empty value', async () => {
-			await createEnvironmentVariableWithValidParameters(dvConfig, vdbFile, constants.REFERENCE_TYPE_VALUE, entryName, '', undefined, undefined);
+			await createEnvironmentVariableWithValidParameters(dvConfig, vdbFile, constants.REFERENCE_TYPE_VALUE, entryName, '');
 		});
 
 		it('should create an environment variable when handing over undefined value', async () => {
-			await createEnvironmentVariableWithValidParameters(dvConfig, vdbFile, constants.REFERENCE_TYPE_VALUE, entryName, undefined, undefined, undefined);
-		});
-
-		it('should create a secret reference environment variable when handing over valid parameters', async () => {
-			await createEnvironmentVariableWithValidParameters(dvConfig, vdbFile, constants.REFERENCE_TYPE_SECRET, entryName, entryValue, 'refName', 'refKey');
-		});
-
-		it('should create a configmap reference environment variable when handing over valid parameters', async () => {
-			await createEnvironmentVariableWithValidParameters(dvConfig, vdbFile, constants.REFERENCE_TYPE_CONFIGMAP, entryName, entryValue, 'refName', 'refKey');
+			await createEnvironmentVariableWithValidParameters(dvConfig, vdbFile, constants.REFERENCE_TYPE_VALUE, entryName, undefined);
 		});
 
 		it('should not create an environment variable when handing over invalid model', async () => {
