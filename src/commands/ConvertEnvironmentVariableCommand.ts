@@ -32,7 +32,7 @@ export async function convertEnvironmentVariableToConfigMap(envVarNode: Environm
 
 async function convertEnvironmentVariable(envVarNode: EnvironmentVariableTreeNode, refType: string) {
 	if(!envVarNode.isValueType()) {
-		vscode.window.showWarningMessage(`Environment variable ${envVarNode.key} cannot be migrated to ${refType} because it is already a reference...`);
+		vscode.window.showWarningMessage(`Environment variable ${envVarNode.key} cannot be migrated to ${refType} because it is already associated to a ${envVarNode.isSecretType() ? constants.SECRET_KIND : constants.CONFIGMAP_KIND}...`);
 		return;
 	}
 

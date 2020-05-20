@@ -32,7 +32,7 @@ export async function convertDataSourceToConfigMap(dsNode: DataSourceTreeNode) {
 async function convertDataSource(dsNode: DataSourceTreeNode, refType: string) {
 
 	if(!dsNode.isEmpty() && !dsNode.isValueType()) {
-		vscode.window.showWarningMessage(`Datasource ${dsNode.dataSourceConfig.name} cannot be migrated to ${refType} because it is already a reference...`);
+		vscode.window.showWarningMessage(`Datasource ${dsNode.dataSourceConfig.name} cannot be migrated to ${refType} because it is already already associated to a ${dsNode.isConfigMapType() ? constants.CONFIGMAP_KIND : constants.SECRET_KIND}...`);
 		return;
 	}
 
