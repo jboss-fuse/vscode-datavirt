@@ -73,7 +73,11 @@
 			{
 				"title": "Edit Property",
 				"command": "datavirt.edit.datasourceentry",
-				"category": "dv"
+				"category": "dv",
+				"icon": {
+					"dark": "icons/dark/edit.svg",
+					"light": "icons/light/edit.svg"
+				}
 			},
 			{
 				"title": "Delete Property",
@@ -98,7 +102,11 @@
 			{
 				"title": "Edit Variable",
 				"command": "datavirt.edit.envvar",
-				"category": "dv"
+				"category": "dv",
+				"icon": {
+					"dark": "icons/dark/edit.svg",
+					"light": "icons/light/edit.svg"
+				}
 			},
 			{
 				"title": "Delete Variable",
@@ -108,7 +116,11 @@
 			{
 				"title": "Edit DDL",
 				"command": "datavirt.edit.schema",
-				"category": "dv"
+				"category": "dv",
+				"icon": {
+					"dark": "icons/dark/edit.svg",
+					"light": "icons/light/edit.svg"
+				}
 			}
 		],
 		"views": {
@@ -226,6 +238,11 @@
 					"when": "viewItem == dv.datasource.property"
 				},
 				{
+					"group": "inline",
+					"command": "datavirt.edit.datasourceentry",
+					"when": "viewItem == dv.datasource.property"
+				},
+				{
 					"group": "dv@2",
 					"command": "datavirt.delete.datasourceentry",
 					"when": "viewItem == dv.datasource.property"
@@ -237,6 +254,11 @@
 				},
 				{
 					"group": "dv@1",
+					"command": "datavirt.edit.envvar",
+					"when": "viewItem == dv.environment.variable"
+				},
+				{
+					"group": "inline",
 					"command": "datavirt.edit.envvar",
 					"when": "viewItem == dv.environment.variable"
 				},
@@ -257,6 +279,11 @@
 				},
 				{
 					"group": "dv@1",
+					"command": "datavirt.edit.schema",
+					"when": "viewItem == dv.schema"
+				},
+				{
+					"group": "inline",
 					"command": "datavirt.edit.schema",
 					"when": "viewItem == dv.schema"
 				}
