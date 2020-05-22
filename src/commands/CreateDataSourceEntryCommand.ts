@@ -86,15 +86,25 @@ async function createDataSourceEntryCommandForReference(dsNode: DataSourceTreeNo
 		let entryValue: string;
 		const refFileExists: boolean = await utils.doesLocalReferenceFileExist(dsNode.getProject().file, refName);
 		if(refFileExists) {
-			const predefinedVariables = await utils.loadPredefinedVariables(dsNode.getProject().file, refName, type);
-			const newProperty: Property = await queryProperty(dsNode, predefinedVariables);
-			if (newProperty === undefined) {
-				return;
+			const predefinedVariables: Property[] = await utils.loadPredefinedVariables(dsNode.getProject().file, refName, type);
+			const unusedVariables: Property[] = predefinedVariables.filter( (element: Property) => {
+				return utils.getDataSourceEntryByName(element.name, dsNode.dataSourceConfig) === undefined;
+			});
+			if (unusedVariables && unusedVariables.length > 0) {
+				const newProperty: Property = await queryProperty(dsNode, unusedVariables);
+				if (newProperty === undefined) {
+					return;
+				}
+				entryName = newProperty.name;
+				entryValue = newProperty.value;
+			} else {
+				entryName = await queryPropertyName(dsNode);
+				if (entryName === undefined) {
+					return;
+				}
 			}
-			entryName = newProperty.name;
-			entryValue = newProperty.value;
 		} else {
-			let entryName: string = await queryPropertyName(dsNode);
+			entryName = await queryPropertyName(dsNode);
 			if (entryName === undefined) {
 				return;
 			}
@@ -121,10 +131,7 @@ async function queryProperty(dsNode: DataSourceTreeNode, predefinedVariables: Ar
 	names.push(CREATE_NEW_ENTRY);
 
 	predefinedVariables.forEach( (variable: Property) => {
-		// only show entries from the reference file which are not yet used in the datasource properties
-		if (utils.getDataSourceEntryByName(variable.name, dsNode.dataSourceConfig) === undefined) {
-			names.push(variable.name);
-		}
+		names.push(variable.name);
 	});
 
 	const selectedPropertyName: string = await vscode.window.showQuickPick(names, { canPickMany: false, placeHolder: `Select a property from the list or "New..." to create a new one` });
