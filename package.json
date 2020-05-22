@@ -2,7 +2,7 @@
 	"name": "vscode-datavirt",
 	"displayName": "Red Hat Integration - Data Virtualization Tooling",
 	"description": "VS Code tools to work with Virtual Database Configurations for Red Hat Integration - Data Virtualization Tooling.",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"publisher": "redhat",
 	"icon": "icons/icon128.png",
 	"preview": true,
