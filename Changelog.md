@@ -1,5 +1,8 @@
 # ChangeLog
 
+## 0.0.2
+- 
+
 ## 0.0.1
 
 - completion to create a Database view in *.ddl files
