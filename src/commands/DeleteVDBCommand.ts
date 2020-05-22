@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 import * as extension from '../extension';
+import * as utils from '../utils';
 import * as vscode from 'vscode';
 import { DVProjectTreeNode } from '../model/tree/DVProjectTreeNode';
 
@@ -30,7 +31,7 @@ export async function deleteVDBCommand(dvProjectNode: DVProjectTreeNode): Promis
 export async function handleVDBDeletion(vdbName: string, file: string): Promise<boolean> {
 	if (vdbName && file) {
 		try {
-			await vscode.workspace.fs.delete(vscode.Uri.file(file));
+			await utils.deleteVDB(file);
 			return true;
 		} catch (error) {
 			extension.log(error);

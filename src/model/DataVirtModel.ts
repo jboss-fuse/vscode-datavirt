@@ -1,3 +1,6 @@
+import { TextEditor } from "vscode";
+import { SchemaTreeNode } from "./tree/SchemaTreeNode";
+
 /**
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -102,4 +105,12 @@ export class ConfigMapConfig {
 	kind: string;
 	metadata: MetaData;
 	data: any;
+}
+
+export interface VDBFileInfo {
+	vdbName: string;
+	vdbFilePath: string;
+	openEditor: TextEditor;
+	ddlNode: SchemaTreeNode;
+	tempSQLFilePath: string;
 }

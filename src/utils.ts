@@ -19,7 +19,7 @@ import * as extension from './extension';
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as constants from './constants';
-import { DataSourceConfig, DataVirtConfig, SecretRef, ConfigMapRef, Property, SecretConfig, ConfigMapConfig, MetaData } from './model/DataVirtModel';
+import { DataSourceConfig, DataVirtConfig, SecretRef, ConfigMapRef, Property, SecretConfig, ConfigMapConfig, MetaData, VDBFileInfo } from './model/DataVirtModel';
 import { log } from './extension';
 import { SchemaTreeNode } from './model/tree/SchemaTreeNode';
 
@@ -345,4 +345,17 @@ export function createEmptyConfigMap(name: string): ConfigMapConfig {
 	configMapRef.metadata.name = name;
 	configMapRef.data = new Object();
 	return configMapRef;
+}
+
+export async function deleteVDB(vdbFile: string): Promise<void> {
+	const infoObject: VDBFileInfo = extension.openedDocuments.find( (element: VDBFileInfo) => {
+		return element.vdbFilePath === vdbFile;
+	});
+	if (infoObject) {
+		if (infoObject.openEditor) {
+			await vscode.workspace.fs.delete(vscode.Uri.file(infoObject.tempSQLFilePath));
+		}
+		extension.openedDocuments.splice(extension.openedDocuments.indexOf(infoObject), 1);
+	}
+	await vscode.workspace.fs.delete(vscode.Uri.file(vdbFile));
 }
