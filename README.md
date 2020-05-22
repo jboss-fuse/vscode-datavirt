@@ -30,7 +30,7 @@ This Visual Studio Code extension provides support for Virtual Database developm
 
 This is an open source project open to anyone. Contributions are extremely welcome!
 
-For information on getting started, refer to the [CONTRIBUTING instructions](CONTRIBUTING.md).
+For information on getting started, refer to the [CONTRIBUTING instructions](Contributing.md).
 
 CI builds can be installed manually by following these instructions:
 
