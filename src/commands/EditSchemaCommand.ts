@@ -18,24 +18,39 @@ import * as extension from '../extension';
 import * as utils from '../utils';
 import * as vscode from 'vscode';
 import { SchemaTreeNode } from '../model/tree/SchemaTreeNode';
+import { VDBFileInfo } from '../model/DataVirtModel';
 
 export async function editSchemaCommand(ddlNode: SchemaTreeNode) {
-	const sql: string = ddlNode.getDDL();
-	const tempFile = await utils.createTempFile(ddlNode.getProject().label, sql);
-	const textDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(tempFile);
-	const editor: vscode.TextEditor = await vscode.window.showTextDocument(textDocument, vscode.ViewColumn.Active, false);
-	extension.fileToNode.set(tempFile, ddlNode);
-	extension.fileToEditor.set(tempFile, editor);
+	const infoObject: VDBFileInfo = extension.openedDocuments.find( (element: VDBFileInfo) => {
+		return element.vdbFilePath === ddlNode.getProject().file;
+	});
+	if (infoObject) {
+		vscode.window.showTextDocument(infoObject.openEditor.document);
+	} else {
+		const sql: string = ddlNode.getDDL();
+		const tempFile = await utils.createTempFile(ddlNode.getProject().label, sql);
+		const textDocument: vscode.TextDocument = await vscode.workspace.openTextDocument(tempFile);
+		const editor: vscode.TextEditor = await vscode.window.showTextDocument(textDocument, vscode.ViewColumn.Active, false);
+		extension.openedDocuments.push( {
+			ddlNode: ddlNode,
+			openEditor: editor,
+			tempSQLFilePath: tempFile,
+			vdbFilePath: ddlNode.getProject().file,
+			vdbName: ddlNode.getProject().label
+		});
+	}
 }
 
 export function handleSaveDDL(event: vscode.TextDocumentWillSaveEvent): Promise<void> {
 	return new Promise<void>( async (resolve, reject) => {
 		const fileName: string = event.document.fileName;
 		const ddl: string = event.document.getText();
-		const sNode: SchemaTreeNode = extension.fileToNode.get(fileName);
-		if (sNode) {
-			sNode.getProject().dvConfig.spec.build.source.ddl = ddl;
-			await (utils.saveModelToFile(sNode.getProject().dvConfig, sNode.getProject().getFile()));
+		const infoObject: VDBFileInfo = extension.openedDocuments.find( (element: VDBFileInfo) => {
+			return element.tempSQLFilePath === fileName;
+		});
+		if (infoObject && infoObject.ddlNode) {
+			infoObject.ddlNode.getProject().dvConfig.spec.build.source.ddl = ddl;
+			await (utils.saveModelToFile(infoObject.ddlNode.getProject().dvConfig, infoObject.vdbFilePath));
 			resolve();
 		} else {
 			reject();

@@ -26,7 +26,7 @@ import { createDataSourceEntryCommand } from './commands/CreateDataSourceEntryCo
 import { createEnvironmentVariableCommandForValue } from './commands/CreateEnvironmentVariableCommand';
 import { createVDBCommand } from './commands/CreateVDBCommand';
 import { DataVirtNodeProvider } from './model/tree/DataVirtNodeProvider';
-import { DataSourceConfig } from './model/DataVirtModel';
+import { DataSourceConfig, VDBFileInfo } from './model/DataVirtModel';
 import { deleteDataSourceCommand } from './commands/DeleteDataSourceCommand';
 import { deleteDataSourceEntryCommand } from './commands/DeleteDataSourceEntryCommand';
 import { deleteEnvironmentVariableCommand } from './commands/DeleteEnvironmentVariableCommand';
@@ -54,8 +54,7 @@ export const DATASOURCE_TYPES: Map<string, DataSourceConfig> = new Map();
 export let dataVirtProvider : DataVirtNodeProvider;
 export let pluginResourcesPath: string;
 export let workspaceReady : boolean = true;
-export let fileToNode: Map<string, SchemaTreeNode> = new Map();
-export let fileToEditor: Map<string, vscode.TextEditor> = new Map();
+export const openedDocuments: VDBFileInfo[] = new Array();
 
 let dataVirtExtensionOutputChannel: vscode.OutputChannel;
 let dataVirtTreeView: vscode.TreeView<vscode.TreeItem>;
@@ -144,12 +143,14 @@ function creatDataVirtView(): void {
 	});
 }
 
-function handleClosedTextDocument(event) {
+async function handleClosedTextDocument(event) {
 	const fileName: string = event.fileName;
-	if (fileToEditor.has(fileName)) {
-		vscode.workspace.fs.delete(vscode.Uri.file(fileName));
-		fileToEditor.delete(fileName);
-		fileToNode.delete(fileName);
+	const infoObject: VDBFileInfo = openedDocuments.find( (element: VDBFileInfo) => {
+		return element.tempSQLFilePath === fileName;
+	});
+	if (infoObject) {
+		await vscode.workspace.fs.delete(vscode.Uri.file(fileName));
+		openedDocuments.splice(openedDocuments.indexOf(infoObject), 1);
 	}
 }
 
