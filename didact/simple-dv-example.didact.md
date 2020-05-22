@@ -26,7 +26,7 @@ You can do this in a couple of ways:
 
 Provide the name of your new VDB - `portfolio` - and press Enter.
 
-You should see a new file `portfolio.vdb` appear in your Explorer view and in the Data Virtualization view [(Execute^)](didact://?commandId=datavirt.focus){.didact}
+You should see a new file `portfolio.yaml` appear in your Explorer view and in the Data Virtualization view [(Execute^)](didact://?commandId=datavirt.focus){.didact}
 
 ## Creating the PostgreSQL Datasource
 
