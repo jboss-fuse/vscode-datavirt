@@ -334,7 +334,7 @@
 		"gulp": "^4.0.2",
 		"gulp-tslint": "^8.1.4",
 		"istanbul": "^0.4.5",
-		"mocha": "^7.1.2",
+		"mocha": "^7.2.0",
 		"mocha-jenkins-reporter": "^0.4.3",
 		"mvn-artifact-download": "^5.0.0",
 		"remap-istanbul": "^0.13.0",
