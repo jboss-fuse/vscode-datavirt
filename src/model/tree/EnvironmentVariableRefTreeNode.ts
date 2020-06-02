@@ -18,17 +18,18 @@ import * as extension from '../../extension';
 import * as utils from '../../utils';
 import * as vscode from 'vscode';
 import { DVTreeItem } from './DVTreeItem';
+import { ConfigMapRef, SecretRef } from '../DataVirtModel';
 import { DVProjectTreeNode } from './DVProjectTreeNode';
 
-export class EnvironmentVariableTreeNode extends DVTreeItem {
+export class EnvironmentVariableRefTreeNode extends DVTreeItem {
 
 	key: string;
-	value: string;
+	ref: ConfigMapRef | SecretRef;
 
-	constructor(projectNode: DVProjectTreeNode, key: string, value: string) {
-		super('dv.environment.variable', undefined, vscode.TreeItemCollapsibleState.None);
+	constructor(projectNode: DVProjectTreeNode, key: string, ref: ConfigMapRef | SecretRef) {
+		super('dv.environment.variable.ref', undefined, vscode.TreeItemCollapsibleState.None);
 		this.setProject(projectNode);
-		utils.generateReferenceValueForLabel(projectNode.file, value, undefined)
+		utils.generateReferenceValueForLabel(projectNode.file, undefined, ref)
 			.then( (label: string | undefined) => {
 				this.label = `${key}: ${label ? label : '<empty>'}`;
 				this.tooltip = `Environment Variable: ${this.label}`;
@@ -37,11 +38,11 @@ export class EnvironmentVariableTreeNode extends DVTreeItem {
 				extension.dataVirtProvider.refreshNode(this);
 			});
 		this.key = key;
-		this.value = value;
+		this.ref = ref;
 	}
 
 	getIconName(): string {
-		return `dv_environment_variable.gif`;
+		return `dv_environment_variable_ref.gif`;
 	}
 
 	getToolTip(): string {
@@ -57,27 +58,34 @@ export class EnvironmentVariableTreeNode extends DVTreeItem {
 		this.label = key;
 	}
 
-	getValue(): string {
-		return this.value;
+	getValue(): ConfigMapRef | SecretRef {
+		return this.ref;
 	}
 
-	setValue(value: string): void {
-		this.value = value;
+	setValue(value: ConfigMapRef | SecretRef): void {
+		this.ref = value;
 	}
 
 	isValueType(): boolean {
-		return true;
+		return false;
 	}
 
 	isSecretType(): boolean {
-		return false;
+		return utils.isSecretRef(this.ref);
 	}
 
 	isConfigMapType(): boolean {
-		return false;
+		return utils.isConfigMapRef(this.ref);
 	}
 
 	getReferenceName(): string {
+		if (utils.isConfigMapRef(this.ref)) {
+			const ref: ConfigMapRef = this.ref;
+			return ref.configMapKeyRef.name;
+		} else if (utils.isSecretRef(this.ref)) {
+			const ref: SecretRef = this.ref;
+			return ref.secretKeyRef.name;
+		}
 		return undefined;
 	}
 }

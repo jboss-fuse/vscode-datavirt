@@ -15,21 +15,22 @@
  * limitations under the License.
  */
 import * as vscode from 'vscode';
-import { DataSourceConfig, Property } from '../DataVirtModel';
+import { DataSourceConfig, Property, ConfigMapRef, SecretRef } from '../DataVirtModel';
 import { DataSourceEntryTreeNode } from './DataSourceEntryTreeNode';
 import { DVTreeItem } from './DVTreeItem';
+import * as utils from '../../utils';
 
-export class DataSourceTreeNode extends DVTreeItem {
+export class DataSourceRefTreeNode extends DVTreeItem {
 
 	dataSourceConfig: DataSourceConfig;
 
 	constructor(dataSourceConfig: DataSourceConfig) {
-		super('dv.datasource', `${dataSourceConfig.name} (${dataSourceConfig.type})`, vscode.TreeItemCollapsibleState.Collapsed);
+		super('dv.datasource.ref', `${dataSourceConfig.name} (${dataSourceConfig.type})`, vscode.TreeItemCollapsibleState.Collapsed);
 		this.dataSourceConfig = dataSourceConfig;
 	}
 
 	getIconName(): string {
-		return `dv_datasource.gif`;
+		return `dv_datasource_ref.gif`;
 	}
 
 	getToolTip(): string {
@@ -61,18 +62,29 @@ export class DataSourceTreeNode extends DVTreeItem {
 	}
 
 	isValueType(): boolean {
-		return true;
+		return false;
 	}
 
 	isSecretType(): boolean {
-		return false;
+		return !this.isEmpty() &&
+			utils.isSecretRef(this.dataSourceConfig.properties[0].valueFrom);
 	}
 
 	isConfigMapType(): boolean {
-		return false;
+		return !this.isEmpty() &&
+			utils.isConfigMapRef(this.dataSourceConfig.properties[0].valueFrom);
 	}
 
 	getReferenceName(): string {
+		if (!this.isEmpty()) {
+			if (utils.isConfigMapRef(this.dataSourceConfig.properties[0].valueFrom)) {
+				const ref: ConfigMapRef = this.dataSourceConfig.properties[0].valueFrom;
+				return ref.configMapKeyRef.name;
+			} else if (utils.isSecretRef(this.dataSourceConfig.properties[0].valueFrom)) {
+				const ref: SecretRef = this.dataSourceConfig.properties[0].valueFrom;
+				return ref.secretKeyRef.name;
+			}
+		}
 		return undefined;
 	}
 }

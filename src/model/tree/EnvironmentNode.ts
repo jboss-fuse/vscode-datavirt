@@ -18,6 +18,7 @@ import * as vscode from 'vscode';
 import { Property } from '../DataVirtModel';
 import { DVTreeItem } from './DVTreeItem';
 import { EnvironmentVariableTreeNode } from './EnvironmentVariableTreeNode';
+import { EnvironmentVariableRefTreeNode } from './EnvironmentVariableRefTreeNode';
 
 export class EnvironmentTreeNode extends DVTreeItem {
 
@@ -39,10 +40,18 @@ export class EnvironmentTreeNode extends DVTreeItem {
 	initialize(): void {
 		if (this.environment) {
 			this.environment.forEach( (element: Property) => {
-				const newItem: EnvironmentVariableTreeNode = new EnvironmentVariableTreeNode(this.getProject(), element.name, element.value, element.valueFrom);
-				newItem.parent = this;
-				if (this.children.indexOf(newItem) < 0) {
-					this.children.push(newItem);
+				if (element.valueFrom) {
+					const newItem: EnvironmentVariableRefTreeNode = new EnvironmentVariableRefTreeNode(this.getProject(), element.name, element.valueFrom);
+					newItem.parent = this;
+					if (this.children.indexOf(newItem) < 0) {
+						this.children.push(newItem);
+					}
+				} else {
+					const newItem: EnvironmentVariableTreeNode = new EnvironmentVariableTreeNode(this.getProject(), element.name, element.value);
+					newItem.parent = this;
+					if (this.children.indexOf(newItem) < 0) {
+						this.children.push(newItem);
+					}
 				}
 			});
 		}
