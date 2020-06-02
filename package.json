@@ -225,12 +225,12 @@
 				{
 					"group": "dv_extra@1",
 					"command": "datavirt.delete.datasource",
-					"when": "viewItem == dv.datasource"
+					"when": "viewItem == dv.datasource || viewItem == dv.datasource.ref"
 				},
 				{
 					"group": "dv@1",
 					"command": "datavirt.create.datasourceentry",
-					"when": "viewItem == dv.datasource"
+					"when": "viewItem == dv.datasource || viewItem == dv.datasource.ref"
 				},
 				{
 					"group": "dv@1",
@@ -255,12 +255,12 @@
 				{
 					"group": "dv@1",
 					"command": "datavirt.edit.envvar",
-					"when": "viewItem == dv.environment.variable"
+					"when": "viewItem == dv.environment.variable || viewItem == dv.environment.variable.ref"
 				},
 				{
 					"group": "inline",
 					"command": "datavirt.edit.envvar",
-					"when": "viewItem == dv.environment.variable"
+					"when": "viewItem == dv.environment.variable || viewItem == dv.environment.variable.ref"
 				},
 				{
 					"group": "dv_convert@2",
@@ -275,7 +275,7 @@
 				{
 					"group": "dv_extra@1",
 					"command": "datavirt.delete.envvar",
-					"when": "viewItem == dv.environment.variable"
+					"when": "viewItem == dv.environment.variable || viewItem == dv.environment.variable.ref"
 				},
 				{
 					"group": "dv@1",

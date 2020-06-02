@@ -18,6 +18,7 @@ import * as vscode from 'vscode';
 import { DataSourceConfig } from '../DataVirtModel';
 import { DataSourceTreeNode } from './DataSourceTreeNode';
 import { DVTreeItem } from './DVTreeItem';
+import { DataSourceRefTreeNode } from './DataSourceRefTreeNode';
 
 export class DataSourcesTreeNode extends DVTreeItem {
 
@@ -39,12 +40,22 @@ export class DataSourcesTreeNode extends DVTreeItem {
 	initialize(): void {
 		if (this.datasources) {
 			this.datasources.forEach( (element: DataSourceConfig) => {
-				const newItem = new DataSourceTreeNode(element);
-				newItem.setProject(this.getProject());
-				newItem.parent = this;
-				newItem.initialize();
-				if (this.children.indexOf(newItem) < 0) {
-					this.children.push(newItem);
+				if (element.properties && element.properties.length>0 && element.properties[0].valueFrom) {
+					const newItem = new DataSourceRefTreeNode(element);
+					newItem.setProject(this.getProject());
+					newItem.parent = this;
+					newItem.initialize();
+					if (this.children.indexOf(newItem) < 0) {
+						this.children.push(newItem);
+					}
+				} else {
+					const newItem = new DataSourceTreeNode(element);
+					newItem.setProject(this.getProject());
+					newItem.parent = this;
+					newItem.initialize();
+					if (this.children.indexOf(newItem) < 0) {
+						this.children.push(newItem);
+					}
 				}
 			});
 		}
