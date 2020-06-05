@@ -49,16 +49,22 @@ async function convertDataSource(dsNode: DataSourceTreeNode, refType: string) {
 
 export async function convertDataSourceToRef(dsConfig: DataSourceConfig, refType: string, dvConfig: DataVirtConfig, file: string): Promise<boolean> {
 	const refName: string = `datasource_${dsConfig.name}_${refType.toLowerCase()}`;
-	if (refName && refType && dvConfig && file) {
+	if (refType && dvConfig && file) {
+		const refFilePath: string = utils.getFullReferenceFilePath(file, refName);
+		if (await utils.doesFileExist(refFilePath)) {
+			extension.log(`The reference file ${refFilePath} could not be created because it already exists. Migration canceled.`);
+			return false;
+		}
+
 		try {
 			if (refType === constants.REFERENCE_TYPE_CONFIGMAP) {
 				const configMapRef: ConfigMapConfig = utils.createEmptyConfigMap(refName);
 				convertConfigMapEntries(configMapRef, dsConfig.properties);
-				utils.saveConfigMapToFile(configMapRef, utils.getFullReferenceFilePath(file, refName));
+				utils.saveConfigMapToFile(configMapRef, refFilePath);
 			} else if (refType === constants.REFERENCE_TYPE_SECRET) {
 				const secretRef: SecretConfig = utils.createEmptySecret(refName);
 				convertSecretEntries(secretRef, dsConfig.properties);
-				utils.saveSecretsToFile(secretRef, utils.getFullReferenceFilePath(file, refName));
+				utils.saveSecretsToFile(secretRef, refFilePath);
 			} else {
 				extension.log(`createDataSource: Unsupported reference type ${refType}...`);
 				return false;
