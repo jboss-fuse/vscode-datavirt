@@ -40,24 +40,22 @@ export class DataSourcesTreeNode extends DVTreeItem {
 	initialize(): void {
 		if (this.datasources) {
 			this.datasources.forEach( (element: DataSourceConfig) => {
-				if (element.properties && element.properties.length>0 && element.properties[0].valueFrom) {
-					const newItem = new DataSourceRefTreeNode(element);
-					newItem.setProject(this.getProject());
-					newItem.parent = this;
-					newItem.initialize();
-					if (this.children.indexOf(newItem) < 0) {
-						this.children.push(newItem);
-					}
-				} else {
-					const newItem = new DataSourceTreeNode(element);
-					newItem.setProject(this.getProject());
-					newItem.parent = this;
-					newItem.initialize();
-					if (this.children.indexOf(newItem) < 0) {
-						this.children.push(newItem);
-					}
+				const newItem: DataSourceTreeNode | DataSourceRefTreeNode = this.createDataSourceNode(element);
+				newItem.setProject(this.getProject());
+				newItem.parent = this;
+				newItem.initialize();
+				if (this.children.indexOf(newItem) < 0) {
+					this.children.push(newItem);
 				}
 			});
+		}
+	}
+
+	createDataSourceNode(element: DataSourceConfig): DataSourceRefTreeNode | DataSourceTreeNode {
+		if (element.properties && element.properties.length>0 && element.properties[0].valueFrom) {
+			return new DataSourceRefTreeNode(element);
+		} else {
+			return new DataSourceTreeNode(element);
 		}
 	}
 }

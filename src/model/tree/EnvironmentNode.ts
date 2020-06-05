@@ -40,20 +40,21 @@ export class EnvironmentTreeNode extends DVTreeItem {
 	initialize(): void {
 		if (this.environment) {
 			this.environment.forEach( (element: Property) => {
-				if (element.valueFrom) {
-					const newItem: EnvironmentVariableRefTreeNode = new EnvironmentVariableRefTreeNode(this.getProject(), element.name, element.valueFrom);
-					newItem.parent = this;
-					if (this.children.indexOf(newItem) < 0) {
-						this.children.push(newItem);
-					}
-				} else {
-					const newItem: EnvironmentVariableTreeNode = new EnvironmentVariableTreeNode(this.getProject(), element.name, element.value);
-					newItem.parent = this;
-					if (this.children.indexOf(newItem) < 0) {
-						this.children.push(newItem);
-					}
+				const newItem: EnvironmentVariableRefTreeNode | EnvironmentVariableTreeNode = this.createEnvironmentVariableNode(element);
+				newItem.parent = this;
+				if (this.children.indexOf(newItem) < 0) {
+					this.children.push(newItem);
 				}
 			});
+		}
+	}
+
+	createEnvironmentVariableNode(element: Property): EnvironmentVariableRefTreeNode | EnvironmentVariableTreeNode {
+		if (element.valueFrom) {
+			return new EnvironmentVariableRefTreeNode(this.getProject(), element.name, element.valueFrom);
+		}
+		else {
+			return new EnvironmentVariableTreeNode(this.getProject(), element.name, element.value);
 		}
 	}
 }

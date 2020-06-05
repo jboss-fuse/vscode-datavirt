@@ -20,10 +20,11 @@ import * as utils from '../utils';
 import * as vscode from 'vscode';
 import { DataSourceTreeNode } from '../model/tree/DataSourceTreeNode';
 import { DataVirtConfig, DataSourceConfig, ConfigMapRef, SecretRef, Property, KeyRef } from '../model/DataVirtModel';
+import { DataSourceRefTreeNode } from '../model/tree/DataSourceRefTreeNode';
 
 const CREATE_NEW_ENTRY: string = 'New...';
 
-export async function createDataSourceEntryCommand(dsNode: DataSourceTreeNode) {
+export async function createDataSourceEntryCommand(dsNode: DataSourceTreeNode | DataSourceRefTreeNode) {
 	let desiredType: string;
 	if (dsNode.isEmpty()) {
 		desiredType = await vscode.window.showQuickPick([ constants.REFERENCE_TYPE_VALUE, constants.REFERENCE_TYPE_CONFIGMAP, constants.REFERENCE_TYPE_SECRET], {canPickMany: false, placeHolder: 'Select the kind of datasource you want to create.'});
@@ -31,7 +32,7 @@ export async function createDataSourceEntryCommand(dsNode: DataSourceTreeNode) {
 	await createDataSourceEntry(dsNode, desiredType);
 }
 
-async function createDataSourceEntry(dsNode: DataSourceTreeNode, dsPropertiesType: string) {
+async function createDataSourceEntry(dsNode: DataSourceTreeNode | DataSourceRefTreeNode, dsPropertiesType: string) {
 	if (constants.REFERENCE_TYPE_VALUE === dsPropertiesType || dsNode.isValueType()) {
 		await createDataSourceEntryCommandForValue(dsNode);
 	} else if (constants.REFERENCE_TYPE_CONFIGMAP === dsPropertiesType || dsNode.isConfigMapType()) {
@@ -41,7 +42,7 @@ async function createDataSourceEntry(dsNode: DataSourceTreeNode, dsPropertiesTyp
 	}
 }
 
-export async function createDataSourceEntryCommandForValue(dsNode: DataSourceTreeNode) {
+export async function createDataSourceEntryCommandForValue(dsNode: DataSourceTreeNode | DataSourceRefTreeNode) {
 	if (dsNode) {
 		let entryName: string = await queryPropertyName(dsNode);
 		if (!entryName) {
@@ -64,15 +65,15 @@ export async function createDataSourceEntryCommandForValue(dsNode: DataSourceTre
 	}
 }
 
-export async function createDataSourceEntryCommandForSecret(dsNode: DataSourceTreeNode) {
+export async function createDataSourceEntryCommandForSecret(dsNode: DataSourceTreeNode | DataSourceRefTreeNode) {
 	await createDataSourceEntryCommandForReference(dsNode, constants.REFERENCE_TYPE_SECRET);
 }
 
-export async function createDataSourceEntryCommandForConfigMap(dsNode: DataSourceTreeNode) {
+export async function createDataSourceEntryCommandForConfigMap(dsNode: DataSourceTreeNode | DataSourceRefTreeNode) {
 	await createDataSourceEntryCommandForReference(dsNode, constants.REFERENCE_TYPE_CONFIGMAP);
 }
 
-async function createDataSourceEntryCommandForReference(dsNode: DataSourceTreeNode, type: string) {
+async function createDataSourceEntryCommandForReference(dsNode: DataSourceTreeNode | DataSourceRefTreeNode, type: string) {
 	if (dsNode) {
 		let refName: string = dsNode.getReferenceName();
 		if(dsNode.isEmpty()) {
@@ -126,7 +127,7 @@ async function createDataSourceEntryCommandForReference(dsNode: DataSourceTreeNo
 	}
 }
 
-async function queryProperty(dsNode: DataSourceTreeNode, predefinedVariables: Array<Property>): Promise<Property | undefined> {
+async function queryProperty(dsNode: DataSourceTreeNode | DataSourceRefTreeNode, predefinedVariables: Array<Property>): Promise<Property | undefined> {
 	const names: string[] = new Array<string>();
 	names.push(CREATE_NEW_ENTRY);
 
@@ -193,7 +194,7 @@ function setDataSourceEntryValue(entries: Property[], entryType: string, entryNa
 	entries.push(entry);
 }
 
-async function queryPropertyName(dsNode: DataSourceTreeNode): Promise<string | undefined> {
+async function queryPropertyName(dsNode: DataSourceTreeNode | DataSourceRefTreeNode): Promise<string | undefined> {
 	return await vscode.window.showInputBox( { validateInput: (name: string) => {
 		if(utils.getDataSourceEntryByName(name, dsNode.dataSourceConfig)) {
 			return `There is already a property with the name ${name}.`;
