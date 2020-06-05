@@ -36,14 +36,9 @@ async function convertDataSource(dsNode: DataSourceTreeNode, refType: string) {
 		return;
 	}
 
-	const refName: string = await vscode.window.showInputBox( { validateInput: utils.validateFileNotExisting, placeHolder: 'Enter the name of the new reference.'});
-	if (refName === undefined) {
-		return;
-	}
-
 	const dvConfig: DataVirtConfig = dsNode.getProject().dvConfig;
 	if (dvConfig) {
-		const success: boolean = await convertDataSourceToRef(dsNode.dataSourceConfig, refName, refType, dvConfig, dsNode.getProject().getFile());
+		const success: boolean = await convertDataSourceToRef(dsNode.dataSourceConfig, refType, dvConfig, dsNode.getProject().getFile());
 		if (success) {
 			vscode.window.showInformationMessage(`Datasource ${dsNode.dataSourceConfig.name} has been migrated to ${refType}...`);
 		} else {
@@ -52,7 +47,8 @@ async function convertDataSource(dsNode: DataSourceTreeNode, refType: string) {
 	}
 }
 
-export async function convertDataSourceToRef(dsConfig: DataSourceConfig, refName: string, refType: string, dvConfig: DataVirtConfig, file: string): Promise<boolean> {
+export async function convertDataSourceToRef(dsConfig: DataSourceConfig, refType: string, dvConfig: DataVirtConfig, file: string): Promise<boolean> {
+	const refName: string = `datasource_${dsConfig.name}_${refType.toLowerCase()}`;
 	if (refName && refType && dvConfig && file) {
 		try {
 			if (refType === constants.REFERENCE_TYPE_CONFIGMAP) {
