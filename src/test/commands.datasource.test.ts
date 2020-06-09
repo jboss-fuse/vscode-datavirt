@@ -22,6 +22,7 @@ import * as path from 'path';
 import * as sinonChai from 'sinon-chai';
 import * as vscode from 'vscode';
 import * as constants from '../constants';
+import * as convertDataSourceCommand from '../commands/ConvertDataSourceCommand';
 import * as createVDBCommand from '../commands/CreateVDBCommand';
 import * as createDSCommand from '../commands/CreateDataSourceCommand';
 import { DataVirtConfig, DataSourceConfig, Property } from '../model/DataVirtModel';
@@ -188,6 +189,61 @@ describe('Commands Tests', () => {
 			should.exist(utils.getDataSourceByName(dvConfig, 'test2'), 'Cannot find expected datasource test2');
 			should.exist(utils.getDataSourceByName(dvConfig, 'test3'), 'Cannot find expected datasource test3');
 			should.exist(utils.getDataSourceByName(dvConfig, dsName), `Cannot find expected datasource ${dsName}`);
+		});
+	});
+
+	context('Convert DataSource', () => {
+		let refFilePath: string;
+		let dsConfig: DataSourceConfig;
+		let refName: string;
+
+		beforeEach( async () => {
+			await createVDB();
+		});
+
+		afterEach( () => {
+			cleanupVDB();
+			fs.unlinkSync(refFilePath);
+		});
+
+		async function createDataSource(refType: string) {
+			const createdDS = await createDSCommand.createDataSource(dsName, dsType, dvConfig, vdbFile);
+			should.equal(true, createdDS, 'Execution of the Create DataSource command returned false');
+			dsConfig = utils.getDataSourceByName(dvConfig, dsName);
+			refName = `datasource_${dsConfig.name}_${refType.toLowerCase()}`;
+			refFilePath = utils.getFullReferenceFilePath(vdbFile, refName);
+		}
+
+		it('should convert a valid datasource to a config map', async () => {
+			await createDataSource(constants.REFERENCE_TYPE_CONFIGMAP);
+			const convertedDS = await convertDataSourceCommand.convertDataSourceToRef(dsConfig, constants.REFERENCE_TYPE_CONFIGMAP, dvConfig, vdbFile);
+			should.equal(true, convertedDS, 'Execution of the Convert DataSource command returned false');
+			should.equal(true, await utils.doesLocalReferenceFileExist(vdbFile, refName), `The reference file for datasource ${dsName} could not be found.`);
+		});
+
+		it('should not convert a valid datasource to a config map if config map file already exists', async () => {
+			await createDataSource(constants.REFERENCE_TYPE_CONFIGMAP);
+			fs.writeFileSync(refFilePath, 'test');
+			should.equal(true, await utils.doesFileExist(refFilePath), `Unable to create file ${refFilePath}.`);
+			const convertedDS = await convertDataSourceCommand.convertDataSourceToRef(dsConfig, constants.REFERENCE_TYPE_CONFIGMAP, dvConfig, vdbFile);
+			should.equal(false, convertedDS, 'Execution of the Convert DataSource command returned true but should have failed because ref file already exists.');
+			should.equal('test', fs.readFileSync(refFilePath).toString(), `File contents of the ref file did change.`);
+		});
+
+		it('should convert a valid datasource to a secret', async () => {
+			await createDataSource(constants.REFERENCE_TYPE_SECRET);
+			const convertedDS = await convertDataSourceCommand.convertDataSourceToRef(dsConfig, constants.REFERENCE_TYPE_SECRET, dvConfig, vdbFile);
+			should.equal(true, convertedDS, 'Execution of the Convert DataSource command returned false');
+			should.equal(true, await utils.doesLocalReferenceFileExist(vdbFile, refName), `The reference file for datasource ${dsName} could not be found.`);
+		});
+
+		it('should not convert a valid datasource to a secret if secret file already exists', async () => {
+			await createDataSource(constants.REFERENCE_TYPE_SECRET);
+			fs.writeFileSync(refFilePath, 'test');
+			should.equal(true, await utils.doesFileExist(refFilePath), `Unable to create file ${refFilePath}.`);
+			const convertedDS = await convertDataSourceCommand.convertDataSourceToRef(dsConfig, constants.REFERENCE_TYPE_SECRET, dvConfig, vdbFile);
+			should.equal(false, convertedDS, 'Execution of the Convert DataSource command returned true but should have failed because ref file already exists.');
+			should.equal('test', fs.readFileSync(refFilePath).toString(), `File contents of the ref file did change.`);
 		});
 	});
 });
