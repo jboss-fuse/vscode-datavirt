@@ -130,7 +130,7 @@ describe('Utils', () => {
 		let fpTest: string;
 
 		before( () => {
-			dummyNonVDBFile = path.resolve(__dirname, '../../testFixture', `dummy.yaml`);
+			dummyNonVDBFile = path.resolve(__dirname, '../../test Fixture with speci@l chars', `dummy.yaml`);
 			fs.writeFileSync(dummyNonVDBFile, 'test');
 		});
 
@@ -141,8 +141,8 @@ describe('Utils', () => {
 
 		it('should match the vdb model contents between a save and reload to/from a vdb file', async () => {
 			const name: string = 'test';
-			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
-			fpTest = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
+			const fpOrig: string = path.resolve(__dirname, '../../test Fixture with speci@l chars', `${name}.yaml`);
+			fpTest = path.resolve(__dirname, '../../test Fixture with speci@l chars', `${name}2.yaml`);
 			const yamlDoc:DataVirtConfig = await utils.loadModelFromFile(fpOrig);
 			should.exist(yamlDoc);
 			await utils.saveModelToFile(yamlDoc, fpTest);
@@ -207,7 +207,7 @@ describe('Utils', () => {
 
 		beforeEach( async() => {
 			const name: string = 'test';
-			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
+			const fpOrig: string = path.resolve(__dirname, '../../test Fixture with speci@l chars', `${name}.yaml`);
 			yamlDoc = await utils.loadModelFromFile(fpOrig);
 			should.exist(yamlDoc);
 		});
@@ -271,8 +271,8 @@ describe('Utils', () => {
 	});
 
 	context('DataSource Entry Label Creation', () => {
-		const secretFile: string = path.resolve(__dirname, '../../testFixture', `mysecret.yaml`);
-		const configMapFile: string = path.resolve(__dirname, '../../testFixture', `myconfigmap.yaml`);
+		const secretFile: string = path.resolve(__dirname, '../../test Fixture with speci@l chars', `mysecret.yaml`);
+		const configMapFile: string = path.resolve(__dirname, '../../test Fixture with speci@l chars', `myconfigmap.yaml`);
 
 		it('should return the name of a non-reference as label with valid parameters', async() => {
 			should.equal('myValue', await utils.generateReferenceValueForLabel(secretFile, 'myValue', undefined));
@@ -297,7 +297,7 @@ describe('Utils', () => {
 		let fpTest: string;
 
 		before( () => {
-			dummyNonSecretFile = path.resolve(__dirname, '../../testFixture', `dummy-secret.yaml`);
+			dummyNonSecretFile = path.resolve(__dirname, '../../test Fixture with speci@l chars', `dummy-secret.yaml`);
 			fs.writeFileSync(dummyNonSecretFile, 'test');
 		});
 
@@ -313,8 +313,8 @@ describe('Utils', () => {
 
 		it('should match the secrets model contents between a save and reload to/from a secret file', async() => {
 			const name: string = 'mysecret';
-			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
-			fpTest = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
+			const fpOrig: string = path.resolve(__dirname, '../../test Fixture with speci@l chars', `${name}.yaml`);
+			fpTest = path.resolve(__dirname, '../../test Fixture with speci@l chars', `${name}2.yaml`);
 			const yamlDoc:SecretConfig = await utils.loadSecretsFromFile(fpOrig);
 			should.exist(yamlDoc);
 			await utils.saveSecretsToFile(yamlDoc, fpTest);
@@ -326,8 +326,8 @@ describe('Utils', () => {
 
 		it('should persist new added secrets entries and be able to retain them from file', async() => {
 			const name: string = 'mysecret';
-			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
-			fpTest = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
+			const fpOrig: string = path.resolve(__dirname, '../../test Fixture with speci@l chars', `${name}.yaml`);
+			fpTest = path.resolve(__dirname, '../../test Fixture with speci@l chars', `${name}2.yaml`);
 			const yamlDoc:SecretConfig = await utils.loadSecretsFromFile(fpOrig);
 			should.exist(yamlDoc);
 			utils.setSecretValueForKey(yamlDoc, 'mySecretKey', 'ABC123');
@@ -349,7 +349,7 @@ describe('Utils', () => {
 		let fpTest: string;
 
 		before( () => {
-			dummyNonConfigMapFile = path.resolve(__dirname, '../../testFixture', `dummy-configmap.yaml`);
+			dummyNonConfigMapFile = path.resolve(__dirname, '../../test Fixture with speci@l chars', `dummy-configmap.yaml`);
 			fs.writeFileSync(dummyNonConfigMapFile, 'test');
 		});
 
@@ -365,8 +365,8 @@ describe('Utils', () => {
 
 		it('should match the configmap model contents between a save and reload to/from a configmap file', async() => {
 			const name: string = 'myconfigmap';
-			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
-			fpTest = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
+			const fpOrig: string = path.resolve(__dirname, '../../test Fixture with speci@l chars', `${name}.yaml`);
+			fpTest = path.resolve(__dirname, '../../test Fixture with speci@l chars', `${name}2.yaml`);
 			const yamlDoc:ConfigMapConfig = await utils.loadConfigMapFromFile(fpOrig);
 			should.exist(yamlDoc);
 			await utils.saveConfigMapToFile(yamlDoc, fpTest);
@@ -378,8 +378,8 @@ describe('Utils', () => {
 
 		it('should persist new added configmap entries and be able to retain them from file', async() => {
 			const name: string = 'myconfigmap';
-			const fpOrig: string = path.resolve(__dirname, '../../testFixture', `${name}.yaml`);
-			fpTest = path.resolve(__dirname, '../../testFixture', `${name}2.yaml`);
+			const fpOrig: string = path.resolve(__dirname, '../../test Fixture with speci@l chars', `${name}.yaml`);
+			fpTest = path.resolve(__dirname, '../../test Fixture with speci@l chars', `${name}2.yaml`);
 			const yamlDoc:ConfigMapConfig = await utils.loadConfigMapFromFile(fpOrig);
 			should.exist(yamlDoc);
 			utils.setConfigMapValueForKey(yamlDoc, 'myConfigMapKey', 'ABC123');

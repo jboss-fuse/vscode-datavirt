@@ -9,5 +9,5 @@
 		"rootDir": "src"
 	},
 	"include": ["src"],
-	"exclude": ["node_modules", ".vscode-test", "coverage", "testFixture", "resources"]
+	"exclude": ["node_modules", ".vscode-test", "coverage", "test Fixture with speci@l chars", "resources"]
 }
