@@ -103,7 +103,7 @@ describe('Commands Tests', () => {
 		extension.fillDataTypes();
 		workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 		should.exist(workspacePath);
-		workspacePath.should.contain('testFixture');
+		workspacePath.should.contain('test Fixture with speci@l chars');
 		templateFolder = path.join(workspacePath, '../resources/');
 	});
 
