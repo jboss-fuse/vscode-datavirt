@@ -312,7 +312,7 @@
 		"tslint": "gulp tslint"
 	},
 	"dependencies": {
-		"js-base64": "^2.5.2",
+		"js-base64": "^2.6.1",
 		"path": "^0.12.7",
 		"tmp": "^0.2.1",
 		"vscode-languageclient": "^6.1.3",
