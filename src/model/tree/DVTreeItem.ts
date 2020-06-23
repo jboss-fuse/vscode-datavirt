@@ -31,6 +31,7 @@ export class DVTreeItem extends vscode.TreeItem {
 		this.contextValue = type;
 		this.type = type;
 		this.parent = parent;
+		if (this.parent) this.setProject(this.parent.getProject());
 		this.children = children;
 		if (DataVirtNodeProvider.context) {
 			this.iconPath = this.getIcon(DataVirtNodeProvider.context);

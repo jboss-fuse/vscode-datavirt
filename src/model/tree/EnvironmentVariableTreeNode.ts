@@ -18,17 +18,15 @@ import * as extension from '../../extension';
 import * as utils from '../../utils';
 import * as vscode from 'vscode';
 import { DVTreeItem } from './DVTreeItem';
-import { DVProjectTreeNode } from './DVProjectTreeNode';
 
 export class EnvironmentVariableTreeNode extends DVTreeItem {
 
 	key: string;
 	value: string;
 
-	constructor(projectNode: DVProjectTreeNode, key: string, value: string) {
-		super('dv.environment.variable', undefined, vscode.TreeItemCollapsibleState.None);
-		this.setProject(projectNode);
-		utils.generateReferenceValueForLabel(projectNode.file, value, undefined)
+	constructor(parent: DVTreeItem, key: string, value: string) {
+		super('dv.environment.variable', undefined, vscode.TreeItemCollapsibleState.None, parent);
+		utils.generateReferenceValueForLabel(parent.getProject().file, value, undefined)
 			.then( (label: string | undefined) => {
 				this.label = `${key}: ${label ? label : '<empty>'}`;
 				this.tooltip = `Environment Variable: ${this.label}`;

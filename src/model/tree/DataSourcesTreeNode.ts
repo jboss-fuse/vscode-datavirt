@@ -24,9 +24,10 @@ export class DataSourcesTreeNode extends DVTreeItem {
 
 	datasources: DataSourceConfig[];
 
-	constructor(label: string, datasources: DataSourceConfig[]) {
-		super('dv.datasources', label, vscode.TreeItemCollapsibleState.Collapsed);
+	constructor(parent: DVTreeItem, label: string, datasources: DataSourceConfig[]) {
+		super('dv.datasources', label, vscode.TreeItemCollapsibleState.Collapsed, parent);
 		this.datasources = datasources;
+		this.initialize();
 	}
 
 	getIconName(): string {
@@ -40,10 +41,7 @@ export class DataSourcesTreeNode extends DVTreeItem {
 	initialize(): void {
 		if (this.datasources) {
 			this.datasources.forEach( (element: DataSourceConfig) => {
-				const newItem: DataSourceTreeNode | DataSourceRefTreeNode = this.createDataSourceNode(element);
-				newItem.setProject(this.getProject());
-				newItem.parent = this;
-				newItem.initialize();
+				const newItem: DVTreeItem = this.createDataSourceNode(element);
 				if (this.children.indexOf(newItem) < 0) {
 					this.children.push(newItem);
 				}
@@ -51,11 +49,11 @@ export class DataSourcesTreeNode extends DVTreeItem {
 		}
 	}
 
-	createDataSourceNode(element: DataSourceConfig): DataSourceRefTreeNode | DataSourceTreeNode {
+	createDataSourceNode(element: DataSourceConfig): DVTreeItem {
 		if (element.properties && element.properties.length>0 && element.properties[0].valueFrom) {
-			return new DataSourceRefTreeNode(element);
+			return new DataSourceRefTreeNode(this, element);
 		} else {
-			return new DataSourceTreeNode(element);
+			return new DataSourceTreeNode(this, element);
 		}
 	}
 }

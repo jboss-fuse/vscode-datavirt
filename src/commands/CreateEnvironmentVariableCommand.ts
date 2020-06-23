@@ -19,7 +19,7 @@ import * as extension from '../extension';
 import * as utils from '../utils';
 import * as vscode from 'vscode';
 import { DataVirtConfig, Property } from '../model/DataVirtModel';
-import { EnvironmentTreeNode } from '../model/tree/EnvironmentNode';
+import { EnvironmentTreeNode } from '../model/tree/EnvironmentTreeNode';
 
 export async function createEnvironmentVariableCommandForValue(envNode: EnvironmentTreeNode) {
 	if (envNode) {

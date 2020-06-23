@@ -22,6 +22,7 @@ import * as constants from './constants';
 import { DataSourceConfig, DataVirtConfig, SecretRef, ConfigMapRef, Property, SecretConfig, ConfigMapConfig, MetaData, VDBFileInfo } from './model/DataVirtModel';
 import { log } from './extension';
 import { SchemaTreeNode } from './model/tree/SchemaTreeNode';
+import * as kubectlapi from 'vscode-kubernetes-tools-api';
 
 const YAML = require('yaml');
 const TMP = require('tmp');
@@ -77,10 +78,10 @@ export function validateDataSourcePropertyName(name: string): string | undefined
 }
 
 export function validateDataSourceName(name: string): string | undefined {
-	if (name && /^[a-zA-Z]{1}[a-zA-Z0-9_]{3,252}$/.test(name)) {
+	if (name && /^[a-zA-Z]{1}[a-zA-Z0-9\-]{3,252}$/.test(name)) {
 		return undefined;
 	} else {
-		return 'The entered name does not comply with the naming conventions. ([a-Z][a-Z0-9_] and length of 4-253 characters)';
+		return 'The entered name does not comply with the naming conventions. ([a-Z][a-Z0-9-] and length of 4-253 characters)';
 	}
 }
 
@@ -116,14 +117,14 @@ export async function generateReferenceValueForLabel(vdbFile: string, value: str
 			const secretRef: SecretRef = ref;
 			const refFile: string = getFullReferenceFilePath(vdbFile, secretRef.secretKeyRef.name);
 			const secret: SecretConfig = await loadSecretsFromFile(refFile);
-			const value: string = getSecretValueForKey(secret, secretRef.secretKeyRef.key);
-			return `${value ? value : '<undefined>'} (Secret: ${secretRef.secretKeyRef.name})`;
+			const refvalue: string = getSecretValueForKey(secret, secretRef.secretKeyRef.key);
+			return `${refvalue ? refvalue : '<undefined>'} (Secret: ${secretRef.secretKeyRef.name})`;
 		} else if (isConfigMapRef(ref)) {
 			const configMapRef: ConfigMapRef = ref;
 			const refFile: string = getFullReferenceFilePath(vdbFile, configMapRef.configMapKeyRef.name);
 			const configMap: ConfigMapConfig = await loadConfigMapFromFile(refFile);
-			const value: string = getConfigMapValueForKey(configMap, configMapRef.configMapKeyRef.key);
-			return `${value ? value : '<undefined>'} (ConfigMap: ${configMapRef.configMapKeyRef.name})`;
+			const refvalue: string = getConfigMapValueForKey(configMap, configMapRef.configMapKeyRef.key);
+			return `${refvalue ? refvalue : '<undefined>'} (ConfigMap: ${configMapRef.configMapKeyRef.name})`;
 		}
 	}
 	return value;
@@ -333,7 +334,7 @@ export function getConfigMapValueForKey(configMapConfig: ConfigMapConfig, key: s
 export function createEmptySecret(name: string): SecretConfig {
 	const secretRef: SecretConfig = new SecretConfig();
 	secretRef.type = constants.SECRET_TYPE_OPAQUE;
-	secretRef.api_version = 'v1';
+	secretRef.apiVersion = 'v1';
 	secretRef.kind = constants.SECRET_KIND;
 	secretRef.metadata = new MetaData();
 	secretRef.metadata.name = name;
@@ -343,7 +344,7 @@ export function createEmptySecret(name: string): SecretConfig {
 
 export function createEmptyConfigMap(name: string): ConfigMapConfig {
 	const configMapRef: ConfigMapConfig = new ConfigMapConfig();
-	configMapRef.api_version = 'v1';
+	configMapRef.apiVersion = 'v1';
 	configMapRef.kind = constants.CONFIGMAP_KIND;
 	configMapRef.metadata = new MetaData();
 	configMapRef.metadata.name = name;
@@ -362,4 +363,96 @@ export async function deleteVDB(vdbFile: string): Promise<void> {
 		extension.openedDocuments.splice(extension.openedDocuments.indexOf(infoObject), 1);
 	}
 	await vscode.workspace.fs.delete(vscode.Uri.file(vdbFile));
+}
+
+export function getKubectlPath(): string {
+	return vscode.workspace.getConfiguration(constants.KUBERNETES_EXTENSION_CONFIG_KEY)[constants.KUBECTL_PATH_CONFIG_KEY];
+}
+
+export async function isVDBDeployed(name: string): Promise<boolean> {
+	const k8sApi: kubectlapi.API<kubectlapi.KubectlV1> = await kubectlapi.extension.kubectl.v1;
+	if (k8sApi && k8sApi.available) {
+		try {
+			const res: kubectlapi.KubectlV1.ShellResult = await k8sApi.api.invokeCommand(`get vdb ${name}`);
+			if (res.code === 0) {
+				return true;
+			}
+		} catch (error) {
+			extension.log(error);
+		}
+	} else {
+		extension.log(`Unable to acquire Kubernetes API. Make sure you have configured Kubernetes correctly and you are logged in.`);
+	}
+	return false;
+}
+
+export async function isResourceDeployed(name: string, type: string): Promise<boolean> {
+	const k8sApi: kubectlapi.API<kubectlapi.KubectlV1> = await kubectlapi.extension.kubectl.v1;
+	if (k8sApi && k8sApi.available) {
+		try {
+			const res: kubectlapi.KubectlV1.ShellResult = await k8sApi.api.invokeCommand(`get ${type.toLowerCase()} ${name}`);
+			if (res.code === 0) {
+				return true;
+			}
+		} catch (error) {
+			extension.log(error);
+		}
+	} else {
+		extension.log(`Unable to acquire Kubernetes API. Make sure you have configured Kubernetes correctly and you are logged in.`);
+	}
+	return false;
+}
+
+export async function deployResource(file: string, type: string) {
+	const k8sApi: kubectlapi.API<kubectlapi.KubectlV1> = await kubectlapi.extension.kubectl.v1;
+	if (k8sApi && k8sApi.available) {
+		try {
+			const res: kubectlapi.KubectlV1.ShellResult = await k8sApi.api.invokeCommand(`create -f ${file}`);
+			if (res.code !== 0) {
+				extension.log(`Unable to create ${type} ${file}.`);
+			} else {
+				vscode.window.showInformationMessage(`${type} ${file} has been deployed.`);
+			}
+		} catch (error) {
+			extension.log(error);
+		}
+	} else {
+		extension.log(`Unable to acquire Kubernetes API. Make sure you have configured Kubernetes correctly and you are logged in.`);
+	}
+}
+
+export async function redeployResource(file: string, type: string) {
+	const k8sApi: kubectlapi.API<kubectlapi.KubectlV1> = await kubectlapi.extension.kubectl.v1;
+	if (k8sApi && k8sApi.available) {
+		try {
+			const res: kubectlapi.KubectlV1.ShellResult = await k8sApi.api.invokeCommand(`replace ${type.toLowerCase()} -f ${file}`);
+			if (res.code !== 0) {
+				extension.log(`Unable to replace ${type} ${file}.`);
+			} else {
+				vscode.window.showInformationMessage(`${type} ${file} has been redeployed.`);
+			}
+		} catch (error) {
+			extension.log(error);
+		}
+	} else {
+		extension.log(`Unable to acquire Kubernetes API. Make sure you have configured Kubernetes correctly and you are logged in.`);
+	}
+}
+
+export async function undeployResource(name: string, type: string) {
+	const k8sApi: kubectlapi.API<kubectlapi.KubectlV1> = await kubectlapi.extension.kubectl.v1;
+	if (k8sApi && k8sApi.available) {
+		try {
+			const res: kubectlapi.KubectlV1.ShellResult = await k8sApi.api.invokeCommand(`delete ${type.toLowerCase()} ${name}`);
+			if (res.code !== 0) {
+				extension.log(`Unable to delete ${type} ${name}.`);
+			} else {
+				vscode.window.showInformationMessage(`${type} ${name} has been undeployed.`);
+			}
+		} catch (error) {
+			extension.log(error);
+		}
+	} else {
+		extension.log(`Unable to acquire Kubernetes API. Make sure you have configured Kubernetes correctly and you are logged in.`);
+	}
 }

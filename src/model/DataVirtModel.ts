@@ -18,7 +18,7 @@ import { SchemaTreeNode } from "./tree/SchemaTreeNode";
  * limitations under the License.
  */
 export class DataVirtConfig {
-	api_version: string;
+	apiVersion: string;
 	kind: string;
 	metadata: MetaData;
 	spec: Spec;
@@ -93,7 +93,7 @@ export class Source {
 }
 
 export class SecretConfig {
-	api_version: string;
+	apiVersion: string;
 	kind: string;
 	metadata: MetaData;
 	type: string;
@@ -101,7 +101,7 @@ export class SecretConfig {
 }
 
 export class ConfigMapConfig {
-	api_version: string;
+	apiVersion: string;
 	kind: string;
 	metadata: MetaData;
 	data: any;
