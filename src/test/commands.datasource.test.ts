@@ -210,7 +210,7 @@ describe('Commands Tests', () => {
 			const createdDS = await createDSCommand.createDataSource(dsName, dsType, dvConfig, vdbFile);
 			should.equal(true, createdDS, 'Execution of the Create DataSource command returned false');
 			dsConfig = utils.getDataSourceByName(dvConfig, dsName);
-			refName = `datasource_${dsConfig.name}_${refType.toLowerCase()}`;
+			refName = `datasource-${dsConfig.name}-${refType.toLowerCase()}`;
 			refFilePath = utils.getFullReferenceFilePath(vdbFile, refName);
 		}
 

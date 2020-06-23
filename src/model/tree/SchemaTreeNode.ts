@@ -21,8 +21,8 @@ export class SchemaTreeNode extends DVTreeItem {
 
 	ddl: string;
 
-	constructor(label: string, ddl: string) {
-		super('dv.schema', label, vscode.TreeItemCollapsibleState.None);
+	constructor(parent: DVTreeItem, label: string, ddl: string) {
+		super('dv.schema', label, vscode.TreeItemCollapsibleState.None, parent);
 		this.ddl = ddl;
 	}
 

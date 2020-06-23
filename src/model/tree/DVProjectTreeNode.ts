@@ -19,7 +19,7 @@ import { DataVirtConfig } from '../DataVirtModel';
 import { DataSourcesTreeNode } from './DataSourcesTreeNode';
 import { DVTreeItem } from './DVTreeItem';
 import { SchemaTreeNode } from './SchemaTreeNode';
-import { EnvironmentTreeNode } from './EnvironmentNode';
+import { EnvironmentTreeNode } from './EnvironmentTreeNode';
 
 export class DVProjectTreeNode extends DVTreeItem {
 	dataSourcesNode: DataSourcesTreeNode;
@@ -62,21 +62,13 @@ export class DVProjectTreeNode extends DVTreeItem {
 	initialize(): void {
 		this.setProject(this);
 
-		this.dataSourcesNode = new DataSourcesTreeNode('Data Sources', this.dvConfig.spec.datasources);
-		this.dataSourcesNode.setProject(this.getProject());
-		this.dataSourcesNode.parent = this;
-		this.dataSourcesNode.initialize();
+		this.dataSourcesNode = new DataSourcesTreeNode(this, 'Data Sources', this.dvConfig.spec.datasources);
 		this.children.push(this.dataSourcesNode);
 
-		this.environmentNode = new EnvironmentTreeNode('Environment', this.dvConfig.spec.env);
-		this.environmentNode.setProject(this.getProject());
-		this.environmentNode.parent = this;
-		this.environmentNode.initialize();
+		this.environmentNode = new EnvironmentTreeNode(this, 'Environment', this.dvConfig.spec.env);
 		this.children.push(this.environmentNode);
 
-		this.schemaNode = new SchemaTreeNode('DDL', this.getProject().dvConfig.spec.build.source.ddl);
-		this.schemaNode.setProject(this.getProject());
-		this.schemaNode.parent = this;
+		this.schemaNode = new SchemaTreeNode(this, 'DDL', this.getProject().dvConfig.spec.build.source.ddl);
 		this.children.push(this.schemaNode);
 	}
 }

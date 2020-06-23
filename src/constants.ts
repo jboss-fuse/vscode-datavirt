@@ -61,3 +61,5 @@ export const REFERENCE_VALUE_TYPES: string[] = [
 	REFERENCE_TYPE_SECRET,
 	REFERENCE_TYPE_CONFIGMAP
 ];
+export const KUBERNETES_EXTENSION_CONFIG_KEY = "vs-kubernetes";
+export const KUBECTL_PATH_CONFIG_KEY = "vs-kubernetes.kubectl-path";

@@ -31,7 +31,7 @@ import { deleteDataSourceCommand } from './commands/DeleteDataSourceCommand';
 import { deleteDataSourceEntryCommand } from './commands/DeleteDataSourceEntryCommand';
 import { deleteEnvironmentVariableCommand } from './commands/DeleteEnvironmentVariableCommand';
 import { deleteVDBCommand } from './commands/DeleteVDBCommand';
-import { deployVDBCommand } from './commands/DeployVDBCommand';
+import { deployCommand } from './commands/DeployVDBCommand';
 import { editDataSourceEntryCommand } from './commands/EditDataSourceEntryCommand';
 import { editEnvironmentVariableCommand } from './commands/EditEnvironmentVariableCommand';
 import { editSchemaCommand, handleSaveDDL } from './commands/EditSchemaCommand';
@@ -47,8 +47,7 @@ import { RelationalDBDataSource } from './model/datasources/RelationalDBDataSour
 import { RestBasedDataSource } from './model/datasources/RestBasedDataSource';
 import { SalesForceDataSource } from './model/datasources/SalesForceDataSource';
 import { SAPGatewayBasedDataSource } from './model/datasources/SAPGatewayBasedDataSource';
-import { SchemaTreeNode } from './model/tree/SchemaTreeNode';
-import { undeployVDBCommand } from './commands/UndeployVDBCommand';
+import { undeployCommand } from './commands/UndeployVDBCommand';
 
 export const DATASOURCE_TYPES: Map<string, DataSourceConfig> = new Map();
 export let dataVirtProvider : DataVirtNodeProvider;
@@ -104,8 +103,8 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.envvar.convert.to.configmap', convertEnvironmentVariableToConfigMap));
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.envvar.convert.to.secret', convertEnvironmentVariableToSecret));
 	context.subscriptions.push(vscode.commands.registerCommand('datavirt.edit.schema', editSchemaCommand));
-	context.subscriptions.push(vscode.commands.registerCommand('datavirt.deploy', deployVDBCommand));
-	context.subscriptions.push(vscode.commands.registerCommand('datavirt.undeploy', undeployVDBCommand));
+	context.subscriptions.push(vscode.commands.registerCommand('datavirt.deploy', deployCommand));
+	context.subscriptions.push(vscode.commands.registerCommand('datavirt.undeploy', undeployCommand));
 
 	languageServer.activate(context);
 }

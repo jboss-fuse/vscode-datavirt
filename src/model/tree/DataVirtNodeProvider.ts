@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import * as constants from '../../constants';
 import * as extension from '../../extension';
 import * as path from 'path';
 import * as utils from '../../utils';
@@ -29,7 +28,7 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 	private _onDidChangeTreeData: vscode.EventEmitter<vscode.TreeItem | undefined> = new vscode.EventEmitter<vscode.TreeItem | undefined>();
 	readonly onDidChangeTreeData: vscode.Event<vscode.TreeItem | undefined> = this._onDidChangeTreeData.event;
 
-	protected treeNodes: DVProjectTreeNode[] = [];
+	protected treeNodes: DVTreeItem[] = [];
 
 	static context : vscode.ExtensionContext | undefined;
 	private workspace: string;
@@ -117,9 +116,9 @@ export class DataVirtNodeProvider implements vscode.TreeDataProvider<vscode.Tree
 
 	async getSchemaTreeNodeOfProject(name: string): Promise<SchemaTreeNode> {
 		await this.refresh();
-		const projectNode:DVProjectTreeNode = this.treeNodes.find( (node) => node.label === name);
-		if (projectNode && projectNode.schemaNode) {
-			return projectNode.schemaNode;
+		const projectNode: DVTreeItem = this.treeNodes.find( (node) => node.label === name);
+		if (projectNode && projectNode.getProject().schemaNode) {
+			return projectNode.getProject().schemaNode;
 		}
 		return undefined;
 	}

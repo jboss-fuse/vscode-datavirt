@@ -33,7 +33,6 @@ describe('Commands Tests', () => {
 	let showInputBoxStub: sinon.SinonStub;
 	let commandSpy: sinon.SinonSpy;
 	let workspacePath: string;
-	let templateFolder: string;
 	let vdbFile: string;
 
 	function cleanupVDB(): void {
@@ -50,7 +49,6 @@ describe('Commands Tests', () => {
 			workspacePath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 			should.exist(workspacePath, `Unable to obtain the current workspace path.`);
 			workspacePath.should.contain('test Fixture with speci@l chars');
-			templateFolder = path.join(workspacePath, '../resources/');
 		});
 
 		beforeEach( () => {

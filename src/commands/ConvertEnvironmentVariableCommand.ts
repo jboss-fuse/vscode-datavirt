@@ -20,7 +20,7 @@ import * as utils from '../utils';
 import * as vscode from 'vscode';
 import { DataVirtConfig, Property, ConfigMapConfig, SecretConfig, ConfigMapRef, KeyRef, SecretRef } from '../model/DataVirtModel';
 import { EnvironmentVariableTreeNode } from '../model/tree/EnvironmentVariableTreeNode';
-import { EnvironmentTreeNode } from '../model/tree/EnvironmentNode';
+import { EnvironmentTreeNode } from '../model/tree/EnvironmentTreeNode';
 
 export async function convertEnvironmentVariableToSecret(envVarNode: EnvironmentVariableTreeNode) {
 	await convertEnvironmentVariable(envVarNode, constants.REFERENCE_TYPE_SECRET);
@@ -36,7 +36,7 @@ async function convertEnvironmentVariable(envVarNode: EnvironmentVariableTreeNod
 		return;
 	}
 
-	const refName: string = await vscode.window.showInputBox( { validateInput: utils.ensureValueIsNotEmpty, placeHolder: 'Enter the name of the new reference.'});
+	const refName: string = await vscode.window.showInputBox( { validateInput: utils.validateDataSourceName, placeHolder: 'Enter the name of the new reference.'});
 	if (refName === undefined) {
 		return;
 	}

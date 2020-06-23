@@ -24,9 +24,10 @@ export class EnvironmentTreeNode extends DVTreeItem {
 
 	environment: Property[];
 
-	constructor(label: string, environment: Property[]) {
-		super('dv.environment', label, vscode.TreeItemCollapsibleState.Collapsed);
+	constructor(parent: DVTreeItem, label: string, environment: Property[]) {
+		super('dv.environment', label, vscode.TreeItemCollapsibleState.Collapsed, parent);
 		this.environment = environment;
+		this.initialize();
 	}
 
 	getIconName(): string {
@@ -51,10 +52,10 @@ export class EnvironmentTreeNode extends DVTreeItem {
 
 	createEnvironmentVariableNode(element: Property): EnvironmentVariableRefTreeNode | EnvironmentVariableTreeNode {
 		if (element.valueFrom) {
-			return new EnvironmentVariableRefTreeNode(this.getProject(), element.name, element.valueFrom);
+			return new EnvironmentVariableRefTreeNode(this, element.name, element.valueFrom);
 		}
 		else {
-			return new EnvironmentVariableTreeNode(this.getProject(), element.name, element.value);
+			return new EnvironmentVariableTreeNode(this, element.name, element.value);
 		}
 	}
 }

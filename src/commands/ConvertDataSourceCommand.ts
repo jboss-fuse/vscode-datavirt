@@ -48,7 +48,7 @@ async function convertDataSource(dsNode: DataSourceTreeNode, refType: string) {
 }
 
 export async function convertDataSourceToRef(dsConfig: DataSourceConfig, refType: string, dvConfig: DataVirtConfig, file: string): Promise<boolean> {
-	const refName: string = `datasource_${dsConfig.name}_${refType.toLowerCase()}`;
+	const refName: string = `datasource-${dsConfig.name}-${refType.toLowerCase()}`;
 	if (refType && dvConfig && file) {
 		const refFilePath: string = utils.getFullReferenceFilePath(file, refName);
 		if (await utils.doesFileExist(refFilePath)) {

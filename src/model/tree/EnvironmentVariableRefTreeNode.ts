@@ -15,21 +15,20 @@
  * limitations under the License.
  */
 import * as extension from '../../extension';
+import * as constants from '../../constants';
 import * as utils from '../../utils';
 import * as vscode from 'vscode';
 import { DVTreeItem } from './DVTreeItem';
 import { ConfigMapRef, SecretRef } from '../DataVirtModel';
-import { DVProjectTreeNode } from './DVProjectTreeNode';
 
 export class EnvironmentVariableRefTreeNode extends DVTreeItem {
 
 	key: string;
 	ref: ConfigMapRef | SecretRef;
 
-	constructor(projectNode: DVProjectTreeNode, key: string, ref: ConfigMapRef | SecretRef) {
-		super('dv.environment.variable.ref', undefined, vscode.TreeItemCollapsibleState.None);
-		this.setProject(projectNode);
-		utils.generateReferenceValueForLabel(projectNode.file, undefined, ref)
+	constructor(parent: DVTreeItem, key: string, ref: ConfigMapRef | SecretRef) {
+		super('dv.environment.variable.ref', undefined, vscode.TreeItemCollapsibleState.None, parent);
+		utils.generateReferenceValueForLabel(parent.getProject().file, undefined, ref)
 			.then( (label: string | undefined) => {
 				this.label = `${key}: ${label ? label : '<empty>'}`;
 				this.tooltip = `Environment Variable: ${this.label}`;
@@ -76,6 +75,15 @@ export class EnvironmentVariableRefTreeNode extends DVTreeItem {
 
 	isConfigMapType(): boolean {
 		return utils.isConfigMapRef(this.ref);
+	}
+
+	getReferenceType(): string {
+		if (this.isConfigMapType()) {
+			return constants.REFERENCE_TYPE_CONFIGMAP;
+		} else if (this.isSecretType()) {
+			return constants.REFERENCE_TYPE_SECRET;
+		}
+		return constants.REFERENCE_TYPE_VALUE;
 	}
 
 	getReferenceName(): string {
