@@ -14,27 +14,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import * as cp from 'child_process';
 import * as path from 'path';
-import { runTests } from 'vscode-test';
+import { runTests, resolveCliPathFromVSCodeExecutablePath, downloadAndUnzipVSCode } from 'vscode-test';
 
 async function runTest() {
 	try {
 		// The folder containing the Extension Manifest package.json
 		// Passed to `--extensionDevelopmentPath`
 		const extensionDevelopmentPath = path.resolve(__dirname, '../../../');
-
+		const vscodeExecutablePath : string = await downloadAndUnzipVSCode('stable');
 		// The path to the extension test runner script
 		// Passed to --extensionTestsPath
 		const extensionTestsPath = path.resolve(__dirname, './');
 
-		const testWorkspace = path.resolve(__dirname, '../../test Fixture with speci@l chars/');
+		const testWorkspace = path.resolve(__dirname, '../../testFixture/');
+
+		const cliPath: string = resolveCliPathFromVSCodeExecutablePath(vscodeExecutablePath);
+		installExtraExtension(cliPath, 'ms-kubernetes-tools.vscode-kubernetes-tools');
 
 		// Download VS Code, unzip it and run the integration test
-		await runTests({ extensionDevelopmentPath, extensionTestsPath, launchArgs: [testWorkspace] });
+		await runTests({ vscodeExecutablePath, extensionDevelopmentPath, extensionTestsPath, launchArgs: [testWorkspace] });
 	} catch (err) {
 		console.error('Failed to run tests');
 		process.exit(1);
 	}
+}
+
+function installExtraExtension(cliPath: string, extensionId: string) {
+	cp.spawnSync(cliPath, ['--install-extension', extensionId, '--force'], {
+		encoding: 'utf-8',
+		stdio: 'inherit'
+	});
+	console.log(`VS Code extension ${extensionId} installed`);
 }
 
 runTest();
