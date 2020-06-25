@@ -36,7 +36,7 @@ async function convertEnvironmentVariable(envVarNode: EnvironmentVariableTreeNod
 		return;
 	}
 
-	const refName: string = await vscode.window.showInputBox( { validateInput: utils.validateDataSourceName, placeHolder: 'Enter the name of the new reference.'});
+	const refName: string = await vscode.window.showInputBox( { validateInput: utils.validateResourceName, placeHolder: 'Enter the name of the new reference.'});
 	if (refName === undefined) {
 		return;
 	}

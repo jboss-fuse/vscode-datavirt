@@ -19,6 +19,7 @@ This Visual Studio Code extension provides support for Virtual Database developm
 - create, modify and delete environment variables
 - convert environment variables to a secret or configmap
 - modify the DDL part of the virtual database
+- deploy and undeploy virtual databases
 
 ## Requirements
 

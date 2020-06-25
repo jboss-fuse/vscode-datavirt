@@ -1,7 +1,8 @@
 # ChangeLog
 
 ## 0.0.2
-- 
+- added support for deploying / undeploying VDB files together with ConfigMaps and Secrets
+
 
 ## 0.0.1
 

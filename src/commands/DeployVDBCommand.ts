@@ -19,7 +19,6 @@ import * as extension from '../extension';
 import { DVProjectTreeNode } from '../model/tree/DVProjectTreeNode';
 import * as utils from '../utils';
 import * as kubectlapi from 'vscode-kubernetes-tools-api';
-import { DVTreeItem } from '../model/tree/DVTreeItem';
 import { EnvironmentVariableRefTreeNode } from '../model/tree/EnvironmentVariableRefTreeNode';
 import { DataSourceRefTreeNode } from '../model/tree/DataSourceRefTreeNode';
 
@@ -57,53 +56,40 @@ async function handleDeploy(name: string, file: string) {
 	}
 }
 
-export async function handleReferences(prjNode: DVTreeItem, deploy: boolean) {
-	let name: string;
-	let file: string;
-	let type: string;
-
-	for (let element of prjNode.getProject().getDataSourcesNode().children) {
+export async function handleReferences(prjNode: DVProjectTreeNode, deploy: boolean) {
+	for (let element of prjNode.getDataSourcesNode().children) {
 		if (element instanceof DataSourceRefTreeNode) {
-			const refDS: DataSourceRefTreeNode = element;
-			name = refDS.getReferenceName();
-			file = utils.getFullReferenceFilePath(prjNode.getProject().file, refDS.getReferenceName());
-			type = refDS.getReferenceType();
-			if (name && file && type) {
-				try {
-					const exists : boolean = await utils.isResourceDeployed(name, type);
-					if (!exists && deploy) {
-						await utils.deployResource(file, type);
-					} else if (exists && deploy) {
-						await utils.redeployResource(file, type);
-					} else if (exists && !deploy) {
-						await utils.undeployResource(name, type);
-					}
-				} catch (err) {
-					extension.log(err);
-				}
-			}
+			await handleReference(element, prjNode.getProject().file, deploy);
 		}
 	}
-	for (let element of prjNode.getProject().getEnvironmentNode().children) {
+	for (let element of prjNode.getEnvironmentNode().children) {
 		if (element instanceof EnvironmentVariableRefTreeNode) {
-			const refEnvVar: EnvironmentVariableRefTreeNode = element;
-			name = refEnvVar.getReferenceName();
-			file = utils.getFullReferenceFilePath(prjNode.getProject().file, refEnvVar.getReferenceName());
-			type = refEnvVar.getReferenceType();
-			if (name && file && type) {
-				try {
-					const exists : boolean = await utils.isResourceDeployed(name, type);
-					if (!exists && deploy) {
-						await utils.deployResource(file, type);
-					} else if (exists && deploy) {
-						await utils.redeployResource(file, type);
-					} else if (exists && !deploy) {
-						await utils.undeployResource(name, type);
-					}
-				} catch (err) {
-					extension.log(err);
-				}
+			await handleReference(element, prjNode.getProject().file, deploy);
+		}
+	}
+}
+
+async function handleReference(reference: DataSourceRefTreeNode | EnvironmentVariableRefTreeNode, vdbFile: string, deploy: boolean) {
+	const name = reference.getReferenceName();
+	const refFile = utils.getFullReferenceFilePath(vdbFile, name);
+	const type = reference.getReferenceType();
+	if (name && refFile && type) {
+		try {
+			const exists: boolean = await utils.isResourceDeployed(name, type);
+			if (!exists && deploy) {
+				await utils.deployResource(refFile, type);
 			}
+			else if (exists && deploy) {
+				await utils.redeployResource(refFile, type);
+			}
+			else if (exists && !deploy) {
+				await utils.undeployResource(name, type);
+			} else {
+				extension.log(`Cannot undeploy ${type} ${name} because it is not deployed.`);
+			}
+		}
+		catch (err) {
+			extension.log(err);
 		}
 	}
 }
