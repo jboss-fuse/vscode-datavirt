@@ -77,6 +77,14 @@ export function validateDataSourcePropertyName(name: string): string | undefined
 	}
 }
 
+export function validateResourceName(name: string): string | undefined {
+	if (name && /^[a-z]{1}[a-z0-9.\-]{3,252}$/.test(name)) {
+		return undefined;
+	} else {
+		return 'The entered name does not comply with the naming conventions. ([a-z][a-z0-9.-] and length of 4-253 characters)';
+	}
+}
+
 export function validateDataSourceName(name: string): string | undefined {
 	if (name && /^[a-zA-Z]{1}[a-zA-Z0-9\-]{3,252}$/.test(name)) {
 		return undefined;
@@ -369,14 +377,15 @@ export function getKubectlPath(): string {
 	return vscode.workspace.getConfiguration(constants.KUBERNETES_EXTENSION_CONFIG_KEY)[constants.KUBECTL_PATH_CONFIG_KEY];
 }
 
-export async function isVDBDeployed(name: string): Promise<boolean> {
+export async function executeKubeCtlCommand(cmd: string, silent: boolean = false): Promise<boolean> {
 	const k8sApi: kubectlapi.API<kubectlapi.KubectlV1> = await kubectlapi.extension.kubectl.v1;
 	if (k8sApi && k8sApi.available) {
 		try {
-			const res: kubectlapi.KubectlV1.ShellResult = await k8sApi.api.invokeCommand(`get vdb ${name}`);
-			if (res.code === 0) {
-				return true;
+			const res: kubectlapi.KubectlV1.ShellResult = await k8sApi.api.invokeCommand(cmd);
+			if (res.code !== 0 && !silent) {
+				extension.log(`Operation kubectl ${cmd} returned code ${res.code}. ${res.stderr ? res.stderr.toString() : res.stdout.toString()}`);
 			}
+			return res.code === 0;
 		} catch (error) {
 			extension.log(error);
 		}
@@ -384,75 +393,34 @@ export async function isVDBDeployed(name: string): Promise<boolean> {
 		extension.log(`Unable to acquire Kubernetes API. Make sure you have configured Kubernetes correctly and you are logged in.`);
 	}
 	return false;
+}
+
+export async function isVDBDeployed(name: string): Promise<boolean> {
+	return isResourceDeployed(name, 'vdb');
 }
 
 export async function isResourceDeployed(name: string, type: string): Promise<boolean> {
-	const k8sApi: kubectlapi.API<kubectlapi.KubectlV1> = await kubectlapi.extension.kubectl.v1;
-	if (k8sApi && k8sApi.available) {
-		try {
-			const res: kubectlapi.KubectlV1.ShellResult = await k8sApi.api.invokeCommand(`get ${type.toLowerCase()} ${name}`);
-			if (res.code === 0) {
-				return true;
-			}
-		} catch (error) {
-			extension.log(error);
-		}
-	} else {
-		extension.log(`Unable to acquire Kubernetes API. Make sure you have configured Kubernetes correctly and you are logged in.`);
-	}
-	return false;
+	const cmd = `get ${type.toLowerCase()} ${name}`;
+	return await executeKubeCtlCommand(cmd, true);
 }
 
 export async function deployResource(file: string, type: string) {
-	const k8sApi: kubectlapi.API<kubectlapi.KubectlV1> = await kubectlapi.extension.kubectl.v1;
-	if (k8sApi && k8sApi.available) {
-		try {
-			const res: kubectlapi.KubectlV1.ShellResult = await k8sApi.api.invokeCommand(`create -f ${file}`);
-			if (res.code !== 0) {
-				extension.log(`Unable to create ${type} ${file}.`);
-			} else {
-				vscode.window.showInformationMessage(`${type} ${file} has been deployed.`);
-			}
-		} catch (error) {
-			extension.log(error);
-		}
-	} else {
-		extension.log(`Unable to acquire Kubernetes API. Make sure you have configured Kubernetes correctly and you are logged in.`);
+	const cmd = `create -f ${file}`;
+	if (await executeKubeCtlCommand(cmd)) {
+		vscode.window.showInformationMessage(`${type} ${file} has been deployed.`);
 	}
 }
 
 export async function redeployResource(file: string, type: string) {
-	const k8sApi: kubectlapi.API<kubectlapi.KubectlV1> = await kubectlapi.extension.kubectl.v1;
-	if (k8sApi && k8sApi.available) {
-		try {
-			const res: kubectlapi.KubectlV1.ShellResult = await k8sApi.api.invokeCommand(`replace ${type.toLowerCase()} -f ${file}`);
-			if (res.code !== 0) {
-				extension.log(`Unable to replace ${type} ${file}.`);
-			} else {
-				vscode.window.showInformationMessage(`${type} ${file} has been redeployed.`);
-			}
-		} catch (error) {
-			extension.log(error);
-		}
-	} else {
-		extension.log(`Unable to acquire Kubernetes API. Make sure you have configured Kubernetes correctly and you are logged in.`);
+	const cmd = `replace ${type.toLowerCase()} -f ${file}`;
+	if (await executeKubeCtlCommand(cmd)) {
+		vscode.window.showInformationMessage(`${type} ${file} has been redeployed.`);
 	}
 }
 
 export async function undeployResource(name: string, type: string) {
-	const k8sApi: kubectlapi.API<kubectlapi.KubectlV1> = await kubectlapi.extension.kubectl.v1;
-	if (k8sApi && k8sApi.available) {
-		try {
-			const res: kubectlapi.KubectlV1.ShellResult = await k8sApi.api.invokeCommand(`delete ${type.toLowerCase()} ${name}`);
-			if (res.code !== 0) {
-				extension.log(`Unable to delete ${type} ${name}.`);
-			} else {
-				vscode.window.showInformationMessage(`${type} ${name} has been undeployed.`);
-			}
-		} catch (error) {
-			extension.log(error);
-		}
-	} else {
-		extension.log(`Unable to acquire Kubernetes API. Make sure you have configured Kubernetes correctly and you are logged in.`);
+	const cmd = `delete ${type.toLowerCase()} ${name}`;
+	if (await executeKubeCtlCommand(cmd)) {
+		vscode.window.showInformationMessage(`${type} ${name} has been undeployed.`);
 	}
 }
