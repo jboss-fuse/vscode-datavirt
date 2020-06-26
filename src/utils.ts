@@ -78,10 +78,10 @@ export function validateDataSourcePropertyName(name: string): string | undefined
 }
 
 export function validateResourceName(name: string): string | undefined {
-	if (name && /^[a-z]{1}[a-z0-9.\-]{3,252}$/.test(name)) {
+	if (name && /^[a-z]{1}[a-z0-9.\-]{3,251}[a-z0-9]{1}$/.test(name)) {
 		return undefined;
 	} else {
-		return 'The entered name does not comply with the naming conventions. ([a-z][a-z0-9.-] and length of 4-253 characters)';
+		return 'The entered name does not comply with the naming conventions. ([a-z][a-z0-9.-][a-z0-9] and length of 4-253 characters)';
 	}
 }
 
