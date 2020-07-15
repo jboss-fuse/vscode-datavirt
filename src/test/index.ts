@@ -43,7 +43,7 @@ function loadCoverageRunner(testsRoot: string): CoverageRunner | undefined {
 
 const mocha = new Mocha({
 	ui: 'bdd',
-	useColors: true,
+	color: true,
 	timeout: 100000,
 	slow: 50000,
 	reporter: 'mocha-jenkins-reporter'
