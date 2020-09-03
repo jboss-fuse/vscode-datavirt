@@ -4,6 +4,9 @@
 [![Build Status](https://travis-ci.org/jboss-fuse/vscode-datavirt.svg?branch=master)](https://travis-ci.org/jboss-fuse/vscode-datavirt)
 [![License](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+## NOTE 
+This extension is no longer maintained / supported!
+
 ## Description
 
 This Visual Studio Code extension provides support for Virtual Database development.
